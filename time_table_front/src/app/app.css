@@ -1,0 +1,129 @@
+/* ============================================================
+   APP SHELL — Layout & Header
+   ============================================================ */
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--gray-50);
+}
+
+/* ---- Header ---- */
+.app-header {
+  background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-800) 60%, var(--navy-700) 100%);
+  border-bottom: 1px solid rgba(245, 197, 24, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(6, 13, 31, 0.4);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Brand / Logo */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(245, 197, 24, 0.2) 0%, rgba(245, 197, 24, 0.05) 100%);
+  border: 1px solid rgba(245, 197, 24, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.brand:hover .brand-logo {
+  transform: scale(1.05);
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  color: var(--gold-400);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--white);
+  font-family: var(--font-thai);
+  letter-spacing: 0.01em;
+}
+
+.brand-sub {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(245, 197, 24, 0.75);
+  font-family: var(--font-thai);
+  letter-spacing: 0.03em;
+}
+
+/* Semester pill */
+.semester-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(245, 197, 24, 0.1);
+  border: 1px solid rgba(245, 197, 24, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--gold-300);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: var(--font-thai);
+  backdrop-filter: blur(8px);
+}
+
+.semester-icon {
+  font-size: 1rem;
+  color: var(--gold-400);
+}
+
+/* ---- Content Area ---- */
+.app-content {
+  flex: 1;
+  width: 100%;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .header-inner {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .brand-name {
+    font-size: 0.9rem;
+  }
+
+  .semester-pill {
+    font-size: 0.7rem;
+    padding: var(--space-1) var(--space-3);
+  }
+}

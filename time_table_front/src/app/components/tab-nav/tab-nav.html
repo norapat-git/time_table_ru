@@ -1,0 +1,16 @@
+<nav class="tab-nav" role="tablist" aria-label="เมนูหลัก">
+  @for (tab of tabs(); track tab.id) {
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === tab.id"
+      (click)="onTabClick(tab.id)"
+      role="tab"
+      [attr.aria-selected]="activeTab() === tab.id"
+      [id]="'tab-btn-' + tab.id"
+    >
+      <span class="material-symbols-rounded tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+      <span class="tab-label">{{ tab.label }}</span>
+      <span class="tab-indicator"></span>
+    </button>
+  }
+</nav>

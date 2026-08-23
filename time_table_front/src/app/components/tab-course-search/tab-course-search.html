@@ -1,0 +1,132 @@
+<div class="course-search-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="material-symbols-rounded title-icon">auto_stories</span>
+        ค้นหารายวิชา
+      </h1>
+      <p class="page-subtitle">เลือกกลุ่มวิชาหรือค้นหาจากรหัส/ชื่อวิชา</p>
+    </div>
+    @if (selectedPrefix() || searchQuery()) {
+      <button class="btn-clear" (click)="clearAll()" id="clear-filter-btn">
+        <span class="material-symbols-rounded btn-icon">filter_alt_off</span> ล้างตัวกรอง
+      </button>
+    }
+  </div>
+
+  <!-- Prefix Filter Buttons -->
+  <section class="filter-section" aria-label="กรองตามกลุ่มวิชา">
+    <p class="filter-label">เลือกกลุ่มวิชา</p>
+    <div class="prefix-buttons">
+      @for (prefix of prefixes; track prefix) {
+        <button
+          class="prefix-btn"
+          [class.active]="selectedPrefix() === prefix"
+          (click)="selectPrefix(prefix)"
+          [id]="'prefix-btn-' + prefix"
+          [attr.aria-pressed]="selectedPrefix() === prefix"
+          [attr.aria-label]="prefixLabels[prefix]"
+        >
+          <span class="prefix-letter">{{ prefix }}</span>
+          <span class="prefix-name">{{ prefixLabels[prefix].split(' — ')[1] }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Search Input -->
+  <section class="search-section" aria-label="ช่องค้นหา">
+    <div class="search-box">
+      <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
+      <input
+        id="course-search-input"
+        class="search-input"
+        type="text"
+        placeholder="ค้นหาจากรหัสวิชาหรือชื่อวิชา..."
+        [(ngModel)]="searchQueryValue"
+        aria-label="ค้นหารายวิชา"
+      />
+      @if (searchQueryValue) {
+        <button class="search-clear-btn" (click)="searchQueryValue = ''" aria-label="ล้างการค้นหา">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Result Count -->
+  <div class="result-info">
+    <span class="result-count">
+      พบ <strong>{{ filteredCourses().length }}</strong> รายวิชา
+    </span>
+    @if (selectedCourse()) {
+      <div class="selected-badge">
+        <span class="badge-dot"></span>
+        เลือกแล้ว: <strong>{{ selectedCourse()!.code }}</strong>
+      </div>
+    }
+  </div>
+
+  <!-- Course Grid -->
+  <div class="course-grid" role="list" aria-label="รายการวิชา">
+    @if (filteredCourses().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded empty-icon">search_off</span>
+        <p class="empty-title">ไม่พบรายวิชา</p>
+        <p class="empty-subtitle">ลองเปลี่ยนคำค้นหาหรือเลือกกลุ่มวิชาอื่น</p>
+      </div>
+    }
+
+    @for (course of filteredCourses(); track course.id) {
+      <div
+        class="course-card"
+        [class.selected]="selectedCourse()?.id === course.id"
+        (click)="selectCourse(course)"
+        role="listitem"
+        [id]="'course-card-' + course.id"
+        tabindex="0"
+        (keydown.enter)="selectCourse(course)"
+        (keydown.space)="selectCourse(course)"
+        [attr.aria-selected]="selectedCourse()?.id === course.id"
+      >
+        <!-- Prefix badge -->
+        <div class="card-prefix-badge" [style.background]="getPrefixColor(course.prefix)">
+          {{ course.prefix }}
+        </div>
+
+        <!-- Course Code -->
+        <div class="card-code">{{ course.code }}</div>
+
+        <!-- Course Names -->
+        <h3 class="card-name-th">{{ course.nameTH }}</h3>
+        <p class="card-name-en">{{ course.nameEN }}</p>
+
+        <!-- Meta info -->
+        <div class="card-meta">
+          <span class="meta-item" title="หน่วยกิต">
+            <span class="material-symbols-rounded meta-icon">award_star</span>
+            {{ course.credits }} หน่วยกิต
+          </span>
+          <span class="meta-item" title="จำนวน section">
+            <span class="material-symbols-rounded meta-icon">layers</span>
+            {{ course.section }} section
+          </span>
+          <span class="meta-item" title="จำนวนนักศึกษา">
+            <span class="material-symbols-rounded meta-icon">groups</span>
+            {{ course.totalStudents }} คน
+          </span>
+        </div>
+
+        <!-- Selected check -->
+        @if (selectedCourse()?.id === course.id) {
+          <div class="card-selected-check" aria-label="เลือกแล้ว">
+            <span class="material-symbols-rounded">check</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>

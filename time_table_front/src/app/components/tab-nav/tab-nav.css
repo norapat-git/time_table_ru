@@ -1,0 +1,77 @@
+.tab-nav {
+  display: flex;
+  align-items: stretch;
+  background: var(--navy-800);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 var(--space-6);
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-radius: 0;
+  transition:
+    color var(--transition-normal),
+    background var(--transition-normal);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  background: none;
+  flex-shrink: 0;
+}
+
+.tab-btn:hover {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-btn.active {
+  color: var(--gold-400);
+  font-weight: 600;
+}
+
+.tab-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: inherit;
+  transition: transform var(--transition-fast);
+}
+
+.tab-btn:hover .tab-icon {
+  transform: translateY(-1px);
+}
+
+.tab-label {
+  font-family: var(--font-thai);
+}
+
+/* Bottom indicator bar */
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
+  transition: background var(--transition-normal);
+}
+
+.tab-btn.active .tab-indicator {
+  background: var(--gold-400);
+  box-shadow: 0 0 12px rgba(245, 197, 24, 0.5);
+}
