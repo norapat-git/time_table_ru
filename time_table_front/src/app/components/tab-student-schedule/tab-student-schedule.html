@@ -1,0 +1,76 @@
+<div class="page-layout">
+
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">รายงาน / ตารางเรียน</div>
+    <h1 class="page-title">ตารางเรียน (Schedule)</h1>
+    <p class="page-subtitle">ห้องเรียน: {{ selectedRoom() }}</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="content-card">
+
+    <!-- Room Dropdown & Actions Bar -->
+    <div class="action-bar">
+      <div class="dropdown-wrap">
+        <select
+          class="custom-dropdown room-dropdown"
+          [ngModel]="selectedRoom()"
+          (ngModelChange)="onRoomChange($event)"
+        >
+          @for (r of rooms; track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      </div>
+
+      <button class="btn-gold-action" (click)="printSchedule()">
+        <span class="material-symbols-rounded">print</span>
+        <span>พิมพ์ตารางเรียน</span>
+      </button>
+    </div>
+
+    <!-- Timetable Matrix Grid -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="56px" [lines]="5" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="schedule-matrix-table">
+          <thead>
+            <tr>
+              <th style="width: 100px;">วัน</th>
+              @for (time of timeHeaders; track time) {
+                <th>{{ time }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of currentSchedule(); track row.day) {
+              <tr>
+                <td class="col-day">
+                  <strong>{{ row.day }}</strong>
+                </td>
+                @for (slot of row.slots; track $index) {
+                  <td class="col-slot" [class.has-course]="!!slot">
+                    @if (slot) {
+                      <div class="slot-card">
+                        <strong class="slot-code">{{ slot.code }}</strong>
+                        <span class="slot-instructor">{{ slot.instructor }}</span>
+                      </div>
+                    } @else {
+                      <span class="slot-empty">—</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+
+</div>

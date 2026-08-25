@@ -1,0 +1,199 @@
+<div class="page-layout">
+
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / จัดการหลักสูตร</div>
+    <h1 class="page-title">จัดการหลักสูตร</h1>
+    <p class="page-subtitle">กำหนดกลุ่มวิชา/กลุ่มวิชาย่อยของแต่ละคณะ และวิชาบังคับในหลักสูตร</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="content-card">
+
+    <!-- Filter & Add Action Bar -->
+    <div class="action-bar">
+      <div class="dropdown-filter-group">
+        <!-- Faculty Dropdown -->
+        <select
+          class="custom-dropdown"
+          [ngModel]="selectedFaculty()"
+          (ngModelChange)="selectedFaculty.set($event)"
+        >
+          @for (f of faculties; track f.id) {
+            <option [value]="f.id">{{ f.label }}</option>
+          }
+        </select>
+
+        <!-- Group Dropdown -->
+        <select
+          class="custom-dropdown"
+          [ngModel]="selectedGroup()"
+          (ngModelChange)="selectedGroup.set($event)"
+        >
+          @for (g of groupOptions; track g.id) {
+            <option [value]="g.id">{{ g.label }}</option>
+          }
+        </select>
+      </div>
+
+      <button class="btn-add-primary" (click)="openAddModal()">
+        <span class="material-symbols-rounded">add</span>
+        <span>เพิ่มข้อมูล</span>
+      </button>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="56px" [lines]="4" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ลำดับ</th>
+              <th style="width: 220px;">กลุ่มวิชา</th>
+              <th>กลุ่มวิชาย่อย</th>
+              <th style="width: 220px; text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredItems().length === 0) {
+              <tr>
+                <td colspan="4" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบข้อมูลหลักสูตรตามตัวกรองที่เลือก</p>
+                </td>
+              </tr>
+            }
+
+            @for (item of filteredItems(); track item.id; let i = $index) {
+              <tr>
+                <td class="col-index">{{ i + 1 }}</td>
+                <td class="col-group">
+                  <strong>{{ item.groupName }}</strong>
+                </td>
+                <td class="col-subgroup">
+                  <span>{{ item.subGroupName }}</span>
+                  <span class="badge-faculty">{{ item.faculty }}</span>
+                </td>
+                <td class="col-actions">
+                  <button class="btn-action btn-detail" (click)="openDetailModal(item)" title="ดูรายละเอียด">
+                    <span>รายละเอียด</span>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteItem(item.id)" title="ลบ">
+                    <span class="material-symbols-rounded">delete</span>
+                    <span>ลบ</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+
+  <!-- Modal Dialog for Add / Edit -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <span class="material-symbols-rounded">{{ isEditing() ? 'edit' : 'add_circle' }}</span>
+            {{ isEditing() ? 'แก้ไขกลุ่มวิชาหลักสูตร' : 'เพิ่มกลุ่มวิชาหลักสูตรใหม่' }}
+          </h2>
+          <button class="btn-close-modal" (click)="closeModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">คณะ</label>
+            <select class="form-select" [(ngModel)]="modalFaculty">
+              <option value="วิทยาศาสตร์">คณะวิทยาศาสตร์</option>
+              <option value="บริหารธุรกิจ">คณะบริหารธุรกิจ</option>
+              <option value="มนุษยศาสตร์">คณะมนุษยศาสตร์</option>
+              <option value="ศึกษาศาสตร์">คณะศึกษาศาสตร์</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">กลุ่มวิชาหลัก</label>
+            <input type="text" class="form-input" [(ngModel)]="modalGroup" placeholder="เช่น สถิติศาสตร์, ภาษาศาสตร์" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">กลุ่มวิชาย่อย</label>
+            <input type="text" class="form-input" [(ngModel)]="modalSubGroup" placeholder="เช่น สถิติศาสตร์คณิตศาสตร์ประกันภัย" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">คำอธิบายกลุ่มวิชา (ถ้ามี)</label>
+            <textarea class="form-textarea" rows="3" [(ngModel)]="modalDesc" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">ยกเลิก</button>
+          <button class="btn-primary" (click)="saveItem()">
+            <span class="material-symbols-rounded">save</span> บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Detail Modal -->
+  @if (isDetailModalOpen() && selectedItem()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <span class="material-symbols-rounded">info</span>
+            รายละเอียดกลุ่มวิชาหลักสูตร
+          </h2>
+          <button class="btn-close-modal" (click)="closeModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-row">
+            <span class="detail-label">คณะ:</span>
+            <strong class="detail-val">{{ selectedItem()!.faculty }}</strong>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">กลุ่มวิชา:</span>
+            <strong class="detail-val">{{ selectedItem()!.groupName }}</strong>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">กลุ่มวิชาย่อย:</span>
+            <span class="detail-val text-navy">{{ selectedItem()!.subGroupName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">จำนวนวิชาบังคับ:</span>
+            <span class="detail-val">{{ selectedItem()!.totalRequiredCourses || 10 }} วิชา</span>
+          </div>
+          @if (selectedItem()!.description) {
+            <div class="detail-desc-box">
+              <span class="detail-label">คำอธิบาย:</span>
+              <p>{{ selectedItem()!.description }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="openEditModal(selectedItem()!)">
+            <span class="material-symbols-rounded">edit</span> แก้ไขข้อมูล
+          </button>
+          <button class="btn-primary" (click)="closeModal()">ปิด</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

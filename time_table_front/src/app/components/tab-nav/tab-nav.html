@@ -1,16 +1,51 @@
-<nav class="tab-nav" role="tablist" aria-label="เมนูหลัก">
-  @for (tab of tabs(); track tab.id) {
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === tab.id"
-      (click)="onTabClick(tab.id)"
-      role="tab"
-      [attr.aria-selected]="activeTab() === tab.id"
-      [id]="'tab-btn-' + tab.id"
-    >
-      <span class="material-symbols-rounded tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-      <span class="tab-label">{{ tab.label }}</span>
-      <span class="tab-indicator"></span>
-    </button>
-  }
-</nav>
+<div class="navigation-wrapper">
+
+  <!-- Level 1: Category Groups Bar -->
+  <div class="category-bar">
+    <div class="category-inner">
+      <div class="group-pills">
+        @for (group of groups; track group.id) {
+          <button
+            class="group-pill"
+            [class.active]="activeGroupId() === group.id"
+            (click)="selectGroup(group.id)"
+            [id]="'group-btn-' + group.id"
+          >
+            <span class="material-symbols-rounded group-icon">{{ group.icon }}</span>
+            <span class="group-name">{{ group.name }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Current Year / Semester Info Indicator -->
+      <div class="active-semester-indicator">
+        <span class="semester-label">ปี / ภาคปัจจุบัน:</span>
+        <span class="semester-val">ภาค 1 / 2569</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 2: Sub Tabs of Active Category -->
+  <nav class="subtab-nav" role="tablist" aria-label="เมนูย่อย">
+    <div class="subtab-inner">
+      @for (tab of currentGroupTabs(); track tab.id) {
+        <button
+          class="subtab-btn"
+          [class.active]="activeTab() === tab.id"
+          (click)="onTabClick(tab.id)"
+          role="tab"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [id]="'tab-btn-' + tab.id"
+        >
+          <span class="material-symbols-rounded tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+          <span class="tab-label">{{ tab.label }}</span>
+          @if (tab.badge) {
+            <span class="tab-badge">{{ tab.badge }}</span>
+          }
+          <span class="tab-indicator"></span>
+        </button>
+      }
+    </div>
+  </nav>
+
+</div>

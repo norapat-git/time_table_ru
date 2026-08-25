@@ -1,0 +1,185 @@
+<div class="page-layout">
+
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / ข้อมูลผู้ใช้งาน</div>
+    <h1 class="page-title">ข้อมูลผู้ใช้งาน</h1>
+    <p class="page-subtitle">จัดการรายชื่อและสิทธิ์ผู้ใช้งานระบบ (เพิ่มข้อมูลผู้ใช้งานก่อนเข้าสู่ระบบ)</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="content-card">
+
+    <!-- Top Action Bar (Search & Add Button) -->
+    <div class="action-bar">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="ค้นหา อีเมล, ชื่อภาษาไทย, ชื่อภาษาอังกฤษ"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button class="btn-clear-search" (click)="searchQuery.set('')">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        }
+      </div>
+
+      <div class="action-right-btns">
+        <button class="btn-secondary" (click)="loadAccountsFromBackend()" title="รีเฟรชข้อมูล">
+          <span class="material-symbols-rounded">refresh</span>
+          <span>โหลดใหม่</span>
+        </button>
+        <button class="btn-add-primary" (click)="openAddModal()">
+          <span class="material-symbols-rounded">person_add</span>
+          <span>เพิ่มผู้ใช้งาน</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="56px" [lines]="4" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ลำดับ</th>
+              <th style="width: 240px;">อีเมลผู้ใช้งาน (Account)</th>
+              <th>ชื่อ - นามสกุล (ไทย)</th>
+              <th>ชื่อ - นามสกุล (อังกฤษ)</th>
+              <th style="width: 170px;">เข้าใช้ล่าสุด</th>
+              <th style="width: 120px; text-align: center;">สถานะ</th>
+              <th style="width: 180px; text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredAccounts().length === 0) {
+              <tr>
+                <td colspan="7" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบข้อมูลผู้ใช้งานที่ค้นหา</p>
+                </td>
+              </tr>
+            }
+
+            @for (item of filteredAccounts(); track item.email; let i = $index) {
+              <tr>
+                <td class="col-index">{{ i + 1 }}</td>
+                <td class="col-email">
+                  <span class="email-text">{{ item.email }}</span>
+                </td>
+                <td class="col-name">
+                  <strong>{{ item.thaiName || '—' }}</strong>
+                </td>
+                <td class="col-name-en">
+                  <span>{{ item.engName || '—' }}</span>
+                </td>
+                <td class="col-time">
+                  <span class="time-text">{{ item.stateInTime || 'ยังไม่เคยเข้าใช้' }}</span>
+                </td>
+                <td class="col-status" style="text-align: center;">
+                  <button
+                    class="badge-status-btn"
+                    [class.active]="item.flag === '1'"
+                    (click)="toggleStatus(item)"
+                    title="คลิกเพื่อเปลี่ยนสถานะ"
+                  >
+                    <span class="material-symbols-rounded status-dot-icon">
+                      {{ item.flag === '1' ? 'check_circle' : 'cancel' }}
+                    </span>
+                    <span>{{ item.flag === '1' ? 'ใช้งานได้' : 'ปิดใช้งาน' }}</span>
+                  </button>
+                </td>
+                <td class="col-actions">
+                  <button class="btn-action btn-edit" (click)="openEditModal(item)" title="แก้ไข">
+                    <span class="material-symbols-rounded">edit</span>
+                    <span>แก้ไข</span>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteAccount(item.email)" title="ลบ">
+                    <span class="material-symbols-rounded">delete</span>
+                    <span>ลบ</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+
+  <!-- Modal Dialog for Add / Edit User Account -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <span class="material-symbols-rounded">{{ isEditing() ? 'manage_accounts' : 'person_add' }}</span>
+            {{ isEditing() ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่' }}
+          </h2>
+          <button class="btn-close-modal" (click)="closeModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">อีเมลมหาวิทยาลัย (Office 365) *</label>
+            <input
+              type="email"
+              class="form-input"
+              [(ngModel)]="modalEmail"
+              [disabled]="isEditing()"
+              placeholder="เช่น dev07@ru.ac.th, somchai.j@ru.ac.th"
+            />
+            <span class="field-hint">หมายเหตุ: ผู้ใช้จะใช้รหัสผ่านเดียวกับอีเมลมหาวิทยาลัย (Microsoft 365) ในการเข้าสู่ระบบ</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ชื่อ - นามสกุล (ภาษาไทย)</label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="modalThaiName"
+              placeholder="เช่น นายทดสอบ พัฒนาระบบ"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ชื่อ - นามสกุล (ภาษาอังกฤษ)</label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="modalEngName"
+              placeholder="เช่น TODSOB PATTANARABOB"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">สถานะการเข้าใช้งาน</label>
+            <select class="form-select" [(ngModel)]="modalFlag">
+              <option value="1">1 - ใช้งานได้ (Active)</option>
+              <option value="0">0 - ปิดการใช้งาน (Inactive)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">ยกเลิก</button>
+          <button class="btn-primary" (click)="saveAccount()">
+            <span class="material-symbols-rounded">save</span> บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

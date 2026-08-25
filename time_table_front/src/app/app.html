@@ -1,56 +1,103 @@
-<div class="app-shell">
+@if (!authService.isAuthenticated()) {
+  <!-- Dedicated Full-Screen Login Page -->
+  <app-login-page />
+} @else {
+  <!-- Main Application Shell (Unlocked after Login) -->
+  <div class="app-shell">
 
-  <!-- ========= HEADER ========= -->
-  <header class="app-header">
-    <div class="header-inner">
-      <!-- Logo / Branding -->
-      <div class="brand">
-        <div class="brand-logo" aria-hidden="true">
-          <span class="material-symbols-rounded brand-icon">school</span>
+    <!-- ========= HEADER ========= -->
+    <header class="app-header">
+      <div class="header-inner">
+        <!-- Logo / Branding -->
+        <div class="brand">
+          <div class="brand-logo" aria-hidden="true">
+            <span class="material-symbols-rounded brand-icon">school</span>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">ระบบตารางสอน</span>
+            <span class="brand-sub">สถาบันภาษา มหาวิทยาลัยรามคำแหง</span>
+          </div>
         </div>
-        <div class="brand-text">
-          <span class="brand-name">ระบบตารางสอน</span>
-          <span class="brand-sub">สถาบันภาษา</span>
+
+        <!-- Header Right: Semester Pill & User Card with Logout -->
+        <div class="header-right">
+          <!-- Semester pill -->
+          <div class="semester-pill hide-on-mobile">
+            <span class="material-symbols-rounded semester-icon">calendar_today</span>
+            <span>ภาคเรียนที่ 1/2569</span>
+          </div>
+
+          <!-- User Info Profile Card -->
+          <div class="user-auth-pill">
+            <div class="user-avatar">
+              <span class="material-symbols-rounded">person</span>
+            </div>
+
+            <div class="user-info">
+              <div class="user-name-line">
+                <span class="user-display-name">{{ authService.currentUser()?.displayName || 'นายทดสอบ พัฒนาระบบ' }}</span>
+                <span class="user-role-badge" data-role="ADMIN">{{ authService.userRole() }}</span>
+              </div>
+              <span class="user-dept-text">{{ authService.currentUser()?.email || 'สถาบันภาษา (Language Institute)' }}</span>
+            </div>
+
+            <!-- Logout Action Button -->
+            <button class="btn-logout" (click)="onLogout()" title="ออกจากระบบ">
+              <span class="material-symbols-rounded">logout</span>
+            </button>
+          </div>
         </div>
       </div>
+    </header>
 
-      <!-- Semester pill -->
-      <div class="semester-pill">
-        <span class="material-symbols-rounded semester-icon">calendar_today</span>
-        <span>ภาคเรียนที่ 1/2567</span>
-      </div>
-    </div>
-  </header>
+    <!-- ========= TWO-TIER CATEGORIZED TAB NAVIGATION ========= -->
+    <app-tab-nav
+      [tabs]="tabs"
+      [activeTab]="activeTab()"
+      (tabChange)="setTab($event)"
+    />
 
-  <!-- ========= TAB NAVIGATION ========= -->
-  <app-tab-nav
-    [tabs]="tabs"
-    [activeTab]="activeTab()"
-    (tabChange)="setTab($event)"
-  />
+    <!-- ========= MAIN CONTENT ========= -->
+    <main class="app-content" role="main">
+      @switch (activeTab()) {
+        <!-- 1. จัดการข้อมูล -->
+        @case ('academic-year') {
+          <app-tab-academic-year />
+        }
+        @case ('course-search') {
+          <app-tab-course-search />
+        }
+        @case ('paired-courses') {
+          <app-tab-paired-courses />
+        }
+        @case ('curriculum') {
+          <app-tab-curriculum />
+        }
+        @case ('instructor') {
+          <app-tab-instructor />
+        }
+        @case ('timetable-manage') {
+          <app-tab-timetable-manage />
+        }
 
-  <!-- ========= MAIN CONTENT ========= -->
-  <main class="app-content" role="main">
-    @switch (activeTab()) {
-      @case (1) {
-        <app-tab-course-search />
+        <!-- 2. รายงาน -->
+        @case ('report-compulsory') {
+          <app-tab-report-compulsory />
+        }
+        @case ('report-faculty-year') {
+          <app-tab-report-faculty-year />
+        }
+        @case ('report-mr30') {
+          <app-tab-report-mr30 />
+        }
+        @case ('student-schedule') {
+          <app-tab-student-schedule />
+        }
+        @case ('report-offered-courses') {
+          <app-tab-report-offered-courses />
+        }
       }
-      @case (2) {
-        <app-tab-instructor />
-      }
-      @case (3) {
-        <app-tab-three />
-      }
-      @case (4) {
-        <app-tab-four />
-      }
-      @case (5) {
-        <app-tab-five />
-      }
-      @case (6) {
-        <app-tab-six />
-      }
-    }
-  </main>
+    </main>
 
-</div>
+  </div>
+}

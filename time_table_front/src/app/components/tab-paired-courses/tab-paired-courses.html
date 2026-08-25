@@ -1,0 +1,156 @@
+<div class="page-layout">
+
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / จัดการวิชาคู่</div>
+    <h1 class="page-title">จัดการวิชาคู่</h1>
+    <p class="page-subtitle">กำหนดกลุ่มวิชาที่สอนคาบเดียวกัน (id group) — การลบจะลบทั้งกลุ่ม</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="content-card">
+
+    <!-- Top Action Bar (Search & Add Button) -->
+    <div class="action-bar">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="ค้นหาวิชา"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button class="btn-clear-search" (click)="searchQuery.set('')">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        }
+      </div>
+
+      <button class="btn-add-primary" (click)="openAddModal()">
+        <span class="material-symbols-rounded">add</span>
+        <span>เพิ่มข้อมูล</span>
+      </button>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="56px" [lines]="4" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;" class="col-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="isAllSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  title="เลือกทั้งหมด"
+                />
+              </th>
+              <th style="width: 70px;">ลำดับ</th>
+              <th>วิชาคู่</th>
+              <th style="width: 180px; text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredGroups().length === 0) {
+              <tr>
+                <td colspan="4" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบกลุ่มวิชาคู่ที่ค้นหา</p>
+                </td>
+              </tr>
+            }
+
+            @for (item of filteredGroups(); track item.id; let i = $index) {
+              <tr [class.selected-row]="item.selected">
+                <td class="col-checkbox">
+                  <input
+                    type="checkbox"
+                    class="custom-checkbox"
+                    [checked]="item.selected"
+                    (change)="toggleRowSelect(item.id, $any($event.target).checked)"
+                  />
+                </td>
+                <td class="col-index">{{ i + 1 }}</td>
+                <td class="col-main">
+                  <div class="paired-courses-wrap">
+                    <span class="material-symbols-rounded group-bullet-icon">link</span>
+                    <span class="paired-text">{{ item.coursesList }}</span>
+                  </div>
+                </td>
+                <td class="col-actions">
+                  <button class="btn-action btn-edit" (click)="openEditModal(item)" title="แก้ไข">
+                    <span class="material-symbols-rounded">edit</span>
+                    <span>แก้ไข</span>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteGroup(item.id)" title="ลบ">
+                    <span class="material-symbols-rounded">delete</span>
+                    <span>ลบ</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Bulk Action Bar -->
+      <div class="table-footer">
+        <button
+          class="btn-bulk-delete"
+          [disabled]="selectedCount() === 0"
+          (click)="deleteSelected()"
+        >
+          <span class="material-symbols-rounded">delete</span>
+          <span>ลบรายการที่เลือก @if (selectedCount() > 0) { ({{ selectedCount() }}) }</span>
+        </button>
+      </div>
+    }
+
+  </div>
+
+  <!-- Modal Dialog for Add / Edit Paired Group -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <span class="material-symbols-rounded">{{ isEditing() ? 'edit' : 'add_circle' }}</span>
+            {{ isEditing() ? 'แก้ไขกลุ่มวิชาคู่' : 'เพิ่มกลุ่มวิชาคู่ใหม่' }}
+          </h2>
+          <button class="btn-close-modal" (click)="closeModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">รายวิชาในกลุ่มคู่ (ระบุรหัสและชื่อวิชา คั่นด้วยเครื่องหมายจุลภาค ,)</label>
+            <textarea
+              class="form-textarea"
+              rows="4"
+              [(ngModel)]="modalCoursesList"
+              placeholder="เช่น ACC1101 หลักการบัญชี, ACC1102 การบัญชีขั้นกลาง, ACC1103 การบัญชีต้นทุน"
+            ></textarea>
+            <span class="field-hint">หมายเหตุ: วิชาในกลุ่มเดียวกันจะถูกจัดลงตารางสอนในคาบเวลาเดียวกัน</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">ยกเลิก</button>
+          <button class="btn-primary" (click)="saveGroup()">
+            <span class="material-symbols-rounded">save</span> บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

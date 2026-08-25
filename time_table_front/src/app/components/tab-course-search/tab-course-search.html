@@ -1,132 +1,184 @@
-<div class="course-search-page">
+<div class="page-layout">
 
-  <!-- Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
-        <span class="material-symbols-rounded title-icon">auto_stories</span>
-        ค้นหารายวิชา
-      </h1>
-      <p class="page-subtitle">เลือกกลุ่มวิชาหรือค้นหาจากรหัส/ชื่อวิชา</p>
-    </div>
-    @if (selectedPrefix() || searchQuery()) {
-      <button class="btn-clear" (click)="clearAll()" id="clear-filter-btn">
-        <span class="material-symbols-rounded btn-icon">filter_alt_off</span> ล้างตัวกรอง
-      </button>
-    }
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / จัดการวิชาที่เปิดสอน</div>
+    <h1 class="page-title">จัดการวิชาที่เปิดสอน</h1>
+    <p class="page-subtitle">วิชาที่เปิดสอนในภาคการศึกษา ภาค 1 / 2569</p>
   </div>
 
-  <!-- Prefix Filter Buttons -->
-  <section class="filter-section" aria-label="กรองตามกลุ่มวิชา">
-    <p class="filter-label">เลือกกลุ่มวิชา</p>
-    <div class="prefix-buttons">
-      @for (prefix of prefixes; track prefix) {
-        <button
-          class="prefix-btn"
-          [class.active]="selectedPrefix() === prefix"
-          (click)="selectPrefix(prefix)"
-          [id]="'prefix-btn-' + prefix"
-          [attr.aria-pressed]="selectedPrefix() === prefix"
-          [attr.aria-label]="prefixLabels[prefix]"
-        >
-          <span class="prefix-letter">{{ prefix }}</span>
-          <span class="prefix-name">{{ prefixLabels[prefix].split(' — ')[1] }}</span>
-        </button>
-      }
-    </div>
-  </section>
+  <!-- Main Card -->
+  <div class="content-card">
 
-  <!-- Search Input -->
-  <section class="search-section" aria-label="ช่องค้นหา">
-    <div class="search-box">
-      <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
-      <input
-        id="course-search-input"
-        class="search-input"
-        type="text"
-        placeholder="ค้นหาจากรหัสวิชาหรือชื่อวิชา..."
-        [(ngModel)]="searchQueryValue"
-        aria-label="ค้นหารายวิชา"
-      />
-      @if (searchQueryValue) {
-        <button class="search-clear-btn" (click)="searchQueryValue = ''" aria-label="ล้างการค้นหา">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-      }
-    </div>
-  </section>
-
-  <!-- Result Count -->
-  <div class="result-info">
-    <span class="result-count">
-      พบ <strong>{{ filteredCourses().length }}</strong> รายวิชา
-    </span>
-    @if (selectedCourse()) {
-      <div class="selected-badge">
-        <span class="badge-dot"></span>
-        เลือกแล้ว: <strong>{{ selectedCourse()!.code }}</strong>
-      </div>
-    }
-  </div>
-
-  <!-- Course Grid -->
-  <div class="course-grid" role="list" aria-label="รายการวิชา">
-    @if (filteredCourses().length === 0) {
-      <div class="empty-state">
-        <span class="material-symbols-rounded empty-icon">search_off</span>
-        <p class="empty-title">ไม่พบรายวิชา</p>
-        <p class="empty-subtitle">ลองเปลี่ยนคำค้นหาหรือเลือกกลุ่มวิชาอื่น</p>
-      </div>
-    }
-
-    @for (course of filteredCourses(); track course.id) {
-      <div
-        class="course-card"
-        [class.selected]="selectedCourse()?.id === course.id"
-        (click)="selectCourse(course)"
-        role="listitem"
-        [id]="'course-card-' + course.id"
-        tabindex="0"
-        (keydown.enter)="selectCourse(course)"
-        (keydown.space)="selectCourse(course)"
-        [attr.aria-selected]="selectedCourse()?.id === course.id"
-      >
-        <!-- Prefix badge -->
-        <div class="card-prefix-badge" [style.background]="getPrefixColor(course.prefix)">
-          {{ course.prefix }}
-        </div>
-
-        <!-- Course Code -->
-        <div class="card-code">{{ course.code }}</div>
-
-        <!-- Course Names -->
-        <h3 class="card-name-th">{{ course.nameTH }}</h3>
-        <p class="card-name-en">{{ course.nameEN }}</p>
-
-        <!-- Meta info -->
-        <div class="card-meta">
-          <span class="meta-item" title="หน่วยกิต">
-            <span class="material-symbols-rounded meta-icon">award_star</span>
-            {{ course.credits }} หน่วยกิต
-          </span>
-          <span class="meta-item" title="จำนวน section">
-            <span class="material-symbols-rounded meta-icon">layers</span>
-            {{ course.section }} section
-          </span>
-          <span class="meta-item" title="จำนวนนักศึกษา">
-            <span class="material-symbols-rounded meta-icon">groups</span>
-            {{ course.totalStudents }} คน
-          </span>
-        </div>
-
-        <!-- Selected check -->
-        @if (selectedCourse()?.id === course.id) {
-          <div class="card-selected-check" aria-label="เลือกแล้ว">
-            <span class="material-symbols-rounded">check</span>
-          </div>
+    <!-- Top Action Bar (Search & Add Button) -->
+    <div class="action-bar">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="ค้นหาวิชาที่เปิดสอน"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button class="btn-clear-search" (click)="searchQuery.set('')">
+            <span class="material-symbols-rounded">close</span>
+          </button>
         }
       </div>
+
+      <button class="btn-add-primary" (click)="openAddModal()">
+        <span class="material-symbols-rounded">add</span>
+        <span>เพิ่มข้อมูล</span>
+      </button>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="56px" [lines]="4" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;" class="col-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="isAllSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  title="เลือกทั้งหมด"
+                />
+              </th>
+              <th style="width: 70px;">ลำดับ</th>
+              <th>วิชา</th>
+              <th style="width: 180px; text-align: right;">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredCourses().length === 0) {
+              <tr>
+                <td colspan="4" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบรายวิชาที่ค้นหา</p>
+                </td>
+              </tr>
+            }
+
+            @for (course of filteredCourses(); track course.id; let i = $index) {
+              <tr [class.selected-row]="course.selected">
+                <td class="col-checkbox">
+                  <input
+                    type="checkbox"
+                    class="custom-checkbox"
+                    [checked]="course.selected"
+                    (change)="toggleRowSelect(course.id, $any($event.target).checked)"
+                  />
+                </td>
+                <td class="col-index">{{ i + 1 }}</td>
+                <td class="col-main">
+                  <span class="course-code-highlight">{{ course.code }}</span>
+                  <span class="course-name-text">{{ course.name }}</span>
+                  <span class="badge-dept">{{ course.department }}</span>
+                </td>
+                <td class="col-actions">
+                  <button class="btn-action btn-edit" (click)="openEditModal(course)" title="แก้ไข">
+                    <span class="material-symbols-rounded">edit</span>
+                    <span>แก้ไข</span>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteCourse(course.id)" title="ลบ">
+                    <span class="material-symbols-rounded">delete</span>
+                    <span>ลบ</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Bulk Action Bar -->
+      <div class="table-footer">
+        <button
+          class="btn-bulk-delete"
+          [disabled]="selectedCount() === 0"
+          (click)="deleteSelected()"
+        >
+          <span class="material-symbols-rounded">delete</span>
+          <span>ลบรายการที่เลือก @if (selectedCount() > 0) { ({{ selectedCount() }}) }</span>
+        </button>
+      </div>
     }
+
   </div>
+
+  <!-- Modal Dialog for Add / Edit Course -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <span class="material-symbols-rounded">{{ isEditing() ? 'edit' : 'add_circle' }}</span>
+            {{ isEditing() ? 'แก้ไขวิชาที่เปิดสอน' : 'เพิ่มวิชาที่เปิดสอนใหม่' }}
+          </h2>
+          <button class="btn-close-modal" (click)="closeModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">รหัสวิชา</label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="modalCode"
+              placeholder="เช่น ACC1101, ENG1001"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ชื่อรายวิชา</label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="modalName"
+              placeholder="เช่น หลักการบัญชี, ภาษาอังกฤษเบื้องต้น"
+            />
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">หน่วยกิต</label>
+              <input type="number" class="form-input" [(ngModel)]="modalCredits" min="1" max="6" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">สาขาวิชา / ภาควิชา</label>
+              <select class="form-select" [(ngModel)]="modalDept">
+                <option value="บริหารธุรกิจ">บริหารธุรกิจ</option>
+                <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
+                <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
+                <option value="ภาษาญี่ปุ่น">ภาษาญี่ปุ่น</option>
+                <option value="ภาษาฝรั่งเศส">ภาษาฝรั่งเศส</option>
+                <option value="ภาษาเยอรมัน">ภาษาเยอรมัน</option>
+                <option value="ภาษาสเปน">ภาษาสเปน</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">ยกเลิก</button>
+          <button class="btn-primary" (click)="saveCourse()">
+            <span class="material-symbols-rounded">save</span> บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>
