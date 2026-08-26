@@ -1,51 +1,111 @@
-<div class="navigation-wrapper">
+<aside class="sidebar-wrapper" [class.mobile-open]="isMobileOpen()">
 
-  <!-- Level 1: Category Groups Bar -->
-  <div class="category-bar">
-    <div class="category-inner">
-      <div class="group-pills">
-        @for (group of groups; track group.id) {
-          <button
-            class="group-pill"
-            [class.active]="activeGroupId() === group.id"
-            (click)="selectGroup(group.id)"
-            [id]="'group-btn-' + group.id"
-          >
-            <span class="material-symbols-rounded group-icon">{{ group.icon }}</span>
-            <span class="group-name">{{ group.name }}</span>
-          </button>
-        }
-      </div>
-
-      <!-- Current Year / Semester Info Indicator -->
-      <div class="active-semester-indicator">
-        <span class="semester-label">ปี / ภาคปัจจุบัน:</span>
-        <span class="semester-val">ภาค 1 / 2569</span>
-      </div>
+  <!-- Sidebar Brand Header -->
+  <div class="sidebar-header">
+    <div class="brand-logo-box">
+      <span class="material-symbols-rounded brand-icon">school</span>
+    </div>
+    <div class="brand-info">
+      <h1 class="brand-title">ระบบจัดตารางสอน</h1>
+      <p class="brand-subtitle">สถาบันภาษา ม.รามคำแหง</p>
     </div>
   </div>
 
-  <!-- Level 2: Sub Tabs of Active Category -->
-  <nav class="subtab-nav" role="tablist" aria-label="เมนูย่อย">
-    <div class="subtab-inner">
-      @for (tab of currentGroupTabs(); track tab.id) {
-        <button
-          class="subtab-btn"
-          [class.active]="activeTab() === tab.id"
-          (click)="onTabClick(tab.id)"
-          role="tab"
-          [attr.aria-selected]="activeTab() === tab.id"
-          [id]="'tab-btn-' + tab.id"
-        >
-          <span class="material-symbols-rounded tab-icon" aria-hidden="true">{{ tab.icon }}</span>
-          <span class="tab-label">{{ tab.label }}</span>
-          @if (tab.badge) {
-            <span class="tab-badge">{{ tab.badge }}</span>
-          }
-          <span class="tab-indicator"></span>
-        </button>
-      }
-    </div>
-  </nav>
+  <!-- Sidebar Navigation Menu Body -->
+  <div class="sidebar-nav-body" #navBody>
 
-</div>
+    <!-- Apple-Style Fluid Frosted Glass Gliding Capsule -->
+    <div
+      class="apple-glass-capsule"
+      [style.transform]="'translate3d(0, ' + indicatorY() + 'px, 0)'"
+      [style.height.px]="indicatorHeight()"
+      [class.visible]="isInitialized()"
+    >
+      <div class="capsule-inner-glow"></div>
+      <div class="capsule-border-highlight"></div>
+    </div>
+
+    <!-- Group 1: จัดการข้อมูล (DATA MANAGEMENT) -->
+    <div class="menu-group">
+      <div class="group-label">
+        <span class="material-symbols-rounded group-icon">database</span>
+        <span>จัดการข้อมูล</span>
+      </div>
+
+      <nav class="menu-list">
+        @for (tab of dataManageTabs(); track tab.id) {
+          <button
+            #navBtn
+            class="nav-item-btn"
+            [attr.data-tab-id]="tab.id"
+            [class.active]="activeTab() === tab.id"
+            (click)="onTabClick(tab.id)"
+          >
+            <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>
+            <span class="item-label">{{ tab.label }}</span>
+          </button>
+        }
+      </nav>
+    </div>
+
+    <!-- Group 2: รายงาน (REPORTS) -->
+    <div class="menu-group">
+      <div class="group-label">
+        <span class="material-symbols-rounded group-icon">monitoring</span>
+        <span>รายงาน</span>
+      </div>
+
+      <nav class="menu-list">
+        @for (tab of reportTabs(); track tab.id) {
+          <button
+            #navBtn
+            class="nav-item-btn"
+            [attr.data-tab-id]="tab.id"
+            [class.active]="activeTab() === tab.id"
+            (click)="onTabClick(tab.id)"
+          >
+            <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>
+            <span class="item-label">{{ tab.label }}</span>
+          </button>
+        }
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- Sidebar Bottom Section (Semester & User Profile) -->
+  <div class="sidebar-footer">
+
+    <!-- Active Semester Indicator -->
+    <div class="semester-box">
+      <span class="material-symbols-rounded sem-icon">event_available</span>
+      <div class="sem-text">
+        <span class="sem-title">ภาคการศึกษาปัจจุบัน</span>
+        <strong class="sem-value">ภาคเรียนที่ 1 / 2569</strong>
+      </div>
+    </div>
+
+    <!-- User Profile & Logout -->
+    <div class="user-profile-box">
+      <div class="user-avatar-circle">
+        <span class="material-symbols-rounded">person</span>
+      </div>
+
+      <div class="user-meta">
+        <span class="user-name">{{ authService.currentUser()?.displayName || 'นายทดสอบ พัฒนาระบบ' }}</span>
+        <span class="user-email">{{ authService.currentUser()?.email || 'dev07@ru.ac.th' }}</span>
+      </div>
+
+      <button class="btn-logout-sidebar" (click)="onLogout()" title="ออกจากระบบ">
+        <span class="material-symbols-rounded">logout</span>
+      </button>
+    </div>
+
+  </div>
+
+</aside>
+
+<!-- Mobile Overlay Backdrop -->
+@if (isMobileOpen()) {
+  <div class="mobile-backdrop" (click)="toggleMobileSidebar()"></div>
+}

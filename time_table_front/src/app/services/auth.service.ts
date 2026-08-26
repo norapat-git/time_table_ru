@@ -250,9 +250,17 @@ export class AuthService {
   }
 
   /**
-   * Log out the current user
+   * Log out the current user and update USER_STATEOUT_TIME in Oracle DB
    */
   logout(): void {
+    const userEmail = this._user()?.email;
+    if (userEmail) {
+      const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/logout' : '/api/service/logout';
+      this.http.post(targetUrl, { email: userEmail }).subscribe({
+        next: () => {},
+        error: () => {},
+      });
+    }
     this.clearSession();
     this.stopTimer();
   }

@@ -1,0 +1,63 @@
+<div class="custom-select-wrapper" [class.open]="isOpen()" [class.disabled]="disabled()">
+
+  <!-- Trigger Button -->
+  <button
+    type="button"
+    class="select-trigger-btn"
+    [disabled]="disabled()"
+    (click)="toggleOpen()"
+  >
+    <div class="trigger-content">
+      @if (icon()) {
+        <span class="material-symbols-rounded trigger-icon">{{ icon() }}</span>
+      }
+      <span class="trigger-label" [class.placeholder]="!selectedOption()">
+        {{ selectedOption()?.label || placeholder() }}
+      </span>
+      @if (selectedOption()?.badge; as badge) {
+        <span class="selected-badge">{{ badge }}</span>
+      }
+    </div>
+
+    <span class="material-symbols-rounded arrow-icon" [class.rotated]="isOpen()">
+      keyboard_arrow_down
+    </span>
+  </button>
+
+  <!-- 60fps SlideDown Menu Popup -->
+  @if (isOpen()) {
+    <div class="select-dropdown-menu" role="listbox">
+      <div class="menu-scroll-area">
+        @for (opt of options(); track opt.value) {
+          <div
+            class="dropdown-option-item"
+            [class.selected]="opt.value === value()"
+            (click)="selectOption(opt, $event)"
+          >
+            <div class="option-left">
+              @if (opt.icon) {
+                <span class="material-symbols-rounded opt-icon">{{ opt.icon }}</span>
+              }
+              <div class="option-text-group">
+                <span class="opt-label">{{ opt.label }}</span>
+                @if (opt.subLabel) {
+                  <span class="opt-sublabel">{{ opt.subLabel }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="option-right">
+              @if (opt.badge) {
+                <span class="opt-badge">{{ opt.badge }}</span>
+              }
+              @if (opt.value === value()) {
+                <span class="material-symbols-rounded check-icon">check</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>

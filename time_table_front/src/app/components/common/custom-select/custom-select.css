@@ -1,0 +1,234 @@
+/* ============================================================
+   CUSTOM SELECT — APPLE SLIDEDOWN 60FPS ANIMATED DROPDOWN
+   Theme: Apple Cupertino Frosted Glass Minimalist
+   ============================================================ */
+
+.custom-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-family: var(--font-thai);
+  user-select: none;
+}
+
+/* Trigger Button */
+.select-trigger-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--apple-text-primary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: 
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.15s ease;
+}
+
+.custom-select-wrapper.open .select-trigger-btn {
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14);
+}
+
+.select-trigger-btn:hover:not(:disabled) {
+  background: #fafafc;
+}
+
+.select-trigger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+  overflow: hidden;
+  text-align: left;
+}
+
+.trigger-icon {
+  font-size: 1.15rem;
+  color: var(--apple-blue);
+  flex-shrink: 0;
+}
+
+.trigger-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+.trigger-label.placeholder {
+  color: var(--apple-text-tertiary);
+  font-weight: 400;
+}
+
+.selected-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+  white-space: nowrap;
+}
+
+.arrow-icon {
+  font-size: 1.25rem;
+  color: var(--apple-text-tertiary);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.arrow-icon.rotated {
+  transform: rotate(180deg);
+  color: var(--apple-blue);
+}
+
+/* ============================================================
+   60FPS SLIDEDOWN ANIMATED MENU POPUP
+   ============================================================ */
+.select-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  overflow: hidden;
+  transform-origin: top center;
+  animation: slideDownApple 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes slideDownApple {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menu-scroll-area {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.menu-scroll-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.menu-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+/* Option Item */
+.dropdown-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.dropdown-option-item:hover {
+  background: #f5f5f7;
+}
+
+.dropdown-option-item.selected {
+  background: #e8f2fc;
+}
+
+.option-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.opt-icon {
+  font-size: 1.1rem;
+  color: var(--apple-text-tertiary);
+  flex-shrink: 0;
+}
+
+.option-text-group {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.opt-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--apple-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-option-item.selected .opt-label {
+  font-weight: 600;
+  color: var(--apple-blue);
+}
+
+.opt-sublabel {
+  font-size: 0.72rem;
+  color: var(--apple-text-secondary);
+}
+
+.option-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.opt-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+}
+
+.check-icon {
+  font-size: 1.15rem;
+  color: var(--apple-blue);
+  font-weight: 700;
+}

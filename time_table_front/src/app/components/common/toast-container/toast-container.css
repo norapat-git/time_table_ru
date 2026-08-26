@@ -1,0 +1,184 @@
+/* ============================================================
+   APPLE FLOATING FROSTED TOAST NOTIFICATIONS (60FPS SPRING)
+   Theme: Apple Dynamic Island / Cupertino Floating Pill
+   ============================================================ */
+
+.toast-viewport {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  pointer-events: none;
+  font-family: var(--font-thai);
+  max-width: 90vw;
+}
+
+/* Toast Pill Card */
+.toast-pill-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.15rem 0.65rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  min-width: 280px;
+  max-width: 520px;
+  cursor: pointer;
+  animation: toastSlideDownSpring 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.toast-pill-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes toastSlideDownSpring {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Left Icon Circle */
+.toast-icon-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-icon-circle .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+/* Success Type */
+.toast-success .toast-icon-circle {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.toast-success .toast-title {
+  color: #137333;
+}
+
+/* Error Type */
+.toast-error .toast-icon-circle {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.toast-error .toast-title {
+  color: #c5221f;
+}
+
+/* Loading Type */
+.toast-loading {
+  background: rgba(29, 29, 31, 0.94);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.toast-loading .toast-icon-circle {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.toast-loading .toast-message {
+  color: #f5f5f7;
+}
+
+/* Info Type */
+.toast-info .toast-icon-circle {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.toast-info .toast-title {
+  color: #1a73e8;
+}
+
+/* Warning Type */
+.toast-warning .toast-icon-circle {
+  background: #fef7e0;
+  color: #b06000;
+}
+
+.toast-warning .toast-title {
+  color: #b06000;
+}
+
+/* Body Content */
+.toast-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.toast-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.toast-message {
+  font-size: 0.86rem;
+  color: #1d1d1f;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Close Button */
+.btn-close-toast {
+  background: none;
+  border: none;
+  color: #86868b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.btn-close-toast:hover {
+  color: #1d1d1f;
+}
+
+.btn-close-toast .material-symbols-rounded {
+  font-size: 1rem;
+}
+
+/* Spin loading animation */
+.spin-loading {
+  animation: spinApple 0.8s linear infinite;
+}
+
+@keyframes spinApple {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
