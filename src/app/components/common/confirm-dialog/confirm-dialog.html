@@ -1,0 +1,51 @@
+@if (dialogService.state().isOpen) {
+  @let state = dialogService.state();
+  <div class="dialog-backdrop" (click)="dialogService.handleCancel()">
+    <div
+      class="dialog-modal-card"
+      [attr.data-variant]="state.variant"
+      (click)="$event.stopPropagation()"
+      role="alertdialog"
+      aria-modal="true"
+    >
+      <!-- Dialog Header with Icon -->
+      <div class="dialog-header">
+        <div class="dialog-icon-badge" [attr.data-variant]="state.variant">
+          <span class="material-symbols-rounded">{{ state.icon }}</span>
+        </div>
+        <div class="dialog-title-wrap">
+          <h3 class="dialog-title">{{ state.title }}</h3>
+          <p class="dialog-message">{{ state.message }}</p>
+        </div>
+      </div>
+
+      <!-- Detail / Warning Subtitle -->
+      @if (state.detail) {
+        <div class="dialog-detail-box">
+          <span class="material-symbols-rounded detail-info-icon">info</span>
+          <span class="detail-text">{{ state.detail }}</span>
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="btn-dialog-cancel"
+          (click)="dialogService.handleCancel()"
+        >
+          {{ state.cancelText }}
+        </button>
+
+        <button
+          type="button"
+          class="btn-dialog-confirm"
+          [attr.data-variant]="state.variant"
+          (click)="dialogService.handleConfirm()"
+        >
+          {{ state.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

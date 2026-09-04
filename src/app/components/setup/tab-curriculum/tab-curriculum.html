@@ -1,0 +1,615 @@
+<div class="page-layout">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / จัดการหลักสูตร</div>
+    <div class="header-title-row">
+      <div>
+        <h1 class="page-title">จัดการหลักสูตร</h1>
+        <p class="page-subtitle">กำหนดรายวิชาตามแผนการเรียน คณะ สาขาวิชา ชั้นปี และภาคการศึกษา</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+
+    <!-- Filters Section -->
+    <div class="curriculum-filters-container" [class.is-fetching-locked]="isLoading()">
+      <div class="filter-col">
+        <label class="filter-label">คณะ</label>
+        <app-custom-select [options]="facultyFilterOptions()" [value]="filterFaculty()"
+          (valueChange)="onFilterFacultyChange($event)" icon="account_balance" />
+      </div>
+
+      <div class="filter-col">
+        <label class="filter-label">กลุ่มวิชา/สาขา</label>
+        <app-custom-select [options]="groupFilterOptions()" [value]="filterGroup()"
+          (valueChange)="filterGroup.set($event); currentPage.set(1)" [disabled]="filterFaculty() === 'ALL'" icon="folder_open" />
+      </div>
+    </div>
+
+    <!-- Action Bar (Search & Buttons) -->
+    <div class="action-bar" [class.is-fetching-locked]="isLoading() || isDeleting()">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input type="text" class="search-input" placeholder="ค้นหากลุ่มวิชา, กลุ่มวิชาย่อย, คณะ หรือรหัสวิชา..."
+          [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
+        @if (searchQuery()) {
+        <button class="btn-clear-search" (click)="searchQuery.set(''); currentPage.set(1)">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+        }
+      </div>
+
+      <div class="action-right-btns">
+        <button class="btn-refresh" [disabled]="isLoading()" (click)="loadCurriculumList()" title="รีเฟรชข้อมูล">
+          <span class="material-symbols-rounded" [class.spin-loading]="isLoading()">refresh</span>
+        </button>
+
+        <button class="btn-primary btn-icon-only" (click)="openAddModal()" title="เพิ่ม/จัดการวิชาในหลักสูตร"
+          aria-label="เพิ่ม/จัดการวิชาในหลักสูตร">
+          <span class="material-symbols-rounded">add</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table & Skeleton Loading -->
+    @if (isLoading()) {
+    <div class="table-skeleton-box">
+      <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+        <app-skeleton variant="rect" width="100%" height="44px" />
+      </div>
+      <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+    </div>
+    } @else {
+    <div class="table-responsive" [class.is-fetching-locked]="isDeleting()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 70px; text-align: center;">ลำดับ</th>
+            <th style="min-width: 240px;">กลุ่มวิชา</th>
+            <th style="min-width: 240px;">กลุ่มวิชาย่อย</th>
+            <th class="col-actions" style="width: 140px; text-align: center;">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (groupedCurriculums().length === 0) {
+          <tr>
+            <td colspan="4" class="text-center empty-cell">
+              <span class="material-symbols-rounded empty-icon">search_off</span>
+              <p>ไม่พบข้อมูลกลุ่มหลักสูตรตามเงื่อนไขที่เลือก</p>
+            </td>
+          </tr>
+          }
+
+          @for (grp of paginatedCurriculums(); track grp.key; let i = $index) {
+          <tr class="context-clickable-row" (contextmenu)="onGroupContextMenu($event, grp)">
+            <td class="col-index" style="text-align: center;">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+            <td class="col-grp">
+              <div class="group-title-box">
+                <strong class="group-main-title">{{ grp.groupName }}</strong>
+                @if (grp.facultyNameThai) {
+                  <span class="group-fac-sub">{{ grp.facultyNameThai }}</span>
+                }
+              </div>
+            </td>
+            <td class="col-subgrp">
+              <span class="subgrp-pill" [class.is-main]="grp.subGroupNo === '00'">
+                {{ grp.subGroupName }}
+              </span>
+            </td>
+            <td class="col-actions" style="text-align: center;">
+              <button
+                type="button"
+                class="btn-action btn-more"
+                (click)="openGroupMenuFromBtn($event, grp)"
+                title="การจัดการ (หรือคลิกขวาที่แถว)"
+              >
+                <span class="material-symbols-rounded">more_vert</span>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls (Apple Style Pills) -->
+    @if (totalPages() > 1) {
+    <div class="pagination-bar">
+      <div class="pagination-info">
+        <span class="info-text">แสดง</span>
+        <strong class="info-strong">{{ startItemIndex() | number }} - {{ endItemIndex() | number }}</strong>
+        <span class="info-text">จากทั้งหมด</span>
+        <strong class="info-strong">{{ totalItems() | number }}</strong>
+        <span class="info-text">รายการ</span>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(1)"
+          title="หน้าแรก"
+        >
+          <span class="material-symbols-rounded">first_page</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)"
+          title="หน้าก่อนหน้า"
+        >
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+
+        <div class="page-pills-list">
+          @for (p of displayedPageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button
+                type="button"
+                class="page-pill-btn"
+                [class.active]="p === currentPage()"
+                (click)="setPage(+p)"
+              >
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === totalPages()"
+          (click)="setPage(currentPage() + 1)"
+          title="หน้าถัดไป"
+        >
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === totalPages()"
+          (click)="setPage(totalPages())"
+          title="หน้าสุดท้าย"
+        >
+          <span class="material-symbols-rounded">last_page</span>
+        </button>
+      </div>
+    </div>
+    }
+    }
+
+  </div>
+
+  <!-- MODAL: เพิ่ม/จัดการวิชาในหลักสูตร (MATCHING USER MOCKUP IMAGE 2) -->
+  @if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card curriculum-modal-card" (click)="$event.stopPropagation()"
+      [class.is-fetching-locked]="isSaving()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">menu_book</span>
+          <div>
+            <h2 class="modal-title">เพิ่ม/จัดการวิชาในหลักสูตร</h2>
+            <span class="modal-subtitle">กำหนดแผนการเรียนตาม คณะ สาขาวิชา ชั้นปี และภาคการศึกษา</span>
+          </div>
+        </div>
+        <div class="modal-header-actions">
+          <button type="button" class="btn-modal-tour" (click)="startModalTour(true)"
+            title="เริ่มแนะนำขั้นตอนการใช้งานในหน้านี้">
+            <span class="material-symbols-rounded">help_outline</span>
+            <span>คำแนะนำ</span>
+          </button>
+          <button class="btn-close-modal" (click)="closeModal()" [disabled]="isSaving()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        @if (formError) {
+        <div class="alert-form-error">
+          <span class="material-symbols-rounded">warning</span>
+          <span>{{ formError }}</span>
+        </div>
+        }
+
+        <!-- Form Grid 2 Columns (Matching Image 2) -->
+        <div class="modal-form-grid">
+          <!-- คณะ -->
+          <div class="form-group">
+            <label class="form-label">คณะ *</label>
+            <app-custom-select [options]="modalFacultyOptions()" [value]="modalFacultyNo"
+              (valueChange)="onModalFacultyChange($event)" icon="account_balance" />
+          </div>
+
+          <!-- กลุ่มวิชา -->
+          <div class="form-group">
+            <label class="form-label">กลุ่มวิชา *</label>
+            <app-custom-select [options]="modalGroupOptions()" [value]="modalGroupNo"
+              (valueChange)="onModalGroupChange($event)" [disabled]="modalGroupsList().length === 0"
+              icon="folder_open" />
+          </div>
+
+          <!-- กลุ่มวิชาย่อย -->
+          <div class="form-group">
+            <label class="form-label">กลุ่มวิชาย่อย</label>
+            <app-custom-select [options]="modalSubGroupOptions()" [value]="modalSubGroupNo"
+              (valueChange)="modalSubGroupNo = $event; hasQueriedExisting.set(false)" icon="subdirectory_arrow_right" />
+          </div>
+
+          <!-- ชั้นปี -->
+          <div class="form-group">
+            <label class="form-label">ชั้นปี *</label>
+            <app-custom-select [options]="modalYearLevelOptions" [value]="modalYearLevel"
+              (valueChange)="modalYearLevel = $event; hasQueriedExisting.set(false)" icon="looks_one" />
+          </div>
+
+          <!-- ภาค -->
+          <div class="form-group">
+            <label class="form-label">ภาค *</label>
+            <app-custom-select [options]="modalSemesterOptions" [value]="modalSemester"
+              (valueChange)="modalSemester = $event; hasQueriedExisting.set(false)" icon="event_available" />
+          </div>
+        </div>
+
+        <!-- Action Buttons Bar (Matching Image 2: "แสดงวิชา" and "เพิ่มวิชา") -->
+        <div class="modal-control-btns-row">
+          <button type="button" class="btn-outline-action" [disabled]="isExistingLoading()"
+            (click)="loadExistingCoursesForModal()" title="ดึงรายวิชาที่มีอยู่ในหลักสูตรนี้มาแสดง">
+            <span class="material-symbols-rounded" [class.spin-loading]="isExistingLoading()">
+              {{ isExistingLoading() ? 'sync' : 'list_alt' }}
+            </span>
+            <span>แสดงวิชา</span>
+          </button>
+
+          <button type="button" class="btn-primary-action" [class.btn-active-toggle]="showAddCoursePicker()"
+            (click)="toggleAddCoursePicker()" title="เปิดแผงเลือกและค้นหารายวิชาเพื่อเพิ่มในหลักสูตรนี้">
+            <span class="material-symbols-rounded">
+              {{ showAddCoursePicker() ? 'expand_less' : 'add_circle' }}
+            </span>
+            <span>{{ showAddCoursePicker() ? 'ซ่อนการค้นหาวิชา' : 'เพิ่มวิชา' }}</span>
+          </button>
+        </div>
+
+        <!-- Section A: Existing Courses Panel (When "แสดงวิชา" is clicked) -->
+        @if (hasQueriedExisting()) {
+        <div class="existing-courses-section">
+          <div class="section-title-row">
+            <div class="section-title">
+              <span class="material-symbols-rounded">format_list_bulleted</span>
+              <span>วิชาในหลักสูตรปัจจุบัน ({{ existingCurriculumCourses().length }} วิชา)</span>
+            </div>
+          </div>
+
+          @if (isExistingLoading()) {
+          <div class="loading-state-sm">
+            <app-skeleton variant="rect" width="100%" height="40px" borderRadius="8px" [lines]="3" />
+          </div>
+          } @else if (existingCurriculumCourses().length === 0) {
+          <div class="empty-inline-box">
+            <span class="material-symbols-rounded">info</span>
+            <span>ยังไม่มีรายวิชาในหลักสูตรตามชั้นปีและภาคเรียนที่เลือกนี้</span>
+          </div>
+          } @else {
+          <div class="existing-courses-grid">
+            @for (c of existingCurriculumCourses(); track c.COURSE_NO) {
+            <div class="existing-course-card">
+              <div class="card-left">
+                <strong class="course-code">{{ c.COURSE_NO }}</strong>
+                <span class="course-name">{{ c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '-' }}</span>
+              </div>
+              <div class="card-right">
+                @if (c.CREDIT != null) {
+                <span class="credit-tag">{{ c.CREDIT }} นก.</span>
+                }
+                <button type="button" class="btn-mini-delete" (click)="deleteCurriculumCourse(c)"
+                  title="ลบวิชานี้ออกจากหลักสูตร">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Section B: Course Picker (When "เพิ่มวิชา" is opened) -->
+        @if (showAddCoursePicker()) {
+        <div class="course-picker-panel">
+          <div class="picker-panel-header">
+            <span class="material-symbols-rounded">manage_search</span>
+            <span>เลือกรายวิชาจากฐานข้อมูล UGB_COURSE เพื่อเพิ่มลงในหลักสูตร</span>
+          </div>
+
+          <!-- Level 1: Letters (A, B, C...) -->
+          <div class="picker-step-box">
+            <div class="step-badge">1. เลือกตัวอักษรแรก:</div>
+            @if (isLettersLoading()) {
+            <div class="letters-pill-row">
+              <app-skeleton variant="rect" width="32px" height="32px" borderRadius="6px" [lines]="10" />
+            </div>
+            } @else {
+            <div class="letters-pill-row" [class.is-fetching-locked]="isPrefixesLoading()">
+              @for (letter of availableLetters(); track letter) {
+              <button type="button" class="letter-pill-btn" [class.active]="selectedLetter() === letter"
+                (click)="selectLetter(letter)">
+                {{ letter }}
+              </button>
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Level 2: Prefix Group (ACC, ACT, MTH...) -->
+          @if (selectedLetter()) {
+          <div class="picker-step-box">
+            <div class="step-badge">2. กลุ่มรหัสวิชา:</div>
+            @if (isPrefixesLoading()) {
+            <div class="prefix-pill-row">
+              <app-skeleton variant="rect" width="60px" height="30px" borderRadius="6px" [lines]="6" />
+            </div>
+            } @else if (prefixGroups().length === 0) {
+            <div class="empty-note">ไม่พบกลุ่มรหัสวิชาในหมวด {{ selectedLetter() }}</div>
+            } @else {
+            <div class="prefix-pill-row" [class.is-fetching-locked]="isUgbCoursesLoading()">
+              @for (prefix of prefixGroups(); track prefix) {
+              <button type="button" class="prefix-pill-btn" [class.active]="selectedPrefix() === prefix"
+                (click)="selectPrefix(prefix)">
+                {{ prefix }}
+              </button>
+              }
+            </div>
+            }
+          </div>
+          }
+
+          <!-- Level 3: Dual Search & Course Selection List -->
+          @if (selectedPrefix()) {
+          <div class="picker-step-box">
+            <div class="step-badge">3. ค้นหาและเลือกวิชา:</div>
+
+            <!-- Dual Search Boxes -->
+            <div class="dual-search-grid">
+              <div class="search-input-wrapper">
+                <span class="material-symbols-rounded search-icon">search</span>
+                <input type="text" class="picker-input" placeholder="ค้นหารหัสวิชา เช่น {{ selectedPrefix() }}1101..."
+                  [ngModel]="pickerCodeQuery()" (ngModelChange)="onPickerCodeSearchChange($event)" />
+              </div>
+              <div class="search-input-wrapper">
+                <span class="material-symbols-rounded search-icon">translate</span>
+                <input type="text" class="picker-input" placeholder="ค้นหาชื่อวิชา เช่น สถิติ, MATH..."
+                  [ngModel]="pickerNameQuery()" (ngModelChange)="onPickerNameSearchChange($event)" />
+              </div>
+            </div>
+
+            <!-- Courses List Box -->
+            <div class="ugb-courses-scroll-box">
+              @if (isUgbCoursesLoading()) {
+              <div class="loading-state-sm">
+                <app-skeleton variant="rect" width="100%" height="40px" borderRadius="8px" [lines]="4" />
+              </div>
+              } @else if (filteredUgbCourses().length === 0) {
+              <div class="empty-note">ไม่พบรายวิชาที่ตรงกับคำค้นหา</div>
+              } @else {
+              <div class="courses-selectable-grid">
+                @for (c of filteredUgbCourses(); track c.COURSE_NO) {
+                <div class="course-select-item" [class.is-selected]="isCourseSelectedInModal(c.COURSE_NO)"
+                  (click)="toggleCourseInModal(c)">
+                  <app-custom-checkbox [checked]="isCourseSelectedInModal(c.COURSE_NO)"
+                    (checkedChange)="toggleCourseInModal(c)" />
+                  <div class="course-text-col">
+                    <strong class="c-code">{{ c.COURSE_NO }}</strong>
+                    <span class="c-th">{{ c.COURSE_NAME_THAI || '-' }}</span>
+                    <span class="c-en">{{ c.COURSE_NAME_ENG_L || '-' }}</span>
+                  </div>
+                  @if (c.CREDIT != null) {
+                  <span class="c-credit">{{ c.CREDIT }} นก.</span>
+                  }
+                </div>
+                }
+              </div>
+              }
+            </div>
+          </div>
+          }
+
+          <!-- Selected Courses Chips Queue -->
+          @if (selectedCoursesCount() > 0) {
+          <div class="selected-queue-box">
+            <div class="queue-header">
+              <div class="queue-title">
+                <span class="material-symbols-rounded">checklist</span>
+                <span>เลือกแล้ว {{ selectedCoursesCount() }} วิชา พร้อมบันทึก</span>
+              </div>
+              <button type="button" class="btn-clear-queue" (click)="clearAllSelectedCourses()">
+                ล้างทั้งหมด
+              </button>
+            </div>
+
+            <div class="chips-flex">
+              @for (c of selectedCourses(); track c.COURSE_NO) {
+              <div class="course-chip">
+                <strong>{{ c.COURSE_NO }}</strong>
+                <span class="chip-name">{{ c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '' }}</span>
+                <button type="button" class="btn-remove-chip" (click)="removeSelectedCourse(c.COURSE_NO)">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+              }
+            </div>
+          </div>
+          }
+
+        </div>
+        }
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn-secondary" [disabled]="isSaving()" (click)="closeModal()">ปิด</button>
+        <button class="btn-primary" [disabled]="selectedCoursesCount() === 0 || isSaving()"
+          (click)="saveCurriculumCourses()">
+          <span class="material-symbols-rounded" [class.spin-loading]="isSaving()">
+            {{ isSaving() ? 'sync' : 'save' }}
+          </span>
+          <span>
+            {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกวิชาในหลักสูตร ' + (selectedCoursesCount() > 0 ? '(' +
+            selectedCoursesCount() + ' วิชา)' : '') }}
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- MODAL: ดูรายละเอียดรายวิชาในกลุ่มหลักสูตร (EYE VIEW BUTTON MODAL) -->
+  @if (isGroupDetailModalOpen() && selectedGroupDetail(); as detail) {
+  <div class="modal-backdrop" (click)="closeGroupDetailModal()">
+    <div class="modal-card detail-group-modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <div class="modal-header-icon-badge">
+            <span class="material-symbols-rounded">folder_open</span>
+          </div>
+          <div>
+            <h3 class="modal-title">{{ detail.groupName }}</h3>
+            <span class="modal-subtitle">
+              {{ detail.subGroupName }} • คณะ{{ detail.facultyNameThai || detail.facultyNo }}
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeGroupDetailModal()" title="ปิดหน้าต่าง">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Summary Bar & Search -->
+      <div class="modal-detail-toolbar">
+        <div class="detail-stats-pills">
+          <span class="stat-pill">
+            <span class="material-symbols-rounded">menu_book</span>
+            <span><strong>{{ modalDetailCourses().length }}</strong> รายวิชา</span>
+          </span>
+          <span class="stat-pill">
+            <span class="material-symbols-rounded">grade</span>
+            <span><strong>{{ detail.totalCredits }}</strong> หน่วยกิตรวม</span>
+          </span>
+        </div>
+
+        <div class="modal-detail-search">
+          <span class="material-symbols-rounded">search</span>
+          <input
+            type="text"
+            placeholder="ค้นหารหัสวิชา, ชื่อวิชา หรือชั้นปีในกลุ่มนี้..."
+            [ngModel]="modalDetailSearch()"
+            (ngModelChange)="modalDetailSearch.set($event)"
+          />
+          @if (modalDetailSearch()) {
+            <button type="button" class="btn-clear-modal-search" (click)="modalDetailSearch.set('')">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Modal Courses Table -->
+      <div class="modal-body-table-wrapper">
+        <table class="data-table modal-courses-table">
+          <thead>
+            <tr>
+              <th style="width: 50px; text-align: center;">ลำดับ</th>
+              <th style="width: 75px; text-align: center;">ชั้นปี</th>
+              <th style="width: 70px; text-align: center;">ภาค</th>
+              <th style="width: 110px;">รหัสวิชา</th>
+              <th>ชื่อวิชา (ภาษาไทย)</th>
+              <th>Course Name (English)</th>
+              <th style="width: 80px; text-align: center;">หน่วยกิต</th>
+              <th style="width: 60px; text-align: center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (modalDetailCourses().length === 0) {
+              <tr>
+                <td colspan="8" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบรายวิชาในกลุ่มนี้ตามคำค้นหา</p>
+                </td>
+              </tr>
+            }
+
+            @for (c of modalDetailCourses(); track c.COURSE_NO + '_' + c.YEAR_LEVEL + '_' + c.SEMESTER; let i = $index) {
+              <tr class="context-clickable-row" (contextmenu)="onCourseContextMenu($event, c)">
+                <td style="text-align: center;" class="col-index">{{ i + 1 }}</td>
+                <td style="text-align: center;">
+                  <span class="level-pill">{{ c.YEAR_LEVEL }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <span class="sem-pill">{{ c.SEMESTER }}</span>
+                </td>
+                <td>
+                  <strong class="course-code-badge">{{ c.COURSE_NO }}</strong>
+                </td>
+                <td>
+                  <strong>{{ c.COURSE_NAME_THAI || '-' }}</strong>
+                </td>
+                <td>
+                  <span class="text-eng">{{ c.COURSE_NAME_ENG_L || '-' }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <span class="credit-pill">{{ c.CREDIT != null ? c.CREDIT : '-' }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <button
+                    type="button"
+                    class="btn-action btn-more btn-sm"
+                    (click)="openCourseMenuFromBtn($event, c)"
+                    title="การจัดการ (หรือคลิกขวาที่แถว)"
+                  >
+                    <span class="material-symbols-rounded">more_vert</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeGroupDetailModal()">ปิด</button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- Reusable Custom Context Menu -->
+  <app-custom-context-menu
+    [isOpen]="isContextMenuOpen()"
+    [position]="contextMenuPos()"
+    [headerBadge]="contextMenuBadge()"
+    [headerTitle]="contextMenuTitle()"
+    [items]="contextMenuItems()"
+    (close)="isContextMenuOpen.set(false)"
+  />
+
+</div>

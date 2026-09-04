@@ -1,0 +1,399 @@
+<div class="page-layout">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="breadcrumb">จัดการข้อมูล / จัดการวิชาที่เปิดสอน</div>
+    <div class="header-title-row">
+      <div>
+        <h1 class="page-title">จัดการวิชาที่เปิดสอน</h1>
+        <p class="page-subtitle">กำหนดรายวิชาที่เปิดสอนประจำภาคการศึกษา</p>
+      </div>
+
+      <!-- Year & Semester Filter Dropdown with 60fps SlideDown -->
+      <div class="sem-selector-container" [class.is-fetching-locked]="isLoading()">
+        <app-custom-select [options]="yearSemSelectOptions()" [value]="selectedYearSemKey()" icon="event_available"
+          (valueChange)="onYearSemChange($event)" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+
+    <!-- Action Bar -->
+    <div class="action-bar" [class.is-fetching-locked]="isLoading() || isDeleting()">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input type="text" class="search-input" placeholder="ค้นหารหัสวิชา หรือชื่อวิชา เช่น ACC1101, ภาษาอังกฤษ..."
+          [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
+        @if (searchQuery()) {
+        <button class="btn-clear-search" (click)="searchQuery.set(''); currentPage.set(1)">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+        }
+      </div>
+
+      <div class="action-right-btns">
+        <!-- Bulk Delete Button (Visible when rows are selected) -->
+        @if (selectedTableCount() > 0) {
+        <button class="btn-bulk-delete" [disabled]="isDeleting()" (click)="deleteSelectedTableCourses()"
+          title="ลบวิชาที่เลือกพร้อมกัน">
+          <span class="material-symbols-rounded" [class.spin-loading]="isDeleting()">
+            {{ isDeleting() ? 'sync' : 'delete_sweep' }}
+          </span>
+          <span>ลบที่เลือก ({{ selectedTableCount() }} วิชา)</span>
+        </button>
+        }
+
+        <button class="btn-refresh" [disabled]="isLoading()" (click)="loadCourseList()" title="รีเฟรชข้อมูล">
+          <span class="material-symbols-rounded" [class.spin-loading]="isLoading()">refresh</span>
+        </button>
+
+        <button class="btn-primary btn-icon-only" (click)="openAddModal()" title="เพิ่มวิชาเปิดสอน"
+          aria-label="เพิ่มวิชาเปิดสอน">
+          <span class="material-symbols-rounded">add</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+    <div class="table-skeleton-box">
+      <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+        <app-skeleton variant="rect" width="100%" height="44px" />
+      </div>
+      <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+    </div>
+    } @else {
+    <div class="table-responsive" [class.is-fetching-locked]="isDeleting()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <!-- Master Checkbox Header -->
+            <th style="width: 44px; text-align: center;">
+              <app-custom-checkbox [checked]="isAllTableSelected()" [disabled]="filteredCourses().length === 0"
+                (checkedChange)="toggleSelectAllTable()" />
+            </th>
+            <th style="width: 50px;">ลำดับ</th>
+            <th style="width: 120px;">รหัสวิชา</th>
+            <th>ชื่อวิชา (ภาษาไทย)</th>
+            <th>Course Name (English)</th>
+            <th style="width: 90px; text-align: center;">หน่วยกิต</th>
+            <th class="col-actions" style="width: 90px; text-align: center;">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredCourses().length === 0) {
+          <tr>
+            <td colspan="7" class="text-center empty-cell">
+              <span class="material-symbols-rounded empty-icon">search_off</span>
+              <p>ไม่พบรายวิชาที่เปิดสอนใน ปีการศึกษา {{ selectedYear() }} ภาค {{ selectedSemester() }}</p>
+            </td>
+          </tr>
+          }
+
+          @for (item of paginatedCourses(); track item.COURSE_NO; let i = $index) {
+          <tr [class.row-selected]="isTableCourseSelected(item.COURSE_NO)" class="context-clickable-row"
+            (contextmenu)="onRowContextMenu($event, item)">
+            <!-- Row Checkbox -->
+            <td class="col-checkbox" style="text-align: center;">
+              <app-custom-checkbox [checked]="isTableCourseSelected(item.COURSE_NO)" [disabled]="!!item.IS_SCHEDULED"
+                [title]="item.IS_SCHEDULED ? 'วิชานี้ถูกจัดในตารางสอนแล้ว ไม่สามารถเลือกลบได้' : ''"
+                (checkedChange)="toggleTableCourseSelect(item.COURSE_NO)" />
+            </td>
+            <td class="col-index">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+            <td class="col-code">
+              <span class="course-code-badge">{{ item.COURSE_NO }}</span>
+            </td>
+            <td class="col-name-th">
+              <div class="course-name-cell">
+                <strong>{{ item.COURSE_NAME_THAI || '-' }}</strong>
+                @if (item.IS_SCHEDULED) {
+                <span class="course-scheduled-badge" title="มีตารางสอนในปี/ภาคนี้จำนวน {{ item.SCHEDULE_COUNT }} คาบ">
+                  <span class="material-symbols-rounded">event_seat</span>
+                  <span>จัดในตารางแล้ว ({{ item.SCHEDULE_COUNT }} คาบ)</span>
+                </span>
+                }
+              </div>
+            </td>
+            <td class="col-name-en">
+              <span class="text-eng">{{ item.COURSE_NAME_ENG_L || '-' }}</span>
+            </td>
+            <td class="col-credit" style="text-align: center;">
+              <span class="credit-pill">{{ item.CREDIT != null ? item.CREDIT : '-' }}</span>
+            </td>
+            <td class="col-actions" style="text-align: center;">
+              <button class="btn-action btn-more" (click)="openMenuFromBtn($event, item)"
+                title="การจัดการ (หรือคลิกขวาที่แถว)">
+                <span class="material-symbols-rounded">more_vert</span>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls (Apple Style Pills) -->
+    @if (totalPages() > 1) {
+    <div class="pagination-bar">
+      <div class="pagination-info">
+        <span class="info-text">แสดง</span>
+        <strong class="info-strong">{{ startItemIndex() | number }} - {{ endItemIndex() | number }}</strong>
+        <span class="info-text">จากทั้งหมด</span>
+        <strong class="info-strong">{{ totalItems() | number }}</strong>
+        <span class="info-text">รายการ</span>
+      </div>
+
+      <div class="pagination-controls">
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === 1" (click)="setPage(1)"
+          title="หน้าแรก">
+          <span class="material-symbols-rounded">first_page</span>
+        </button>
+
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)" title="หน้าก่อนหน้า">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+
+        <div class="page-pills-list">
+          @for (p of displayedPageNumbers(); track $index) {
+          @if (p === '...') {
+          <span class="page-ellipsis">…</span>
+          } @else {
+          <button type="button" class="page-pill-btn" [class.active]="p === currentPage()" (click)="setPage(+p)">
+            {{ p }}
+          </button>
+          }
+          }
+        </div>
+
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === totalPages()"
+          (click)="setPage(currentPage() + 1)" title="หน้าถัดไป">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === totalPages()"
+          (click)="setPage(totalPages())" title="หน้าสุดท้าย">
+          <span class="material-symbols-rounded">last_page</span>
+        </button>
+      </div>
+    </div>
+    }
+    }
+
+  </div>
+
+  <!-- Multi-Level & Multi-Select Course Picker Modal (Add) -->
+  @if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card course-modal-card" (click)="$event.stopPropagation()"
+      [class.is-fetching-locked]="isSaving()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">add_circle</span>
+          <div>
+            <h2 class="modal-title">เพิ่มวิชาที่เปิดสอน (เลือกได้หลายวิชา)</h2>
+            <span class="modal-subtitle">ปีการศึกษา {{ modalStudyYear }} ภาคการศึกษาที่ {{ modalStudySemester }}</span>
+          </div>
+        </div>
+        <div class="modal-header-actions">
+          <button type="button" class="btn-modal-tour" (click)="startModalTour(true)"
+            title="เริ่มแนะนำขั้นตอนการใช้งานในหน้านี้">
+            <span class="material-symbols-rounded">help_outline</span>
+            <span>คำแนะนำ</span>
+          </button>
+          <button class="btn-close-modal" (click)="closeModal()" [disabled]="isSaving()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        @if (formError) {
+        <div class="alert-form-error">
+          <span class="material-symbols-rounded">warning</span>
+          <span>{{ formError }}</span>
+        </div>
+        }
+
+        <!-- Course Selector Interactive Section -->
+        <div class="picker-section">
+          <label class="form-label font-bold">เลือกวิชาจากฐานข้อมูลมหาวิทยาลัย</label>
+
+          <!-- Level 1: First Letter Selection Pills (A, B, C, D...) -->
+          <div class="picker-step-box">
+            <div class="step-badge">1. เลือกตัวอักษรแรก:</div>
+            @if (isLettersLoading()) {
+            <div class="letters-pill-row">
+              <app-skeleton variant="rect" width="32px" height="32px" borderRadius="6px" [lines]="10" />
+            </div>
+            } @else {
+            <div class="letters-pill-row" [class.is-fetching-locked]="isPrefixesLoading()">
+              @for (letter of availableLetters(); track letter) {
+              <button type="button" class="letter-pill-btn" [class.active]="selectedLetter() === letter"
+                (click)="selectLetter(letter)">
+                {{ letter }}
+              </button>
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Level 2: Prefix Group Selection (ACC, ANT, APR...) -->
+          @if (selectedLetter()) {
+          <div class="picker-step-box">
+            <div class="step-badge">2. เลือกกลุ่มวิชาที่ขึ้นต้นด้วย "{{ selectedLetter() }}":</div>
+            @if (isPrefixesLoading()) {
+            <div class="prefix-pill-row">
+              <app-skeleton variant="rect" width="60px" height="32px" borderRadius="8px" [lines]="6" />
+            </div>
+            } @else {
+            <div class="prefix-pill-row" [class.is-fetching-locked]="isUgbCoursesLoading()">
+              @for (pfx of prefixGroups(); track pfx) {
+              <button type="button" class="prefix-pill-btn" [class.active]="selectedPrefix() === pfx"
+                (click)="selectPrefix(pfx)">
+                {{ pfx }}
+              </button>
+              }
+            </div>
+            }
+          </div>
+          }
+
+          <!-- Level 3: Course List Table with Search & Multi-Select Checkboxes -->
+          @if (selectedPrefix()) {
+          <div class="picker-step-box">
+            <div class="step-header-row">
+              <div class="step-badge-with-actions">
+                <span class="step-badge">3. เลือกวิชาในกลุ่ม "{{ selectedPrefix() }}" (เลือกได้หลายวิชา):</span>
+                @if (filteredUgbCourses().length > 0 && !isUgbCoursesLoading()) {
+                <button type="button" class="btn-select-all-group" (click)="toggleSelectAllInGroup()">
+                  <span class="material-symbols-rounded">
+                    {{ isAllGroupSelected() ? 'deselect' : 'select_all' }}
+                  </span>
+                  <span>{{ isAllGroupSelected() ? 'ยกเลิกเลือกทั้งหมดในกลุ่ม' : 'เลือกทั้งหมดในกลุ่ม' }}</span>
+                </button>
+                }
+              </div>
+
+              <!-- Dual Search Inputs (Course Code & Course Name) -->
+              <div class="picker-dual-search-container">
+                <div class="mini-search-box mini-search-code">
+                  <span class="material-symbols-rounded">tag</span>
+                  <input type="text" placeholder="ค้นหารหัสวิชา (เช่น ACC1101)" [ngModel]="pickerCodeQuery()"
+                    (ngModelChange)="onPickerCodeSearchChange($event)" />
+                  @if (pickerCodeQuery()) {
+                  <button type="button" class="btn-mini-clear" (click)="onPickerCodeSearchChange('')">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                  }
+                </div>
+
+                <div class="mini-search-box mini-search-name">
+                  <span class="material-symbols-rounded">translate</span>
+                  <input type="text" placeholder="ค้นหาชื่อวิชา (ไทยหรืออังกฤษ)" [ngModel]="pickerNameQuery()"
+                    (ngModelChange)="onPickerNameSearchChange($event)" />
+                  @if (pickerNameQuery()) {
+                  <button type="button" class="btn-mini-clear" (click)="onPickerNameSearchChange('')">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            @if (isUgbCoursesLoading()) {
+            <div class="ugb-course-scroll-box" style="padding: 0.5rem; gap: 0.4rem;">
+              <app-skeleton variant="rect" width="100%" height="42px" borderRadius="6px" [lines]="4" />
+            </div>
+            } @else {
+            <div class="ugb-course-scroll-box">
+              @if (filteredUgbCourses().length === 0) {
+              <div class="empty-ugb-msg">ไม่พบรายวิชาในกลุ่มนี้</div>
+              } @else {
+              @for (c of filteredUgbCourses(); track c.COURSE_NO) {
+              <div class="ugb-course-item" [class.selected]="isCourseSelected(c.COURSE_NO)" (click)="toggleCourse(c)">
+                <div class="ugb-col-checkbox">
+                  <app-custom-checkbox [checked]="isCourseSelected(c.COURSE_NO)" (checkedChange)="toggleCourse(c)" />
+                </div>
+                <div class="ugb-col-code">
+                  <strong>{{ c.COURSE_NO }}</strong>
+                  @if (c.CREDIT != null) {
+                  <span class="ugb-credit-badge">{{ c.CREDIT }} นก.</span>
+                  }
+                </div>
+                <div class="ugb-col-names">
+                  <span class="ugb-thai">{{ c.COURSE_NAME_THAI || '-' }}</span>
+                  <span class="ugb-eng">{{ c.COURSE_NAME_ENG_L || '-' }}</span>
+                </div>
+              </div>
+              }
+              }
+            </div>
+            }
+          </div>
+          }
+
+        </div>
+
+        <!-- Multi-Selected Courses Summary Box -->
+        @if (selectedCourses().length > 0) {
+        <div class="selected-courses-summary-card">
+          <div class="summary-header">
+            <div class="summary-count-badge">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>เลือกแล้ว {{ selectedCoursesCount() }} วิชา</span>
+            </div>
+            <button type="button" class="btn-clear-all" (click)="clearAllSelected()">
+              ล้างการเลือกทั้งหมด
+            </button>
+          </div>
+
+          <!-- Selected Course Tag Chips -->
+          <div class="chips-container">
+            @for (c of selectedCourses(); track c.COURSE_NO) {
+            <div class="course-chip">
+              <strong class="chip-code">{{ c.COURSE_NO }}</strong>
+              <span class="chip-name">{{ c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '' }}</span>
+              <button type="button" class="btn-remove-chip" (click)="removeSelectedCourse(c.COURSE_NO)"
+                title="ลบวิชานี้">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn-secondary" [disabled]="isSaving()" (click)="closeModal()">ยกเลิก</button>
+        <button class="btn-primary" [disabled]="selectedCoursesCount() === 0 || isSaving()" (click)="saveCourse()">
+          <span class="material-symbols-rounded" [class.spin-loading]="isSaving()">
+            {{ isSaving() ? 'sync' : 'save' }}
+          </span>
+          <span>
+            {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกข้อมูล ' + (selectedCoursesCount() > 1 ? '(' +
+            selectedCoursesCount() + ' วิชา)' : '') }}
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- Reusable Custom Context Menu -->
+  <app-custom-context-menu [isOpen]="isContextMenuOpen()" [position]="contextMenuPos()"
+    [headerBadge]="selectedContextMenuCourse()?.COURSE_NO"
+    [headerTitle]="selectedContextMenuCourse()?.COURSE_NAME_THAI || selectedContextMenuCourse()?.COURSE_NAME_ENG_L || 'วิชาเปิดสอน'"
+    [items]="contextMenuItems()" (close)="isContextMenuOpen.set(false)" />
+
+</div>

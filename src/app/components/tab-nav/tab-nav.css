@@ -1,0 +1,443 @@
+/* APPLE-STYLE SIDEBAR NAVIGATION (WHITE & GRAY THEME)
+   Theme: macOS / iPadOS Cupertino Clean Minimalist */
+
+.sidebar-wrapper {
+  width: 270px;
+  min-width: 270px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: var(--apple-sidebar-bg);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  color: var(--apple-text-primary);
+  z-index: 99;
+  font-family: var(--font-thai);
+  user-select: none;
+}
+
+/* Header / Branding */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.35rem 1.25rem 1.15rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.brand-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  font-size: 1.35rem;
+  color: var(--apple-blue);
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brand-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--apple-text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.brand-subtitle {
+  font-size: 0.72rem;
+  color: var(--apple-text-secondary);
+  margin: 0;
+}
+
+/* Nav Body Container */
+.sidebar-nav-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.25rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  position: relative;
+}
+
+.sidebar-nav-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* APPLE-STYLE FLUID WHITE GLIDING CAPSULE (SEGMENTED PILL) */
+.apple-glass-capsule {
+  position: absolute;
+  top: 0;
+  left: 0.85rem;
+  right: 0.85rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.03);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  will-change: transform, height;
+  transition: 
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.apple-glass-capsule.visible {
+  opacity: 1;
+}
+
+/* Subtle Apple Blue Left Pill Line */
+.capsule-border-highlight {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--apple-blue);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Menu Group */
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--apple-text-tertiary);
+  padding: 0 0.65rem 0.35rem 0.65rem;
+}
+
+.group-icon {
+  font-size: 0.9rem;
+  color: var(--apple-text-quaternary);
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Nav Item Button */
+.nav-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--apple-text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  z-index: 3;
+  transition: 
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.item-icon {
+  font-size: 1.2rem;
+  color: var(--apple-text-tertiary);
+  transition: 
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hover State */
+.nav-item-btn:hover:not(.active) {
+  color: var(--apple-text-primary);
+  background: rgba(0, 0, 0, 0.035);
+}
+
+.nav-item-btn:hover:not(.active) .item-icon {
+  color: var(--apple-text-primary);
+}
+
+/* Active / Selected Tab State */
+.nav-item-btn.active {
+  color: var(--apple-text-primary);
+  font-weight: 600;
+}
+
+.nav-item-btn.active .item-icon {
+  color: var(--apple-blue);
+  font-variation-settings: 'FILL' 1;
+  transform: scale(1.05);
+}
+
+/* Locked Tab State (During Drag & Drop) */
+.nav-item-btn.is-locked {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.nav-item-btn.is-locked:hover {
+  background: transparent !important;
+  color: var(--apple-text-secondary) !important;
+}
+
+/* Active Press Effect */
+.nav-item-btn:active {
+  transform: scale(0.985);
+}
+
+/* Footer Section */
+.sidebar-footer {
+  padding: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: var(--apple-surface-sub);
+  position: relative;
+  z-index: 5;
+}
+
+/* Semester Info Box */
+.semester-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 8px;
+}
+
+.sem-icon {
+  font-size: 1.15rem;
+  color: var(--apple-blue);
+  flex-shrink: 0;
+}
+
+.sem-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sem-title {
+  font-size: 0.65rem;
+  color: var(--apple-text-tertiary);
+}
+
+.sem-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+}
+
+/* User Profile Box */
+.user-profile-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 8px;
+}
+
+.user-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--apple-dark);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-avatar-circle .material-symbols-rounded {
+  font-size: 1rem;
+}
+
+.user-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--apple-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 0.68rem;
+  color: var(--apple-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-logout-sidebar {
+  background: none;
+  border: none;
+  color: var(--apple-text-quaternary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-logout-sidebar:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Responsive Mobile */
+@media (max-width: 900px) {
+  .sidebar-wrapper {
+    position: fixed;
+    left: -280px;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+    transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sidebar-wrapper.mobile-open {
+    left: 0;
+  }
+
+  .mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    z-index: 98;
+  }
+}
+
+/* DARK MODE — SIDEBAR TAB NAV */
+:host-context([data-theme="dark"]) .sidebar-header {
+  border-bottom-color: var(--color-border);
+}
+
+:host-context([data-theme="dark"]) .brand-logo-box {
+  background: var(--apple-surface-sub);
+  border-color: var(--color-border);
+}
+
+:host-context([data-theme="dark"]) .apple-glass-capsule {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn {
+  color: var(--apple-text-secondary);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn:hover {
+  color: var(--apple-text-primary);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn.active {
+  color: #38bdf8;
+}
+
+:host-context([data-theme="dark"]) .sidebar-footer {
+  border-top-color: var(--color-border);
+  background: var(--apple-sidebar-bg) !important;
+}
+
+:host-context([data-theme="dark"]) .semester-box {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+}
+
+:host-context([data-theme="dark"]) .sem-title {
+  color: var(--apple-text-tertiary) !important;
+}
+
+:host-context([data-theme="dark"]) .sem-value {
+  color: var(--apple-text-primary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-profile-box {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+}
+
+:host-context([data-theme="dark"]) .user-name {
+  color: var(--apple-text-primary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-email {
+  color: var(--apple-text-secondary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-avatar-circle {
+  background: var(--apple-surface);
+  border: 1px solid var(--color-border);
+  color: #38bdf8;
+}
+
+:host-context([data-theme="dark"]) .btn-logout-sidebar {
+  color: var(--apple-text-tertiary);
+}
+
+:host-context([data-theme="dark"]) .btn-logout-sidebar:hover {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}

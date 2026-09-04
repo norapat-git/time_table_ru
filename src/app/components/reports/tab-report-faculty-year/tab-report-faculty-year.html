@@ -1,0 +1,165 @@
+<div class="page-layout">
+
+  <!-- Breadcrumb & Header Title -->
+  <div class="header-section">
+    <div class="breadcrumb">รายงาน / วิชาโปรแกรมแยกคณะ/ชั้นปี</div>
+    <h1 class="page-title">รายงานวิชาโปรแกรม แยกตามคณะและชั้นปี</h1>
+    <p class="page-subtitle">เลือกคณะเพื่อดูกลุ่มวิชา ภาคเรียน วิชา และวันเวลาเรียน</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="content-card">
+
+    <!-- Faculty Dropdown Selection Bar -->
+    <div class="action-bar">
+      <div class="dropdown-wrap">
+        <select
+          class="custom-dropdown"
+          [ngModel]="selectedFaculty()"
+          (ngModelChange)="onFacultyChange($event)"
+        >
+          @for (f of faculties; track f.id) {
+            <option [value]="f.id">{{ f.label }}</option>
+          }
+        </select>
+      </div>
+
+      @if (selectedFaculty()) {
+        <button class="btn-gold-action" (click)="printReport()">
+          <span class="material-symbols-rounded">print</span>
+          <span>พิมพ์รายงาน</span>
+        </button>
+      }
+    </div>
+
+    <!-- Report Table -->
+    @if (isLoading()) {
+      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <app-skeleton variant="rect" width="100%" height="52px" [lines]="3" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 220px;">กลุ่มวิชา</th>
+              <th style="width: 160px;">ภาคเรียน</th>
+              <th>วิชา</th>
+              <th style="width: 260px;">วันเวลาเรียน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Empty State when no faculty is chosen -->
+            @if (!selectedFaculty()) {
+              <tr>
+                <td colspan="4" class="text-center empty-prompt-cell">
+                  <span class="material-symbols-rounded prompt-icon">tune</span>
+                  <p class="prompt-text">กรุณาเลือกคณะเพื่อแสดงรายงาน</p>
+                </td>
+              </tr>
+            } @else if (currentRows().length === 0) {
+              <tr>
+                <td colspan="4" class="text-center empty-prompt-cell">
+                  <span class="material-symbols-rounded prompt-icon">search_off</span>
+                  <p class="prompt-text">ไม่พบข้อมูลรายวิชาโปรแกรมสำหรับคณะที่เลือก</p>
+                </td>
+              </tr>
+            } @else {
+              @for (row of paginatedRows(); track row.id) {
+                <tr>
+                  <td class="col-group">
+                    <strong>{{ row.groupName }}</strong>
+                  </td>
+                  <td class="col-semester">
+                    {{ row.semesterText }}
+                  </td>
+                  <td class="col-course">
+                    <span class="course-code-text">{{ row.courseCode }}</span>
+                    <span class="course-name-text">{{ row.courseName }}</span>
+                  </td>
+                  <td class="col-schedule">
+                    <span class="schedule-badge">{{ row.schedule }}</span>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls (Apple Style Pills) -->
+      @if (totalPages() > 1) {
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          <span class="info-text">แสดง</span>
+          <strong class="info-strong">{{ startItemIndex() | number }} - {{ endItemIndex() | number }}</strong>
+          <span class="info-text">จากทั้งหมด</span>
+          <strong class="info-strong">{{ totalItems() | number }}</strong>
+          <span class="info-text">รายการ</span>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(1)"
+            title="หน้าแรก"
+          >
+            <span class="material-symbols-rounded">first_page</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(currentPage() - 1)"
+            title="หน้าก่อนหน้า"
+          >
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          <div class="page-pills-list">
+            @for (p of displayedPageNumbers(); track $index) {
+              @if (p === '...') {
+                <span class="page-ellipsis">…</span>
+              } @else {
+                <button
+                  type="button"
+                  class="page-pill-btn"
+                  [class.active]="p === currentPage()"
+                  (click)="setPage(+p)"
+                >
+                  {{ p }}
+                </button>
+              }
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(currentPage() + 1)"
+            title="หน้าถัดไป"
+          >
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(totalPages())"
+            title="หน้าสุดท้าย"
+          >
+            <span class="material-symbols-rounded">last_page</span>
+          </button>
+        </div>
+      </div>
+      }
+    }
+
+  </div>
+
+</div>
