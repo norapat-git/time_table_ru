@@ -1,0 +1,183 @@
+@if (authService.isAuthModalOpen()) {
+  <div class="modal-backdrop" (click)="closeOnBackdrop($event)">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="header-brand">
+          <span class="material-symbols-rounded header-icon">vpn_key</span>
+          <div>
+            <h2 class="header-title" id="modal-title">JWT Decoder & Authentication Manager</h2>
+            <p class="header-subtitle">ระบบตรวจสอบ Token, Decode ข้อมูล, และจัดการสิทธิ์ผู้ใช้งาน</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="close()" aria-label="ปิดหน้าต่าง">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Role Preset Switcher for Fast Testing -->
+        <div class="presets-card">
+          <h3 class="section-title">
+            <span class="material-symbols-rounded section-icon">switch_account</span>
+            สลับสิทธิ์ทดสอบจำลอง (Quick Role Presets)
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--gray-600); margin-bottom: 0.5rem;">
+            เลือกบทบาทเพื่อสร้างและใช้งาน Mock JWT Token สำหรับทดสอบ Auth Guard, Role Guard และ Interceptor ได้ทันที:
+          </p>
+          <div class="preset-buttons">
+            <button
+              class="preset-btn"
+              [class.active]="authService.userRole() === 'ADMIN'"
+              (click)="applyPreset('ADMIN')"
+            >
+              <span class="material-symbols-rounded">admin_panel_settings</span>
+              ผู้ดูแลระบบ (Admin)
+            </button>
+
+            <button
+              class="preset-btn"
+              [class.active]="authService.userRole() === 'INSTRUCTOR'"
+              (click)="applyPreset('INSTRUCTOR')"
+            >
+              <span class="material-symbols-rounded">school</span>
+              อาจารย์ผู้สอน (Instructor)
+            </button>
+
+            <button
+              class="preset-btn"
+              [class.active]="authService.userRole() === 'STAFF'"
+              (click)="applyPreset('STAFF')"
+            >
+              <span class="material-symbols-rounded">badge</span>
+              เจ้าหน้าที่ (Staff)
+            </button>
+
+            <button
+              class="preset-btn"
+              [class.active]="authService.userRole() === 'STUDENT'"
+              (click)="applyPreset('STUDENT')"
+            >
+              <span class="material-symbols-rounded">person</span>
+              นักศึกษา (Student)
+            </button>
+
+            <button
+              class="preset-btn btn-danger"
+              (click)="applyPreset('EXPIRED')"
+            >
+              <span class="material-symbols-rounded">timer_off</span>
+              Token หมดอายุ (Expired Demo)
+            </button>
+          </div>
+        </div>
+
+        <!-- Current Status Banner -->
+        <div class="status-banner">
+          <div class="status-card">
+            <span class="status-card-label">สถานะการเข้าสู่ระบบ</span>
+            <div class="status-card-value">
+              @if (authService.isAuthenticated()) {
+                <span class="badge-valid">
+                  <span class="material-symbols-rounded">check_circle</span> เข้าสู่ระบบแล้ว
+                </span>
+              } @else {
+                <span class="badge-expired">
+                  <span class="material-symbols-rounded">cancel</span> ยังไม่เข้าสู่ระบบ / หมดอายุ
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="status-card">
+            <span class="status-card-label">บทบาทปัจจุบัน (Role)</span>
+            <div class="status-card-value" style="color: var(--navy-700);">
+              {{ authService.userRole() }}
+            </div>
+          </div>
+
+          <div class="status-card">
+            <span class="status-card-label">ผู้ใช้งาน</span>
+            <div class="status-card-value">
+              {{ authService.currentUser()?.displayName || '-' }}
+            </div>
+          </div>
+
+          <div class="status-card">
+            <span class="status-card-label">เวลาคงเหลือของ Token</span>
+            <div class="status-card-value" [style.color]="authService.remainingSeconds() > 0 ? '#276749' : '#c53030'">
+              {{ authService.remainingTimeFormatted() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Token Input & Raw Editor -->
+        <div class="token-input-wrapper">
+          <h3 class="section-title">
+            <span class="material-symbols-rounded section-icon">code</span>
+            Raw JWT Token (Input / Inspector)
+          </h3>
+          <textarea
+            class="token-textarea"
+            [(ngModel)]="rawTokenInput"
+            placeholder="วาง JWT Token ที่ต้องการ Decode ที่นี่ (header.payload.signature)..."
+            (ngModelChange)="onTokenChange()"
+          ></textarea>
+
+          <div class="token-actions">
+            <button class="btn-secondary" (click)="loadCurrentToken()">
+              <span class="material-symbols-rounded">sync</span> ดึง Token ปัจจุบัน
+            </button>
+            <button class="btn-primary" (click)="applyCustomToken()">
+              <span class="material-symbols-rounded">login</span> นำ Token นี้มาใช้งาน (Set Active Session)
+            </button>
+          </div>
+        </div>
+
+        <!-- Decoded Output Inspection Panels -->
+        <div class="decoded-grid">
+          <!-- Header -->
+          <div class="code-card">
+            <div class="code-header">
+              <span class="code-tag tag-header">Decoded Header (Algorithm & Token Type)</span>
+              <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" (click)="copyJson(decodedHeaderJson)">
+                <span class="material-symbols-rounded" style="font-size: 14px;">content_copy</span> คัดลอก
+              </button>
+            </div>
+            <pre class="code-content"><code>{{ decodedHeaderJson }}</code></pre>
+          </div>
+
+          <!-- Payload -->
+          <div class="code-card">
+            <div class="code-header">
+              <span class="code-tag tag-payload">Decoded Payload (User Data & Claims)</span>
+              <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" (click)="copyJson(decodedPayloadJson)">
+                <span class="material-symbols-rounded" style="font-size: 14px;">content_copy</span> คัดลอก
+              </button>
+            </div>
+            <pre class="code-content"><code>{{ decodedPayloadJson }}</code></pre>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div>
+          @if (authService.isAuthenticated()) {
+            <button class="btn-secondary" style="color: #c53030; border-color: #feb2b2;" (click)="logout()">
+              <span class="material-symbols-rounded">logout</span> ออกจากระบบ (Logout)
+            </button>
+          }
+        </div>
+        <button class="btn-primary" (click)="close()">
+          <span class="material-symbols-rounded">check</span> เรียบร้อย
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

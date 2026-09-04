@@ -1,0 +1,1168 @@
+<div class="page-layout">
+
+  <!-- 1. HEADER SECTION & EXPORT/PRINT TOOLBAR -->
+  <div class="header-section">
+    <div class="header-titles">
+      <div class="breadcrumb">
+        <span class="material-symbols-rounded breadcrumb-icon">calendar_month</span>
+        <span>ตารางสอน</span>
+        <span class="separator">/</span>
+        <span class="active">จัดตารางสอน (ตามห้องเรียน)</span>
+      </div>
+      <h1 class="page-title">จัดตารางสอนตามห้อง (Room Schedule & Timetable)</h1>
+      <p class="page-subtitle">
+        จัดสรรห้องเรียน วัน-เวลาเรียน อาจารย์ผู้สอน และตรวจดูตารางเรียน ประจำปีการศึกษา <strong>{{ activeYear() || '—' }}</strong> ภาค <strong>{{
+          activeSemester() || '—' }}</strong>
+        @if (selectedRoom()) {
+        <span> • กำลังดูห้อง: <strong class="text-room-highlight">{{ selectedRoom() }}</strong></span>
+        }
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Clone Semester Button -->
+      <button type="button" class="btn-action-tool" (click)="openCloneModal()" title="คัดลอกตารางสอนจากปี/ภาคอื่น">
+        <span class="material-symbols-rounded">content_copy</span>
+        <span>คัดลอกตาราง</span>
+      </button>
+
+      <!-- Export CSV Button -->
+      <button type="button" class="btn-action-outline" (click)="exportToCsv()"
+        [disabled]="isLoading() || classList().length === 0" title="ส่งออกตารางเรียนห้องนี้เป็นไฟล์ CSV">
+        <span class="material-symbols-rounded">download</span>
+        <span>ส่งออก CSV</span>
+      </button>
+
+      <!-- Print Button -->
+      <button type="button" class="btn-action-outline" (click)="printSchedule()"
+        [disabled]="isLoading() || !selectedRoom()" title="พิมพ์ตารางเรียน">
+        <span class="material-symbols-rounded print-icon">print</span>
+        <span>พิมพ์ตารางเรียน</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- 2. FILTER & ROOM SELECTOR CARD -->
+  <div class="filter-card">
+    <div class="filter-controls-grid">
+
+      <!-- Year / Semester Selector -->
+      <div class="filter-item">
+        <label class="filter-label">ปีการศึกษา / ภาค</label>
+        <app-custom-select [options]="yearSemSelectOptions()" [value]="selectedYearSem()"
+          (valueChange)="onYearSemChange($event)" placeholder="เลือกปี/ภาคการศึกษา" icon="event_available" />
+      </div>
+
+      <!-- Room Searchable Selector -->
+      <div class="filter-item filter-item-room">
+        <label class="filter-label">เลือกห้องเรียน</label>
+        <app-custom-select [options]="roomSelectOptions()" [value]="selectedRoom()" (valueChange)="onRoomChange($event)"
+          placeholder="เลือกหรือค้นหาห้องเรียน..." [searchable]="true"
+          searchPlaceholder="พิมพ์ค้นหาเลขห้อง เช่น 301, 502..." icon="meeting_room" />
+      </div>
+
+      <!-- Action Buttons: Refresh & Add Class -->
+      <div class="filter-item filter-actions-item">
+        <label class="filter-label">&nbsp;</label>
+        <div class="filter-actions-group">
+          <!-- Refresh Button (icon-only 40x40 matching + button) -->
+          <button type="button" class="btn-refresh" (click)="loadScheduleForRoom()"
+            [disabled]="isLoading() || isEditMode()" title="รีเฟรชข้อมูลตารางเรียน" aria-label="รีเฟรชข้อมูล">
+            <span class="material-symbols-rounded" [class.spin-loading]="isLoading()">refresh</span>
+          </button>
+
+          <!-- Add Timetable Class Button (Icon-only Square + Button exactly like tab-paired-courses) -->
+          <button type="button" class="btn-primary btn-icon-only btn-add-timetable-class" (click)="openAddClassModal()"
+            title="เพิ่มข้อมูลตารางสอน" aria-label="เพิ่มข้อมูลตารางสอน">
+            <span class="material-symbols-rounded">add</span>
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+
+  <!-- 3. TIMETABLE SCHEDULE MATRIX SECTION -->
+  <div class="matrix-section-wrapper">
+
+    <!-- Dedicated Grid Control Bar Directly Above Grid -->
+    <div class="grid-control-bar">
+      <div class="grid-control-left">
+        <span class="material-symbols-rounded grid-title-icon">calendar_view_week</span>
+        <span class="grid-title-text">
+          ตารางสอนห้อง <strong class="room-strong-tag">{{ selectedRoom() || '—' }}</strong>
+        </span>
+        @if (isEditMode()) {
+        <span class="edit-badge-pill">
+          <span class="material-symbols-rounded">touch_app</span>
+          <span>โหมดปรับตาราง (ลากวางได้ทันที)</span>
+        </span>
+        }
+      </div>
+
+      <div class="grid-control-right">
+        <!-- Edit Mode Toggle Button Directly Above Grid -->
+        <button type="button" class="btn-action-edit-mode" [class.is-active]="isEditMode()" (click)="toggleEditMode()"
+          [disabled]="isLoading() || !selectedRoom()" title="เปิด/ปิดโหมดลากย้ายตารางสอน (Drag & Drop)">
+          <span class="material-symbols-rounded">{{ isEditMode() ? 'edit_off' : 'drag_indicator' }}</span>
+          <span>{{ isEditMode() ? 'ปิดโหมดปรับตาราง' : 'ปรับเปลี่ยนตารางสอน' }}</span>
+        </button>
+
+        <!-- Save Changes Button (Visible in Edit Mode) -->
+        @if (isEditMode()) {
+        <button type="button" class="btn-save-moves" [disabled]="isSavingMoves() || pendingMoves().length === 0"
+          (click)="savePendingMoves()" title="บันทึกการปรับเปลี่ยนวันและเวลาเรียนลงฐานข้อมูล">
+          <span class="material-symbols-rounded" [class.spin-loading]="isSavingMoves()">
+            {{ isSavingMoves() ? 'sync' : 'save' }}
+          </span>
+          <span>{{ isSavingMoves() ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง' }}</span>
+          @if (pendingMoves().length > 0) {
+          <span class="moves-count-badge">{{ pendingMoves().length }}</span>
+          }
+        </button>
+
+        <button type="button" class="btn-cancel-moves" [disabled]="isSavingMoves()" (click)="cancelEditMode()"
+          title="ยกเลิกการปรับเปลี่ยนและคืนค่าเดิม">
+          <span class="material-symbols-rounded">close</span>
+          <span>ยกเลิก</span>
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- Edit Mode Notice Banner Directly Above Table -->
+    @if (isEditMode()) {
+    <div class="edit-mode-banner">
+      <div class="banner-left">
+        <span class="material-symbols-rounded banner-icon">touch_app</span>
+        <div class="banner-text">
+          <strong>โหมดปรับเปลี่ยนตารางสอน (Drag & Drop Active)</strong>
+          <p>ท่านสามารถคลิกค้างแล้วลากกล่องวิชาไปยังช่องวันและเวลาอื่นที่ต้องการได้ทันที จากนั้นกดปุ่ม "บันทึกการเปลี่ยนแปลง"</p>
+        </div>
+      </div>
+      @if (pendingMoves().length > 0) {
+      <div class="banner-pending-status">
+        <span class="material-symbols-rounded">pending_actions</span>
+        <span>รอการบันทึก <strong>{{ pendingMoves().length }}</strong> รายการ</span>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Matrix Table Container -->
+    <div class="schedule-matrix-container" [class.edit-mode-active]="isEditMode()">
+      @if (isLoading()) {
+      <div class="skeleton-matrix-box">
+        <app-skeleton variant="rect" width="100%" height="52px" borderRadius="10px" [lines]="7" />
+      </div>
+      } @else if (!selectedRoom()) {
+      <div class="empty-room-state">
+        <span class="material-symbols-rounded empty-icon">meeting_room</span>
+        <h3>กรุณาเลือกห้องเรียน</h3>
+        <p>เลือกห้องเรียนจากดรอปดาวน์ด้านบนเพื่อแสดงตารางการใช้ห้องเรียน</p>
+      </div>
+      } @else {
+      <div class="matrix-table-wrapper">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <!-- Day Column Header -->
+              <th class="th-day-col">
+                <span class="th-day-title">วัน</span>
+              </th>
+
+              <!-- Time Periods Headers (Only Time Range is displayed) -->
+              @for (time of timeSlots(); track time.code) {
+              <th class="th-time-col">
+                <div class="time-header-box">
+                  <span class="time-slot-period">{{ time.period }}</span>
+                </div>
+              </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (day of daysConfig; track day.code) {
+            <tr>
+              <!-- Day Name Cell -->
+              <td class="td-day-col">
+                <div class="day-badge-box" [ngClass]="day.colorClass">
+                  <span class="day-short">{{ day.shortLabel }}</span>
+                </div>
+              </td>
+
+              <!-- Time Slot Cells (With Colspan for multi-period courses) -->
+              @for (cell of matrixGridRows()[day.code]; track cell.timeCode) {
+              @let isDropHover = isDropSlotHovered(day.code, cell.timeCode);
+              @let isDropInvalid = isDropSlotInvalid(day.code, cell.timeCode);
+              <td class="td-slot-col"
+                [attr.colspan]="cell.colspan > 1 ? cell.colspan : null"
+                [class.is-spanned]="cell.colspan > 1"
+                [class.has-classes]="cell.classes && cell.classes.length > 0"
+                [class.drop-hover]="isDropHover"
+                [class.drop-invalid]="isDropInvalid"
+                [class.edit-mode-cell]="isEditMode()"
+                [class.is-empty-slot]="!cell.classes || cell.classes.length === 0"
+                (contextmenu)="onSlotContextMenu($event, day.code, cell.timeCode, cell.classes)"
+                (dragover)="onDragOver($event, day.code, cell.timeCode)"
+                (dragleave)="onDragLeave($event, day.code, cell.timeCode)"
+                (drop)="onDrop($event, day.code, cell.timeCode)">
+                @if (cell.classes && cell.classes.length > 0) {
+                <div class="classes-stack" [class.is-stretched]="cell.colspan > 1">
+                  @for (c of cell.classes; track c.COURSE_NO + '_' + (c.INSTR_GROUP || '0')) {
+                  <div class="course-slot-card"
+                    [class.is-draggable]="isEditMode()"
+                    [class.is-moved]="c.isMoved && !c.hasInstructorConflict"
+                    [class.is-conflict]="c.hasInstructorConflict"
+                    [class.is-multi-period]="cell.colspan > 1"
+                    [draggable]="isEditMode()" (dragstart)="onDragStart($event, c, cell)" (dragend)="onDragEnd($event)"
+                    (click)="openClassDetail(c, $event)"
+                    (contextmenu)="onCardContextMenu($event, c)"
+                    [title]="c.hasInstructorConflict ? ('คำเตือน: ' + c.instructorConflictReason) : (isEditMode() ? 'คลิกค้างแล้วลากกล่องนี้เพื่อย้ายคาบเรียน' : 'คลิกดูรายละเอียด • คลิกขวาเพื่อแก้ไข/ลบวิชา ' + c.COURSE_NO + ' (' + cell.periodRangeLabel + ')')">
+                    
+                    <!-- Card Content Inner -->
+                    <div class="card-inner-content">
+                      <!-- Card Header Line -->
+                      <div class="card-top-line">
+                        <div class="course-code-wrap">
+                          @if (isEditMode()) {
+                          <div class="drag-handle-pill" title="ลากเพื่อย้าย">
+                            <span class="material-symbols-rounded drag-handle-icon">drag_indicator</span>
+                          </div>
+                          }
+                          <span class="course-code-pill">{{ c.COURSE_NO }}</span>
+                          @if (cell.colspan > 1) {
+                          <span class="multi-period-indicator-pill" title="วิชาสอนต่อเนื่องหลายคาบ">
+                            <span class="material-symbols-rounded">timelapse</span>
+                            <span>{{ cell.periodRangeLabel }}</span>
+                          </span>
+                          }
+                        </div>
+                        <div class="card-top-actions">
+                          @if (c.CREDIT != null) {
+                          <span class="course-credit-pill">{{ c.CREDIT }} นก.</span>
+                          }
+                          @if (!isEditMode()) {
+                          <button type="button" class="card-quick-menu-btn" (click)="onCardContextMenu($event, c)" title="จัดการวิชา (แก้ไข / ลบ)">
+                            <span class="material-symbols-rounded">more_horiz</span>
+                          </button>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Floating Moved / Conflict Status Badge -->
+                      @if (c.hasInstructorConflict) {
+                      <div class="floating-conflict-badge" [title]="c.instructorConflictReason || 'อาจารย์ไม่สามารถสอนในวันและเวลานี้ได้'">
+                        <span class="material-symbols-rounded">person_off</span>
+                        <span>อาจารย์สอนไม่ได้</span>
+                      </div>
+                      } @else if (c.isMoved) {
+                      <div class="floating-moved-badge" title="ย้ายแล้ว (รอการกดบันทึก)">
+                        <span class="material-symbols-rounded">swap_horiz</span>
+                        <span>ย้ายแล้ว</span>
+                      </div>
+                      }
+
+                      <!-- Conflict Alert Banner inside card -->
+                      @if (c.hasInstructorConflict) {
+                      <div class="conflict-alert-banner" [title]="c.instructorConflictReason || 'อาจารย์ไม่สามารถสอนในเวลานี้'">
+                        <span class="material-symbols-rounded alert-icon">warning</span>
+                        <span class="alert-text">{{ c.instructorConflictReason || 'อาจารย์ไม่สามารถสอนในเวลานี้' }}</span>
+                      </div>
+                      }
+
+                      <!-- Paired Courses Status Badge (สถานะแปะบนการ์ดว่ามีวิชาคู่ - กะทัดรัด ไม่ดันขนาดการ์ด) -->
+                      @if (c.PAIRED_COURSES && c.PAIRED_COURSES.length > 0) {
+                      <div class="paired-status-badge"
+                        [title]="'วิชาคู่ที่เปิดสอนร่วมกัน (' + c.PAIRED_COURSES.length + ' วิชา): ' + getPairedCoursesTooltip(c.PAIRED_COURSES) + ' • คลิกการ์ดเพื่อดูรายละเอียดเพิ่มเติม'">
+                        <span class="material-symbols-rounded pair-badge-icon">link</span>
+                        <span class="pair-badge-text">มีวิชาคู่</span>
+                        @if (c.PAIRED_COURSES.length > 1) {
+                        <span class="pair-badge-count">({{ c.PAIRED_COURSES.length }})</span>
+                        }
+                      </div>
+                      }
+
+                      <!-- Instructor Row & Period Range info for wide cards -->
+                      <div class="card-footer-info-row">
+                        @if (c.INSTRUCTORS && c.INSTRUCTORS.length > 0) {
+                        <div class="instructors-pill-box">
+                          <div class="inst-avatar-mini">
+                            <span class="material-symbols-rounded inst-icon">person</span>
+                          </div>
+                          <span class="inst-names-text">
+                            {{ c.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }} {{ c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI ||
+                            c.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            @if (c.INSTRUCTORS.length > 1) {
+                            <span class="more-inst-badge">+{{ c.INSTRUCTORS.length - 1 }}</span>
+                            }
+                          </span>
+                        </div>
+                        }
+                        @if (cell.colspan > 1) {
+                        <span class="spanned-time-text" title="ช่วงเวลาเรียนทั้งหมด">
+                          {{ cell.timePeriodLabel }}
+                        </span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  }
+                </div>
+                } @else {
+                @if (isEditMode()) {
+                <div class="empty-drop-zone" [class.hovered]="isDropHover" [class.invalid]="isDropInvalid">
+                  <span class="material-symbols-rounded drop-icon">{{ isDropInvalid ? 'block' : 'add_circle' }}</span>
+                  <span class="drop-hint-text">{{ isDropInvalid ? 'วางไม่ได้' : 'วางที่นี่' }}</span>
+                </div>
+                } @else {
+                <div class="empty-slot-dot"
+                  (click)="openAddClassModal(day.code, cell.timeCode)"
+                  (contextmenu)="onSlotContextMenu($event, day.code, cell.timeCode)"
+                  [title]="'คลิกขวาเพื่อเพิ่มข้อมูลตารางสอน (วัน' + day.shortLabel + ' ' + cell.timePeriodLabel + ')'">
+                  <span class="empty-dash">—</span>
+                  <span class="empty-add-icon material-symbols-rounded">add</span>
+                </div>
+                }
+                }
+              </td>
+              }
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- 4. CLASS DETAIL MODAL (APPLE FROSTED GLASS) -->
+  @if (isDetailModalOpen() && selectedClassDetail(); as detail) {
+  <div class="modal-backdrop" (click)="closeDetailModal()">
+    <div class="modal-card detail-modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">menu_book</span>
+          <div>
+            <h3 class="modal-title">{{ detail.COURSE_NO }} : {{ detail.COURSE_NAME_THAI || '—' }}</h3>
+            <span class="modal-subtitle">{{ detail.COURSE_NAME_ENG || 'Course Schedule Details' }}</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeDetailModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="detail-grid">
+          <!-- Room -->
+          <div class="detail-item">
+            <span class="detail-label">ห้องเรียน</span>
+            <strong class="detail-val highlight-room">{{ detail.ROOM_CODE || selectedRoom() }}</strong>
+          </div>
+
+          <!-- Day -->
+          <div class="detail-item">
+            <span class="detail-label">วันเรียน</span>
+            <strong class="detail-val">{{ getDayLabel(detail.DAY_CODE) }}</strong>
+          </div>
+
+          <!-- Time -->
+          <div class="detail-item">
+            <span class="detail-label">คาบเรียน / เวลา</span>
+            <strong class="detail-val">คาบที่ {{ detail.TIME_CODE }} ({{ getTimePeriod(detail.TIME_CODE) }})</strong>
+          </div>
+
+          <!-- Credit -->
+          <div class="detail-item">
+            <span class="detail-label">หน่วยกิต</span>
+            <strong class="detail-val">{{ detail.CREDIT != null ? detail.CREDIT + ' หน่วยกิต' : '—' }}</strong>
+          </div>
+
+          <!-- Year / Semester -->
+          <div class="detail-item">
+            <span class="detail-label">ปีการศึกษา / ภาค</span>
+            <strong class="detail-val">{{ detail.STUDY_YEAR }} / {{ detail.STUDY_SEMESTER }}</strong>
+          </div>
+        </div>
+
+        <!-- Paired Courses Section in Modal -->
+        @if (detail.PAIRED_COURSES && detail.PAIRED_COURSES.length > 0) {
+        <div class="paired-courses-detail-section">
+          <h4 class="inst-section-title paired-title">
+            <span class="material-symbols-rounded">link</span>
+            <span>วิชาคู่ที่เปิดสอนร่วมกัน ({{ detail.PAIRED_COURSES.length }} วิชา)</span>
+          </h4>
+          <div class="paired-courses-cards-list">
+            @for (p of detail.PAIRED_COURSES; track p.courseNo) {
+            <div class="paired-course-profile-card">
+              <div class="pair-code-badge-box">
+                <span class="material-symbols-rounded">school</span>
+                <strong>{{ p.courseNo }}</strong>
+              </div>
+              <div class="pair-card-meta">
+                <strong class="pair-thai-name">{{ p.courseNameThai || '-' }}</strong>
+                @if (p.courseNameEng) {
+                <span class="pair-eng-name">{{ p.courseNameEng }}</span>
+                }
+                @if (p.credit != null) {
+                <span class="pair-credit-tag">{{ p.credit }} หน่วยกิต</span>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Instructors Section in Modal -->
+        <div class="instructors-detail-section">
+          <h4 class="inst-section-title">
+            <span class="material-symbols-rounded">group</span>
+            <span>อาจารย์ผู้สอนในคาบนี้ ({{ (detail.INSTRUCTORS || []).length }} ท่าน)</span>
+          </h4>
+
+          @if (detail.INSTRUCTORS && detail.INSTRUCTORS.length > 0) {
+          <div class="instructors-cards-list">
+            @for (inst of detail.INSTRUCTORS; track inst.INSTRUCTOR_CODE) {
+            <div class="instructor-profile-card">
+              <div class="inst-avatar-box">
+                <span class="material-symbols-rounded">person</span>
+              </div>
+              <div class="inst-card-meta">
+                <strong class="inst-thai-name">
+                  {{ inst.RANK_NAME_THAI_S || '' }} {{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}
+                </strong>
+                <span class="inst-code-sub">รหัส: {{ inst.INSTRUCTOR_CODE }}</span>
+              </div>
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="inst-empty-notice">
+            <span class="material-symbols-rounded">info</span>
+            <span>ไม่ระบุรายชื่ออาจารย์ผู้สอนในคาบนี้</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer modal-footer-spaced">
+        <div class="footer-left-actions">
+          <button type="button" class="btn-danger-outline" (click)="deleteClassFromDetail(detail)">
+            <span class="material-symbols-rounded">delete</span>
+            <span>ลบตารางสอน</span>
+          </button>
+          <button type="button" class="btn-edit-action" (click)="openEditFromDetail(detail)">
+            <span class="material-symbols-rounded">edit_calendar</span>
+            <span>แก้ไขตารางสอน</span>
+          </button>
+        </div>
+        <button type="button" class="btn-primary" (click)="closeDetailModal()">ปิด</button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- 5. MODERN VERTICAL FROSTED GLASS CONTEXT MENU (60 FPS) -->
+  @if (isContextMenuOpen() && contextMenuItem(); as menuCourse) {
+  <div class="card-context-menu-backdrop" (click)="closeContextMenu()" (contextmenu)="closeContextMenu(); $event.preventDefault()">
+    <div class="vertical-glass-menu"
+      [style.top.px]="contextMenuPos().y"
+      [style.left.px]="contextMenuPos().x"
+      (click)="$event.stopPropagation()">
+
+      <!-- Glass Header Badge (Cascade 1) -->
+      <div class="glass-menu-header cascade-item" style="animation-delay: 0.02s;">
+        <span class="glass-course-code">{{ menuCourse.COURSE_NO }}</span>
+        <span class="glass-course-title" [title]="menuCourse.COURSE_NAME_THAI || menuCourse.COURSE_NAME_ENG || ''">
+          {{ menuCourse.COURSE_NAME_THAI || menuCourse.COURSE_NAME_ENG || 'ข้อมูลรายวิชา' }}
+        </span>
+      </div>
+
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.05s;"></div>
+
+      <!-- Action 1: Edit (ปากกา) (Cascade 2) -->
+      <button type="button" class="glass-menu-item item-edit cascade-item" style="animation-delay: 0.08s;"
+        (click)="openEditModalFromMenu(menuCourse)">
+        <div class="glass-item-icon-box icon-edit">
+          <span class="material-symbols-rounded">edit</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title">แก้ไขตารางสอน</span>
+          <span class="glass-item-desc">วัน คาบ ห้องเรียน อาจารย์</span>
+        </div>
+        <span class="material-symbols-rounded glass-item-arrow">chevron_right</span>
+      </button>
+
+      <!-- Action 2: View Details (ดวงตา) (Cascade 3) -->
+      <button type="button" class="glass-menu-item item-detail cascade-item" style="animation-delay: 0.12s;"
+        (click)="openDetailModalFromMenu(menuCourse)">
+        <div class="glass-item-icon-box icon-detail">
+          <span class="material-symbols-rounded">visibility</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title">ดูรายละเอียด</span>
+          <span class="glass-item-desc">ข้อมูลและอาจารย์ผู้สอน</span>
+        </div>
+        <span class="material-symbols-rounded glass-item-arrow">chevron_right</span>
+      </button>
+
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.15s;"></div>
+
+      <!-- Action 3: Delete (ถังขยะ) (Cascade 4) -->
+      <button type="button" class="glass-menu-item item-delete cascade-item" style="animation-delay: 0.18s;"
+        (click)="deleteClassFromMenu(menuCourse)">
+        <div class="glass-item-icon-box icon-delete">
+          <span class="material-symbols-rounded">delete</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title">ลบตารางสอน</span>
+          <span class="glass-item-desc">ย้ายลงประวัติ HIS</span>
+        </div>
+      </button>
+
+    </div>
+  </div>
+  }
+
+  <!-- 5.2 EMPTY SLOT FROSTED GLASS CONTEXT MENU (ADD AT DAY/TIME) -->
+  @if (isEmptySlotMenuOpen() && emptySlotContext(); as slot) {
+  <div class="card-context-menu-backdrop" (click)="closeEmptySlotMenu()" (contextmenu)="closeEmptySlotMenu(); $event.preventDefault()">
+    <div class="vertical-glass-menu"
+      [style.top.px]="contextMenuPos().y"
+      [style.left.px]="contextMenuPos().x"
+      (click)="$event.stopPropagation()">
+
+      <!-- Glass Header Badge (Cascade 1) -->
+      <div class="glass-menu-header cascade-item" style="animation-delay: 0.02s;">
+        <span class="glass-course-code">วัน{{ slot.dayLabel }}</span>
+        <span class="glass-course-title">{{ slot.timePeriod }} • ห้อง {{ selectedRoom() || '—' }}</span>
+      </div>
+
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.05s;"></div>
+
+      <!-- Action: Add Class Here (Cascade 2) -->
+      <button type="button" class="glass-menu-item item-add cascade-item" style="animation-delay: 0.08s;"
+        (click)="addFromEmptySlot()">
+        <div class="glass-item-icon-box icon-add">
+          <span class="material-symbols-rounded">add_circle</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title">เพิ่มข้อมูลตารางสอน</span>
+          <span class="glass-item-desc">ใส่ วัน{{ slot.dayLabel }} {{ slot.timePeriod }} อัตโนมัติ</span>
+        </div>
+        <span class="material-symbols-rounded glass-item-arrow">chevron_right</span>
+      </button>
+
+    </div>
+  </div>
+  }
+
+  <!-- 6. ADD / EDIT CLASS MODAL (SMART AVAILABILITY COMPANION) -->
+  @if (isEditModalOpen() && (isAddMode() || editingItem())) {
+  <div class="modal-backdrop" (click)="closeEditModal()">
+    <div class="modal-companion-layout" (click)="$event.stopPropagation()">
+
+      <!-- MAIN FORM MODAL CARD (LEFT) -->
+      <div class="modal-card modal-main-form-card">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-title-box">
+            <span class="material-symbols-rounded modal-title-icon">{{ isAddMode() ? 'calendar_add_on' : 'edit_calendar' }}</span>
+            <div class="title-with-sem">
+              <h2 class="modal-title">{{ isAddMode() ? 'เพิ่มข้อมูลตารางสอน' : 'แก้ไขข้อมูลตารางสอน' }}</h2>
+              <span class="modal-sem-tag">ปี {{ activeYear() }} ภาค {{ activeSemester() }}</span>
+            </div>
+          </div>
+          <div class="modal-header-actions">
+            @if (isAddMode()) {
+            <button type="button" class="btn-modal-tour" (click)="startAddClassModalTour(true)"
+              title="เริ่มแนะนำขั้นตอนการใช้งานในหน้านี้">
+              <span class="material-symbols-rounded">help_outline</span>
+              <span>คำแนะนำ</span>
+            </button>
+            }
+            <button class="btn-close-modal" (click)="closeEditModal()" [disabled]="isSavingEdit()" title="ปิดหน้าต่าง">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body (Form Steps) -->
+        <div class="modal-body modal-form-scrollable">
+
+          <!-- Error Alert -->
+          @if (editFormError()) {
+          <div class="alert-error-box">
+            <span class="material-symbols-rounded">error</span>
+            <span>{{ editFormError() }}</span>
+          </div>
+          }
+
+          <!-- Form Step 1: กระบวนวิชา -->
+          <div class="form-group inline-picker-group">
+            <div class="course-label-row">
+              <label class="form-label font-bold">กระบวนวิชา *</label>
+              @if (!isAddMode()) {
+              <span class="badge-edit-locked">
+                <span class="material-symbols-rounded">lock</span>
+                <span>รหัสวิชา (ไม่สามารถเปลี่ยนได้ขณะแก้ไข)</span>
+              </span>
+              }
+            </div>
+
+            <!-- Direct Searchable Input & Dropdown -->
+            <div class="inline-search-wrapper">
+              <div class="inline-search-input-box" [class.is-open]="isInlineDropdownOpen()"
+                [class.has-value]="editCourseNo()" [class.is-disabled]="!isAddMode()"
+                (click)="isAddMode() && openInlineDropdown()">
+                <span class="material-symbols-rounded inline-search-icon">search</span>
+                <input
+                  type="text"
+                  class="inline-search-input"
+                  [placeholder]="isAddMode() ? 'พิมพ์รหัสวิชา (เช่น ACC1101) หรือชื่อวิชา...' : ''"
+                  [value]="courseDisplayValue()"
+                  (input)="onInlineSearchChange($any($event.target).value)"
+                  (focus)="isAddMode() && openInlineDropdown()"
+                  (click)="$event.stopPropagation()"
+                  [disabled]="!isAddMode()"
+                />
+                @if (editCourseNo() && isAddMode()) {
+                <button type="button" class="btn-inline-clear"
+                  (click)="$event.stopPropagation(); clearCourseSelection()" title="ล้างข้อมูลวิชา">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+                }
+                @if (isAddMode()) {
+                <button type="button" class="btn-toggle-dropdown"
+                  (click)="$event.stopPropagation(); toggleInlineDropdown()">
+                  <span class="material-symbols-rounded" [class.rotated]="isInlineDropdownOpen()">
+                    expand_more
+                  </span>
+                </button>
+                }
+              </div>
+
+              <!-- Floating Dropdown Suggestions -->
+              @if (isInlineDropdownOpen() && isAddMode()) {
+              <div class="inline-dropdown-menu" (click)="$event.stopPropagation()">
+                <div class="dropdown-header-hint">
+                  <span>ผลการค้นหาจากฐานข้อมูล UGB_COURSE</span>
+                  <button type="button" class="btn-close-inline-menu" (click)="closeInlineDropdown()">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+
+                @if (isInlineSearching()) {
+                <div style="padding: 0.75rem;">
+                  <app-skeleton variant="rect" width="100%" height="36px" [lines]="4" />
+                </div>
+                } @else if (inlineSearchResults().length === 0) {
+                <div class="inline-empty-msg">
+                  <span class="material-symbols-rounded">search_off</span>
+                  <p>ไม่พบรายวิชาที่ค้นหา ลองระบุรหัสวิชา เช่น ACC1101</p>
+                </div>
+                } @else {
+                <div class="inline-results-scroll">
+                  @for (c of inlineSearchResults(); track c.COURSE_NO) {
+                  <div class="inline-option-row" [class.selected]="editCourseNo() === c.COURSE_NO"
+                    (click)="selectInlineCourse(c)">
+                    <div class="inline-col-code">
+                      <span class="code-badge">{{ c.COURSE_NO }}</span>
+                      @if (c.CREDIT != null) {
+                      <span class="credit-badge">{{ c.CREDIT }} นก.</span>
+                      }
+                    </div>
+                    <div class="inline-col-name">
+                      <span class="thai-name">{{ c.COURSE_NAME_THAI || '-' }}</span>
+                      <span class="eng-name">{{ c.COURSE_NAME_ENG || '-' }}</span>
+                    </div>
+                    <button type="button" class="btn-select-inline">
+                      <span class="material-symbols-rounded">check</span>
+                      <span>เลือก</span>
+                    </button>
+                  </div>
+                  }
+                </div>
+                }
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Form Step 2: Day, Multi-Period Picker, and Room Inputs -->
+          <div class="form-section">
+            <div class="section-header">
+              <span class="section-number">2</span>
+              <div class="section-title-wrap">
+                <h3 class="section-title">กำหนดวัน คาบเวลา และห้องเรียน</h3>
+                <span class="section-sub-hint">เลือกได้หลายคาบต่อ 1 วิชา หรือไม่ต้องเลือกคาบเพื่อส่งเข้ารายการรอจัดคาบ (ลากวางในตารางภายหลัง)</span>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <!-- Day Select -->
+              <div class="form-group">
+                <label class="form-label required">วันเรียน</label>
+                <app-custom-select
+                  [options]="daySelectOptions()"
+                  [value]="editDayCode()"
+                  (valueChange)="onEditDayChange($event)"
+                  placeholder="เลือกวันเรียน"
+                  icon="calendar_month"
+                />
+              </div>
+
+              <!-- Room Input -->
+              <div class="form-group">
+                <label class="form-label required">ห้องเรียน</label>
+                <app-custom-select
+                  [options]="roomOptionsForEdit()"
+                  [value]="editRoomCode()"
+                  (valueChange)="editRoomCode.set($event)"
+                  placeholder="เลือกหรือค้นหาเลขห้องเรียน..."
+                  [searchable]="true"
+                  [allowCustom]="true"
+                  searchPlaceholder="พิมพ์ค้นหาเลขห้อง เช่น 1, 2, LAB..."
+                  icon="meeting_room"
+                />
+              </div>
+            </div>
+
+            <!-- Multi-Period Interactive Picker -->
+            <div class="form-group multi-period-picker-group">
+              <div class="period-picker-header">
+                <div class="period-picker-label">
+                  <label class="form-label required">คาบเวลาที่สอน (คลิกเลือกได้หลายคาบ)</label>
+                  <span class="period-summary-pill">
+                    <span class="material-symbols-rounded">timelapse</span>
+                    <span>{{ editPeriodDurationText() }}</span>
+                  </span>
+                </div>
+                <div class="period-quick-presets">
+                  <span class="preset-label">ทางลัด:</span>
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 1)" title="เลือก 1 คาบ (2 ชม.)">
+                    1 คาบ (2 ชม.)
+                  </button>
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 2)" title="เลือก 2 คาบติดกัน (4 ชม.)">
+                    2 คาบ (4 ชม.)
+                  </button>
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 3)" title="เลือก 3 คาบติดกัน (6 ชม.)">
+                    3 คาบ (6 ชม.)
+                  </button>
+                </div>
+              </div>
+
+              <div class="period-pills-grid">
+                @for (t of timeSlots(); track t.code) {
+                @let isSelected = isTimeCodeSelected(t.code);
+                <button type="button"
+                  class="period-select-chip"
+                  [class.is-selected]="isSelected"
+                  (click)="toggleEditTimeCode(t.code)">
+                  <div class="chip-check-circle">
+                    @if (isSelected) {
+                    <span class="material-symbols-rounded">check</span>
+                    }
+                  </div>
+                  <div class="chip-text-group">
+                    <span class="chip-period-title">คาบที่ {{ t.code }}</span>
+                    <span class="chip-period-time">{{ t.period }}</span>
+                  </div>
+                </button>
+                }
+              </div>
+            </div>
+
+            <!-- Instructor Slot Conflict / Unavailable Alert -->
+            @if (!isSelectedSlotAvailableForInstructors()) {
+            <div class="slot-unavailable-alert">
+              <span class="material-symbols-rounded alert-icon">error</span>
+              <div class="alert-text-group">
+                <strong>อาจารย์ไม่สามารถสอนในวันและเวลานี้ได้!</strong>
+                <p>{{ slotUnavailabilityReason() }} — กรุณาคลิกเลือกคาบที่ว่างจากการ์ด
+                  <strong>"วันและเวลาที่ว่างของอาจารย์"</strong> ทางขวามือ</p>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Form Step 3: Assigned Instructors -->
+          <div class="form-section">
+            <div class="section-header">
+              <span class="section-number">3</span>
+              <h3 class="section-title">อาจารย์ผู้สอนในคาบนี้ (เลือกได้หลายท่าน)</h3>
+            </div>
+
+            <!-- Selected Instructors Preview Chips -->
+            @if (editInstructorCodes().length > 0) {
+            <div class="selected-instructors-bar">
+              <div class="selected-header-row">
+                <div class="selected-count-badge">
+                  <span class="material-symbols-rounded">how_to_reg</span>
+                  <span>เลือกแล้ว <strong>{{ editInstructorCodes().length }}</strong> ท่าน</span>
+                </div>
+                <button type="button" class="btn-clear-instructors" (click)="clearInstructorSelection()">
+                  <span class="material-symbols-rounded">delete_sweep</span>
+                  <span>ล้างรายการอาจารย์</span>
+                </button>
+              </div>
+              <div class="instructors-chip-scroll">
+                @for (inst of selectedInstructorObjects(); track inst.INSTRUCTOR_CODE) {
+                <div class="selected-instructor-chip">
+                  <span class="chip-code">{{ inst.INSTRUCTOR_CODE }}</span>
+                  <span class="chip-name">
+                    {{ inst.RANK_NAME_THAI_S || '' }} {{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}
+                  </span>
+                  <button type="button" class="btn-remove-inst" (click)="removeInstructor(inst.INSTRUCTOR_CODE)" title="นำออก">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            <!-- Search & Instructor List Grid -->
+            <div class="instructor-picker-container">
+              <div class="inst-search-box">
+                <span class="material-symbols-rounded search-icon">search</span>
+                <input
+                  type="text"
+                  class="inst-search-input"
+                  placeholder="ค้นหาอาจารย์ด้วยรหัสอาจารย์, คำนำหน้า หรือชื่อ-นามสกุล..."
+                  [ngModel]="instructorSearch()"
+                  (ngModelChange)="instructorSearch.set($event)"
+                />
+                @if (instructorSearch().trim()) {
+                <button type="button" class="btn-clear-search" (click)="instructorSearch.set('')" title="ล้างคำค้นหา">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+                }
+                <span class="inst-count-indicator">
+                  {{ filteredInstructorsList().length }} / {{ allInstructors().length }} ท่าน
+                </span>
+              </div>
+
+              <!-- Quick Slot Filter Chips -->
+              @if (hasSelectedSlot()) {
+              <div class="inst-filter-chips-row">
+                <button type="button" class="inst-filter-chip"
+                  [class.active]="instructorFilterMode() === 'all'"
+                  (click)="instructorFilterMode.set('all')">
+                  <span>ทั้งหมด</span>
+                  <span class="chip-count">{{ allInstructors().length }}</span>
+                </button>
+                <button type="button" class="inst-filter-chip available"
+                  [class.active]="instructorFilterMode() === 'available'"
+                  (click)="instructorFilterMode.set('available')">
+                  <span class="material-symbols-rounded">check_circle</span>
+                  <span>ว่างสอนในเวลานี้</span>
+                  <span class="chip-count">{{ slotAvailableInstructorCodes().size }}</span>
+                </button>
+                @if (allInstructors().length - slotAvailableInstructorCodes().size > 0) {
+                <button type="button" class="inst-filter-chip busy"
+                  [class.active]="instructorFilterMode() === 'busy'"
+                  (click)="instructorFilterMode.set('busy')">
+                  <span class="material-symbols-rounded">block</span>
+                  <span>ติดสอน / ไม่ว่าง</span>
+                  <span class="chip-count">{{ allInstructors().length - slotAvailableInstructorCodes().size }}</span>
+                </button>
+                }
+              </div>
+              }
+
+              <div class="instructor-list-scroll">
+                @if (isInstructorsLoading()) {
+                <div class="inst-loading-box">
+                  <app-skeleton variant="rect" width="100%" height="48px" borderRadius="10px" [lines]="4" />
+                </div>
+                } @else if (filteredInstructorsList().length === 0) {
+                <div class="inst-empty-box">
+                  <span class="material-symbols-rounded">person_search</span>
+                  <p>ไม่พบรายชื่ออาจารย์ที่ตรงกับ "<strong>{{ instructorSearch() }}</strong>"</p>
+                  <span class="empty-sub">ลองค้นหาด้วยรหัส หรือชื่ออาจารย์ท่านอื่น</span>
+                </div>
+                } @else {
+                <div class="instructor-items-grid">
+                  @for (inst of displayedFilteredInstructors(); track inst.INSTRUCTOR_CODE) {
+                    @let isSel = isInstructorSelected(inst.INSTRUCTOR_CODE);
+                    @let badge = getInstructorStatusBadge(inst.INSTRUCTOR_CODE);
+                    <div
+                      class="inst-pick-item"
+                      [class.is-selected]="isSel"
+                      [class.is-slot-available]="badge?.type === 'available'"
+                      [class.is-slot-busy]="badge?.type === 'busy'"
+                      [class.is-slot-unavailable]="badge?.type === 'unavailable'"
+                      (click)="toggleInstructorCode(inst.INSTRUCTOR_CODE)"
+                    >
+                      <div class="inst-pick-left">
+                        <app-custom-checkbox
+                          [checked]="isSel"
+                          (checkedChange)="toggleInstructorCode(inst.INSTRUCTOR_CODE)"
+                        />
+                        <span class="inst-code-badge">{{ inst.INSTRUCTOR_CODE }}</span>
+                        <div class="inst-info-details">
+                          <div class="inst-name-line">
+                            @if (inst.RANK_NAME_THAI_S) {
+                            <span class="inst-rank-badge">{{ inst.RANK_NAME_THAI_S }}</span>
+                            }
+                            <span class="inst-th-name">{{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}</span>
+
+                            <!-- สถานะบนการ์ดสำหรับอาจารย์ -->
+                            @if (badge) {
+                            <span class="inst-status-badge" [ngClass]="badge.type" [title]="badge.tooltip">
+                              <span class="material-symbols-rounded">{{ badge.icon }}</span>
+                              <span>{{ badge.text }}</span>
+                            </span>
+                            }
+                          </div>
+                          @if (inst.INSTRUCTOR_NAME_ENG) {
+                          <span class="inst-en-name">{{ inst.INSTRUCTOR_NAME_ENG }}</span>
+                          }
+                        </div>
+                      </div>
+                      @if (isSel) {
+                      <span class="inst-selected-icon material-symbols-rounded">check_circle</span>
+                      }
+                    </div>
+                  }
+                </div>
+
+                @if (filteredInstructorsList().length > instructorPickerLimit()) {
+                <div class="inst-picker-load-more">
+                  <button type="button" class="btn-load-more-inst" (click)="loadMoreInstructors()">
+                    <span class="material-symbols-rounded">expand_more</span>
+                    <span>แสดงเพิ่มอีก 40 ท่าน (กำลังแสดง {{ displayedFilteredInstructors().length }} จาก {{ filteredInstructorsList().length }} ท่าน)</span>
+                  </button>
+                  <button type="button" class="btn-show-all-inst" (click)="showAllInstructors()">
+                    แสดงทั้งหมด
+                  </button>
+                </div>
+                }
+                }
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeEditModal()" [disabled]="isSavingEdit()">
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="saveEditClass()"
+            [disabled]="isSavingEdit() || !editRoomCode().trim()"
+          >
+            <span class="material-symbols-rounded" [class.spin-loading]="isSavingEdit()">
+              {{ isSavingEdit() ? 'sync' : 'save' }}
+            </span>
+            <span>{{ isSavingEdit() ? 'กำลังบันทึก...' : (isAddMode() ? 'บันทึกข้อมูลตารางสอน' : 'บันทึกการแก้ไข') }}</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- COMPANION FLOATING AVAILABILITY CARD (RIGHT: กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ) -->
+      <div class="modal-availability-companion-card" [class.is-collapsed]="editInstructorCodes().length === 0">
+        <div class="companion-inner-content">
+          <div class="avail-panel-header">
+            <div class="avail-title-row">
+              <div class="avail-header-icon-box">
+                <span class="material-symbols-rounded">event_available</span>
+              </div>
+              <div class="avail-title-text">
+                <h4 class="avail-title">วันและเวลาที่ว่างของอาจารย์</h4>
+                <p class="avail-subtitle">
+                  เลือกอาจารย์ <strong>{{ editInstructorCodes().length }}</strong> ท่าน
+                  • <span class="badge-free-count">ว่าง {{ freeSlotsCount() }} คาบ</span>
+                  @if (busySlotsCount() > 0) {
+                  • <span class="badge-busy-count">ติดสอน {{ busySlotsCount() }} คาบ</span>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avail-panel-body">
+            @if (isAvailabilityLoading()) {
+            <div class="avail-loading-box">
+              <app-skeleton variant="rect" width="100%" height="56px" borderRadius="10px" [lines]="4" />
+            </div>
+            } @else if (displayedAvailabilitySlots().length === 0) {
+            <div class="avail-empty-prompt">
+              <div class="prompt-icon-bubble warn">
+                <span class="material-symbols-rounded">event_busy</span>
+              </div>
+              <h5>ไม่มีคาบที่ว่าง</h5>
+              <p>อาจารย์ที่เลือกมีตารางสอนวิชาอื่นชนทุกคาบ หรือไม่มีเวลาสอนตรงกัน</p>
+            </div>
+            } @else {
+            <div class="avail-slots-scroll">
+              @for (slot of displayedAvailabilitySlots(); track (slot.dayCode + '_' + slot.timeCode)) {
+              @let isCurrentSelected = (editDayCode() === slot.dayCode && isTimeCodeSelected(slot.timeCode));
+              <div class="avail-slot-card" [class.is-free]="slot.isAvailable" [class.is-busy]="!slot.isAvailable"
+                [class.is-selected-slot]="isCurrentSelected"
+                (click)="slot.isAvailable ? applyAvailableSlot(slot) : null">
+
+                <div class="slot-card-main-info">
+                  <div class="slot-card-left">
+                    <span class="day-tag-badge" [ngClass]="slot.colorClass">
+                      {{ slot.dayShort }}
+                    </span>
+                    <div class="slot-time-info">
+                      <div class="slot-time-primary">
+                        <strong>คาบที่ {{ slot.timeCode }}</strong>
+                        <span class="slot-period-text">{{ slot.period }}</span>
+                      </div>
+                      <span class="slot-day-full">{{ slot.dayLabel }}</span>
+                    </div>
+                  </div>
+
+                  <div class="slot-card-right">
+                    @if (slot.isBusyInClass) {
+                    <div class="slot-busy-tag" [title]="'ติดสอน ' + slot.busyCount + ' ท่าน'">
+                      <span class="material-symbols-rounded">block</span>
+                      <span>ติดสอน ({{ slot.busyCount }})</span>
+                    </div>
+                    } @else if (slot.isAvailable) {
+                    @if (isCurrentSelected) {
+                    <button type="button" class="slot-applied-btn"
+                      (click)="$event.stopPropagation(); applyAvailableSlot(slot)"
+                      title="คลิกเพื่อยกเลิกการเลือกคาบนี้">
+                      <span class="material-symbols-rounded icon-normal">check_circle</span>
+                      <span class="material-symbols-rounded icon-hover">cancel</span>
+                      <span class="text-normal">กำลังเลือก</span>
+                      <span class="text-hover">ยกเลิก</span>
+                    </button>
+                    } @else {
+                    <button type="button" class="btn-apply-slot"
+                      (click)="$event.stopPropagation(); applyAvailableSlot(slot)"
+                      title="คลิกเพื่อเลือกคาบนี้">
+                      <span>เลือก</span>
+                      <span class="material-symbols-rounded">touch_app</span>
+                    </button>
+                    }
+                    } @else {
+                    <div class="slot-busy-tag" style="background: #f1f5f9; color: #64748b; border-color: #cbd5e1;">
+                      <span class="material-symbols-rounded">schedule</span>
+                      <span>ไม่ตรง มร.30</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+
+                @if (slot.isBusyInClass && slot.busyList.length > 0) {
+                <div class="slot-busy-details-box">
+                  @for (b of slot.busyList; track b.instructorCode) {
+                  <div class="busy-inst-item">
+                    <span class="material-symbols-rounded busy-icon">person_off</span>
+                    <span><strong>{{ b.instructorName }}</strong> ติดสอน {{ b.courseNo }}</span>
+                  </div>
+                  }
+                </div>
+                }
+
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL) -->
+  @if (isCloneModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCloneModal()">
+    <div class="modal-card modal-clone-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">content_copy</span>
+          <div>
+            <h2 class="modal-title">คัดลอกตารางสอนจากปี / ภาคอื่น</h2>
+            <span class="modal-sem-tag">คัดลอกไปยัง: ปี {{ activeYear() }} ภาค {{ activeSemester() }}</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" (click)="closeCloneModal()" [disabled]="isCloning()" title="ปิดหน้าต่าง">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="clone-form-grid">
+          <div class="form-group">
+            <label class="form-label required">ปีการศึกษาต้นทาง (Source Year)</label>
+            <div class="clone-input-box">
+              <span class="material-symbols-rounded clone-input-icon">calendar_month</span>
+              <input type="text" class="clone-input" [value]="cloneSourceYear()"
+                (input)="cloneSourceYear.set($any($event.target).value)" placeholder="เช่น 2568" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">ภาคการศึกษาต้นทาง (Source Semester)</label>
+            <app-custom-select [options]="cloneSemesterOptions" [value]="cloneSourceSemester()"
+              (valueChange)="cloneSourceSemester.set($event)" placeholder="เลือกภาคต้นทาง" icon="event_available" />
+          </div>
+        </div>
+
+        <!-- Clone Mode Option -->
+        <div class="clone-mode-section">
+          <label class="form-label required">รูปแบบการคัดลอก (Import Mode)</label>
+          <div class="clone-mode-options">
+            <label class="clone-mode-card" [class.selected]="cloneMode() === 'merge'">
+              <input type="radio" name="cloneMode" value="merge" [checked]="cloneMode() === 'merge'"
+                (change)="cloneMode.set('merge')" />
+              <div class="clone-mode-info">
+                <strong>ต่อเติมข้อมูล (Merge Mode) — แนะนำ</strong>
+                <p>นำตารางจากปี/ภาคต้นทางมาเพิ่มเข้ากับตารางเดิมที่มีอยู่ โดยวิชาที่ซ้ำวัน/เวลาเดียวกันจะไม่ทับกัน</p>
+              </div>
+            </label>
+            <label class="clone-mode-card danger-mode" [class.selected]="cloneMode() === 'replace'">
+              <input type="radio" name="cloneMode" value="replace" [checked]="cloneMode() === 'replace'"
+                (change)="cloneMode.set('replace')" />
+              <div class="clone-mode-info">
+                <strong class="text-danger">แทนที่ทั้งหมด (Replace Mode)</strong>
+                <p>ล้างข้อมูลตารางสอนทั้งหมดของปี {{ activeYear() }} ภาค {{ activeSemester() }} แล้วนำข้อมูลจากต้นทางมาใส่แทนที่ทั้งหมด (สำรองข้อมูลเดิมลง HIS ให้อัตโนมัติ)</p>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeCloneModal()" [disabled]="isCloning()">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn-primary" (click)="submitCloneSemester()"
+          [disabled]="isCloning() || !cloneSourceYear().trim()">
+          <span class="material-symbols-rounded" [class.spin-loading]="isCloning()">
+            {{ isCloning() ? 'sync' : 'content_copy' }}
+          </span>
+          <span>{{ isCloning() ? 'กำลังคัดลอกข้อมูล...' : 'เริ่มคัดลอกตารางสอน' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

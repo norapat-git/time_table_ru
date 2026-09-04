@@ -1,0 +1,21 @@
+<label class="apple-checkbox-container" [class.is-disabled]="disabled()" [for]="id()">
+  <input
+    class="apple-checkbox-input"
+    type="checkbox"
+    [id]="id()"
+    [checked]="checked()"
+    [disabled]="disabled()"
+    (change)="onInputChange($event)"
+  />
+  <span class="apple-checkmark">
+    <svg viewBox="0 0 16 16" fill="none" class="apple-check-icon">
+      <path
+        d="M3.5 8.5L6.5 11.5L12.5 4.5"
+        stroke="white"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+</label>

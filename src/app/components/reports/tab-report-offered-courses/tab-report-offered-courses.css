@@ -1,0 +1,359 @@
+/* REPORT OFFERED COURSES STYLING (APPLE FROSTED DESIGN SYSTEM) */
+
+.page-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 3rem;
+  font-family: var(--font-thai);
+}
+
+.header-section {
+  margin-bottom: 1.5rem;
+}
+
+.breadcrumb {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Main Content Card */
+.content-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem;
+}
+
+/* Filters & Summary Row */
+.report-filters-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.filter-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 240px;
+}
+
+.filter-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.summary-stats-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.stat-icon {
+  font-size: 1.35rem;
+  color: var(--apple-blue);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Action Bar */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  width: 100%;
+  max-width: 420px;
+  transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+  background: #ffffff;
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+}
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 1.25rem;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.88rem;
+  color: #1e293b;
+  font-family: var(--font-thai);
+}
+
+.btn-clear-search {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.1rem;
+}
+
+.btn-clear-search:hover {
+  color: #475569;
+}
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.btn-print-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  transition: background-color 0.15s ease;
+}
+
+.btn-print-action:hover {
+  background: #1e293b;
+}
+
+.btn-print-action .material-symbols-rounded {
+  font-size: 1.15rem;
+}
+
+/* Skeleton Loading */
+.table-skeleton-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.5rem 0;
+}
+
+/* Data Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.data-table thead {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.12s ease;
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.data-table td {
+  padding: 0.85rem 1rem;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.course-code-badge {
+  color: var(--apple-blue);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.text-eng {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.credit-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.45rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.remark-text {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.empty-cell {
+  padding: 3rem !important;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 2.75rem;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+}
+
+/* Print Only Header */
+.print-only-header {
+  display: none;
+}
+
+/* PRINT STYLES (@media print) */
+@media print {
+  body {
+    background: #ffffff !important;
+    font-size: 11pt !important;
+  }
+
+  .no-print,
+  app-topbar,
+  app-sidebar,
+  .btn-print-action,
+  .btn-refresh,
+  .search-box,
+  .breadcrumb,
+  .report-actions {
+    display: none !important;
+  }
+
+  .page-layout {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .content-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .print-only-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .print-title {
+    font-size: 16pt;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+
+  .print-subtitle {
+    font-size: 11pt;
+    color: #333333;
+    margin: 0;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem 0.65rem !important;
+    border: 1px solid #cccccc !important;
+  }
+
+  .data-table thead {
+    background: #eeeeee !important;
+  }
+}

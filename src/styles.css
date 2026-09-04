@@ -1,0 +1,1093 @@
+/* GLOBAL DESIGN TOKENS — Apple Minimalist Theme (White & Gray)
+   Aesthetics: Apple macOS / iOS Cupertino Clean Monochrome & Blue Accent */
+
+:root {
+  /* Apple Canvas & Surfaces */
+  --apple-canvas:      #f5f5f7;
+  --apple-surface:     #ffffff;
+  --apple-surface-sub: #fafafc;
+  --apple-sidebar-bg:  #f8f9fa;
+  --apple-sidebar-alt: #f1f2f4;
+
+  /* Apple Monochrome Palette */
+  --apple-text-primary:   #1d1d1f;
+  --apple-text-secondary: #6e6e73;
+  --apple-text-tertiary:  #86868b;
+  --apple-text-quaternary:#aeaeb2;
+
+  /* Apple Accent */
+  --apple-blue:       #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-blue-soft:  #e8f2fc;
+  --apple-dark:       #1d1d1f;
+  --apple-dark-hover: #333336;
+
+  /* Semantic Aliases */
+  --color-bg:             var(--apple-canvas);
+  --color-surface:        var(--apple-surface);
+  --color-border:         #e5e5ea;
+  --color-border-dark:    #d2d2d7;
+  --color-text-primary:   var(--apple-text-primary);
+  --color-text-secondary: var(--apple-text-secondary);
+  --color-text-muted:     var(--apple-text-tertiary);
+
+  /* Typography */
+  --font-sans:   'SF Pro Display', 'SF Pro Text', 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-thai:   'Sarabun', 'SF Pro Text', 'Inter', -apple-system, sans-serif;
+
+  /* Spacing */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Border Radius */
+  --radius-sm:   0.375rem;  /* 6px */
+  --radius-md:   0.625rem;  /* 10px */
+  --radius-lg:   0.875rem;  /* 14px */
+  --radius-xl:   1.125rem;  /* 18px */
+  --radius-full: 9999px;
+
+  /* Apple Soft Diffuse Shadows */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg:     0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* Apple Spring Transitions */
+  --spring-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast:   150ms var(--spring-apple);
+  --transition-normal: 280ms var(--spring-apple);
+  --transition-slow:   400ms var(--spring-apple);
+}
+
+/* GLOBAL DESIGN TOKENS — Apple Cupertino Dark Theme
+   Deep Charcoal Surfaces, High-Contrast Text & Crisp Accents */
+[data-theme="dark"] {
+  /* Apple Dark Canvas & Surfaces */
+  --apple-canvas:      #0b0f17;
+  --apple-surface:     #131924;
+  --apple-surface-sub: #1c2433;
+  --apple-sidebar-bg:  #111620;
+  --apple-sidebar-alt: #19212e;
+
+  /* Apple Dark Monochrome Palette */
+  --apple-text-primary:   #f8fafc;
+  --apple-text-secondary: #94a3b8;
+  --apple-text-tertiary:  #64748b;
+  --apple-text-quaternary:#475569;
+
+  /* Apple Dark Accent */
+  --apple-blue:       #38bdf8;
+  --apple-blue-hover: #0ea5e9;
+  --apple-blue-soft:  rgba(56, 189, 248, 0.12);
+  --apple-dark:       #f8fafc;
+  --apple-dark-hover: #e2e8f0;
+
+  /* Semantic Aliases */
+  --color-bg:             var(--apple-canvas);
+  --color-surface:        var(--apple-surface);
+  --color-border:         #242e3f;
+  --color-border-dark:    #334155;
+  --color-text-primary:   var(--apple-text-primary);
+  --color-text-secondary: var(--apple-text-secondary);
+  --color-text-muted:     var(--apple-text-tertiary);
+
+  /* Dark Diffuse Shadows */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg:     0 12px 32px rgba(0, 0, 0, 0.65);
+  --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* GLOBAL RESET & BASE */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-thai);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-text-primary);
+  background-color: var(--apple-canvas);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--apple-text-primary);
+  font-family: var(--font-thai);
+}
+
+p { color: var(--apple-text-secondary); }
+
+button {
+  font-family: var(--font-thai);
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+input, select, textarea {
+  font-family: var(--font-thai);
+}
+
+/* APPLE CLEAN SCROLLBAR */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* MATERIAL SYMBOLS (MODERN ICONS) */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  vertical-align: middle;
+  user-select: none;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-rounded.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* APPLE ANIMATED CUSTOM CHECKBOX (SPRING 60FPS) */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid #c7c7cc;
+  background-color: #ffffff;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  position: relative;
+  vertical-align: middle;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: 
+    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease;
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+input[type="checkbox"]:active {
+  transform: scale(0.88);
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2.2px solid #ffffff;
+  border-bottom: 2.2px solid #ffffff;
+  transform: rotate(-45deg) scale(0);
+  transform-origin: center;
+  margin-top: -2px;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--apple-blue);
+  border-color: var(--apple-blue);
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.28);
+  animation: appleCheckboxPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: rotate(-45deg) scale(1);
+}
+
+@keyframes appleCheckboxPop {
+  0% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Modal Header Actions & Help Tour Button */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-modal-tour {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.65rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  color: var(--apple-blue);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-tour:hover {
+  background: var(--apple-blue);
+  color: #ffffff;
+  border-color: var(--apple-blue);
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-modal-tour .material-symbols-rounded {
+  font-size: 0.95rem;
+}
+
+/* FETCH LOCK & DOUBLE-CLICK PREVENTION (60FPS ACCELERATED) */
+.is-fetching-locked {
+  pointer-events: none !important;
+  user-select: none !important;
+  cursor: wait !important;
+}
+
+.is-fetching-locked * {
+  pointer-events: none !important;
+}
+
+/* GLOBAL MODAL FOOTER & STANDARD BUTTONS (APPLE BLUE ACCENT) */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 1rem 1.5rem;
+  background: #fafafc;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  background: var(--apple-blue) !important;
+  color: #ffffff !important;
+  border: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.2);
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--apple-blue-hover) !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.25);
+  transform: none !important;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary.btn-icon-only,
+.btn-add-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--apple-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.2) !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease !important;
+}
+
+.btn-primary.btn-icon-only:hover:not(:disabled),
+.btn-add-icon:hover:not(:disabled) {
+  background: var(--apple-blue-hover) !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.25) !important;
+  transform: none !important;
+}
+
+.btn-primary.btn-icon-only .material-symbols-rounded,
+.btn-add-icon .material-symbols-rounded {
+  font-size: 1.35rem !important;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  color: var(--apple-text-primary);
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f5f5f7;
+  border-color: var(--color-border-dark);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Standard Refresh Icon Button (Apple Gray Icon Box) */
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  border: 1px solid var(--color-border);
+  color: var(--apple-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #e5e5ea;
+  color: var(--apple-text-primary);
+  border-color: var(--color-border-dark);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-refresh .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.spin-loading {
+  animation: spinLoading 0.9s linear infinite;
+}
+
+@keyframes spinLoading {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Global clean modal scrollbars (no chunky bars) */
+.modal-body,
+.modal-card,
+.ugb-course-scroll-box,
+.instructor-list-scroll,
+.instructors-chip-scroll,
+.drawer-body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.modal-body::-webkit-scrollbar,
+.modal-card::-webkit-scrollbar,
+.ugb-course-scroll-box::-webkit-scrollbar,
+.instructor-list-scroll::-webkit-scrollbar,
+.instructors-chip-scroll::-webkit-scrollbar,
+.drawer-body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* CUSTOM CHECKBOX (checkbox-container & checkAnim) */
+.checkbox-container {
+  display: inline-block;
+  position: relative;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.custom-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+  margin: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 22px;
+  width: 22px;
+  background-color: #e5e5ea;
+  border-radius: 5px;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+  box-sizing: border-box;
+}
+
+.custom-checkbox:checked ~ .checkmark {
+  background-color: #2196F3;
+  box-shadow: 0 3px 7px rgba(33, 150, 243, 0.35);
+}
+
+.custom-checkbox:checked ~ .checkmark:after {
+  display: block;
+  animation: checkAnim 0.2s forwards;
+}
+
+@keyframes checkAnim {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 10px;
+  }
+}
+
+.checkbox-container.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox-container.is-disabled .custom-checkbox {
+  cursor: not-allowed;
+}
+
+/* Global Level & Semester Badges (Clean Number Only Badges) */
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.45rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  color: #0369a1;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sem-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.45rem;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 9999px;
+  color: #7e22ce;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* GLOBAL APPLE-STYLE PAGINATION BAR */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: #fafafc;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.84rem;
+  color: #64748b;
+}
+
+.pagination-info .info-text {
+  color: #64748b;
+}
+
+.pagination-info .info-strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-pagination-nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-pagination-nav:hover:not(:disabled) {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.12);
+}
+
+.btn-pagination-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #f1f5f9;
+}
+
+.btn-pagination-nav .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.page-pills-list {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0.25rem;
+}
+
+.page-pill-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.45rem;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.page-pill-btn:hover:not(.active) {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
+.page-pill-btn.active {
+  background: #f0f9ff;
+  border: 1.5px solid #0284c7;
+  color: #0284c7;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+  cursor: default;
+}
+
+.page-ellipsis {
+  padding: 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  user-select: none;
+}
+
+/* GLOBAL MODAL SCROLL LOCK & SCROLL CHAINING PREVENTION */
+html:has(.modal-backdrop),
+html:has(.dialog-backdrop),
+html:has(.drawer-backdrop),
+html:has(.custom-modal-overlay),
+body:has(.modal-backdrop),
+body:has(.dialog-backdrop),
+body:has(.drawer-backdrop),
+body:has(.custom-modal-overlay) {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+html:has(.modal-backdrop) .dashboard-main-area,
+html:has(.modal-backdrop) .dashboard-view-content,
+body:has(.modal-backdrop) .dashboard-main-area,
+body:has(.modal-backdrop) .dashboard-view-content,
+html:has(.dialog-backdrop) .dashboard-main-area,
+html:has(.dialog-backdrop) .dashboard-view-content,
+body:has(.dialog-backdrop) .dashboard-main-area,
+body:has(.dialog-backdrop) .dashboard-view-content {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+/* Prevent scroll chaining on all backdrops */
+.modal-backdrop,
+.dialog-backdrop,
+.drawer-backdrop,
+.custom-modal-overlay {
+  overscroll-behavior: contain !important;
+}
+
+/* Modal cards, dialog cards, and scrollable bodies */
+.modal-card,
+.dialog-modal-card,
+.drawer-content,
+.modal-body,
+.modal-form-scrollable,
+.modal-recommend-body {
+  overscroll-behavior: contain !important;
+}
+
+/* NATIVE DARK MODE & EXTENSION ANTI-SINKING RULES
+   Guarantees readable text contrast across all dark modes & extensions */
+[data-theme="dark"] body {
+  background-color: var(--apple-canvas) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .dashboard-shell,
+[data-theme="dark"] .dashboard-main-area {
+  background-color: var(--apple-canvas) !important;
+}
+
+/* Header Topbar */
+[data-theme="dark"] .dashboard-topbar {
+  background: var(--apple-surface) !important;
+  border-bottom-color: var(--color-border) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .dashboard-topbar .page-name,
+[data-theme="dark"] .dashboard-topbar .topbar-name {
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .topbar-sem-badge,
+[data-theme="dark"] .topbar-user-pill {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+/* Cards & Containers across ALL tabs */
+[data-theme="dark"] .content-card,
+[data-theme="dark"] .filter-card,
+[data-theme="dark"] .timetable-manage-card,
+[data-theme="dark"] .matrix-container,
+[data-theme="dark"] .schedule-matrix-container,
+[data-theme="dark"] .manage-card,
+[data-theme="dark"] .apple-card,
+[data-theme="dark"] .card-section,
+[data-theme="dark"] .grid-control-bar,
+[data-theme="dark"] .compare-header-card,
+[data-theme="dark"] .room-matrix-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+/* Search Boxes & Action Bars across ALL tabs */
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .modal-search-box,
+[data-theme="dark"] .search-input-wrapper,
+[data-theme="dark"] .filter-search-box {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .modal-search-input {
+  background: transparent !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .search-input::placeholder,
+[data-theme="dark"] .modal-search-input::placeholder {
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+[data-theme="dark"] .search-box .material-symbols-rounded,
+[data-theme="dark"] .search-icon {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+/* Tables & Data Grids across ALL tabs */
+[data-theme="dark"] table,
+[data-theme="dark"] .classes-table,
+[data-theme="dark"] .table-wrapper,
+[data-theme="dark"] .table-container,
+[data-theme="dark"] .data-table,
+[data-theme="dark"] .data-table-container {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] thead th,
+[data-theme="dark"] table th,
+[data-theme="dark"] .classes-table thead th,
+[data-theme="dark"] .data-table thead th {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] tbody td,
+[data-theme="dark"] table td,
+[data-theme="dark"] .classes-table tbody td,
+[data-theme="dark"] .data-table tbody td {
+  background: var(--apple-surface, #131924) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] tbody tr:hover td,
+[data-theme="dark"] table tbody tr:hover td,
+[data-theme="dark"] .classes-table tbody tr:hover td,
+[data-theme="dark"] .data-table tbody tr:hover td {
+  background: var(--apple-surface-sub, #1c2433) !important;
+}
+
+/* High-Contrast Text in Tables to Prevent Sinking */
+[data-theme="dark"] .course-code-link,
+[data-theme="dark"] .col-course-code,
+[data-theme="dark"] .course-name-thai,
+[data-theme="dark"] .thai-name,
+[data-theme="dark"] .instructor-name,
+[data-theme="dark"] .room-badge {
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .course-name-eng,
+[data-theme="dark"] .eng-name,
+[data-theme="dark"] .info-text,
+[data-theme="dark"] .sub-text,
+[data-theme="dark"] .table-hint {
+  color: var(--apple-text-secondary) !important;
+}
+
+[data-theme="dark"] .info-strong {
+  color: #38bdf8 !important;
+}
+
+/* Pagination Bar */
+[data-theme="dark"] .pagination-bar {
+  background: var(--apple-surface) !important;
+  border-top-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .btn-pagination-nav,
+[data-theme="dark"] .page-pill-btn {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .page-pill-btn.active {
+  background: var(--apple-blue) !important;
+  color: #ffffff !important;
+  border-color: var(--apple-blue) !important;
+}
+
+/* Form Controls & Inputs */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .inline-search-input,
+[data-theme="dark"] .inst-search-input {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border: 1px solid var(--color-border-dark, #334155) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  background: var(--apple-surface, #131924) !important;
+  border-color: #38bdf8 !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+[data-theme="dark"] .form-input::placeholder {
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+/* Modals & Dialogs across ALL tabs (Add/Edit modals) */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-card,
+[data-theme="dark"] .dialog-modal-card,
+[data-theme="dark"] .curriculum-modal-card,
+[data-theme="dark"] .modal-instructor-card,
+[data-theme="dark"] .instructor-detail-modal-card,
+[data-theme="dark"] .course-modal-card,
+[data-theme="dark"] .pair-modal-card,
+[data-theme="dark"] .detail-modal-card,
+[data-theme="dark"] .modal-clone-card,
+[data-theme="dark"] .modal-detail-card,
+[data-theme="dark"] .modal-recommend-card,
+[data-theme="dark"] .modal-main-form-card,
+[data-theme="dark"] .modal-availability-companion-card,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .modal-form-scrollable,
+[data-theme="dark"] .modal-recommend-body,
+[data-theme="dark"] .drawer-content {
+  background: var(--apple-surface, #131924) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom: 1px solid var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top: 1px solid var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .dialog-title,
+[data-theme="dark"] .modal-card-title,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .field-label,
+[data-theme="dark"] .input-label,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .avail-title,
+[data-theme="dark"] .filter-label {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .form-checkbox-row {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .btn-close-modal {
+  background: transparent !important;
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+[data-theme="dark"] .btn-close-modal:hover {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+/* Secondary & Action Buttons across all tabs */
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-action,
+[data-theme="dark"] .btn-more,
+[data-theme="dark"] .btn-action-more,
+[data-theme="dark"] .btn-refresh {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover:not(:disabled),
+[data-theme="dark"] .btn-action:hover:not(:disabled),
+[data-theme="dark"] .btn-more:hover:not(:disabled),
+[data-theme="dark"] .btn-action-more:hover:not(:disabled),
+[data-theme="dark"] .btn-refresh:hover:not(:disabled) {
+  background: var(--apple-surface, #131924) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+/* Badges & Status Indicators across tabs */
+[data-theme="dark"] .year-badge,
+[data-theme="dark"] .badge-year,
+[data-theme="dark"] .rank-badge,
+[data-theme="dark"] .faculty-pill {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] .active-sem-badge {
+  background: rgba(34, 197, 94, 0.15) !important;
+  color: #4ade80 !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Period Pills & Multi-period Selection */
+[data-theme="dark"] .period-select-chip {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .period-select-chip:hover {
+  background: #242e3f !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .period-select-chip.is-selected {
+  background: rgba(56, 189, 248, 0.18) !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .chip-period-title {
+  color: var(--apple-text-primary) !important;
+}
+
+[data-theme="dark"] .btn-preset-chip {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+/* Timetable Matrix in tab-student-schedule */
+[data-theme="dark"] .matrix-table th {
+  background: var(--apple-surface-sub) !important;
+  color: var(--apple-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .matrix-slot-cell {
+  background: var(--apple-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .matrix-slot-cell:hover {
+  background: var(--apple-surface-sub) !important;
+}
+
+/* Secondary Buttons */
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-action,
+[data-theme="dark"] .btn-refresh {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+  color: var(--apple-text-primary) !important;
+}
+
+/* Dark Reader and 3rd Party Extension Resilience */
+html[data-darkreader-mode] body,
+html[data-darkreader-scheme="dark"] body {
+  color: #f8fafc !important;
+}
+
+html[data-darkreader-mode] table td,
+html[data-darkreader-scheme="dark"] table td {
+  color: #f8fafc !important;
+}
+
+
+
+
+
+

@@ -1,0 +1,221 @@
+<div class="page-layout">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="breadcrumb">รายงาน / รายงานวิชาที่เปิดสอน</div>
+    <div class="header-title-row">
+      <div>
+        <h1 class="page-title">รายงานวิชาที่เปิดสอน</h1>
+        <p class="page-subtitle">แสดงรายการรายวิชาทั้งหมดที่เปิดสอนตามปีการศึกษาและภาคเรียนที่กำหนด</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+
+    <!-- Top Filters & Summary Stats Row -->
+    <div class="report-filters-bar">
+      <div class="filter-col">
+        <label class="filter-label">ปีการศึกษา / ภาคเรียน</label>
+        <app-custom-select
+          [options]="yearSemSelectOptions()"
+          [value]="selectedYearSemKey()"
+          (valueChange)="onYearSemChange($event)"
+          icon="event_available"
+        />
+      </div>
+
+      <div class="summary-stats-wrap">
+        <div class="stat-badge-item">
+          <span class="material-symbols-rounded stat-icon">menu_book</span>
+          <div class="stat-info">
+            <span class="stat-label">วิชาที่เปิดสอน</span>
+            <strong class="stat-value">{{ filteredCourses().length }} วิชา</strong>
+          </div>
+        </div>
+
+        <div class="stat-badge-item">
+          <span class="material-symbols-rounded stat-icon">grade</span>
+          <div class="stat-info">
+            <span class="stat-label">หน่วยกิตรวม</span>
+            <strong class="stat-value">{{ totalCredits() }} หน่วยกิต</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Bar (Search, Refresh, Print) -->
+    <div class="action-bar no-print">
+      <div class="search-box">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="ค้นหารหัสวิชา, ชื่อวิชา (ภาษาไทย/อังกฤษ)..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event); currentPage.set(1)"
+        />
+        @if (searchQuery()) {
+          <button type="button" class="btn-clear-search" (click)="searchQuery.set(''); currentPage.set(1)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        }
+      </div>
+
+      <div class="report-actions">
+        <button
+          type="button"
+          class="btn-refresh"
+          [disabled]="isLoading()"
+          (click)="loadOfferedCourses()"
+          title="รีเฟรชข้อมูล"
+        >
+          <span class="material-symbols-rounded" [class.spin-loading]="isLoading()">refresh</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-print-action"
+          (click)="printReport()"
+          title="พิมพ์รายงานวิชาที่เปิดสอน"
+        >
+          <span class="material-symbols-rounded">print</span>
+          <span>พิมพ์รายงาน</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Print Header Only Visible on Paper/PDF Print -->
+    <div class="print-only-header">
+      <h2 class="print-title">รายงานวิชาที่เปิดสอน</h2>
+      <p class="print-subtitle">ปีการศึกษา {{ selectedYear() }} ภาคการศึกษาที่ {{ selectedSemester() }} (จำนวนทั้งหมด {{ filteredCourses().length }} วิชา)</p>
+    </div>
+
+    <!-- Data Table & Skeleton Loading -->
+    @if (isLoading()) {
+      <div class="table-skeleton-box">
+        <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+          <app-skeleton variant="rect" width="100%" height="44px" />
+        </div>
+        <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 70px; text-align: center;">ลำดับ</th>
+              <th style="width: 140px;">รหัสวิชา</th>
+              <th>ชื่อวิชา (ภาษาไทย)</th>
+              <th>Course Name (English)</th>
+              <th style="width: 100px; text-align: center;">หน่วยกิต</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredCourses().length === 0) {
+              <tr>
+                <td colspan="5" class="text-center empty-cell">
+                  <span class="material-symbols-rounded empty-icon">search_off</span>
+                  <p>ไม่พบรายวิชาที่เปิดสอนในภาคเรียนนี้</p>
+                </td>
+              </tr>
+            }
+
+            @for (row of paginatedCourses(); track row.COURSE_NO; let i = $index) {
+              <tr>
+                <td class="col-index" style="text-align: center;">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+                <td class="col-code">
+                  <strong class="course-code-badge">{{ row.COURSE_NO }}</strong>
+                </td>
+                <td class="col-name-th">
+                  <strong>{{ row.COURSE_NAME_THAI || '-' }}</strong>
+                </td>
+                <td class="col-name-en">
+                  <span class="text-eng">{{ row.COURSE_NAME_ENG_L || '-' }}</span>
+                </td>
+                <td class="col-credit" style="text-align: center;">
+                  <span class="credit-pill">{{ row.CREDIT != null ? row.CREDIT : '-' }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls (Apple Style Pills) -->
+      @if (totalPages() > 1) {
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          <span class="info-text">แสดง</span>
+          <strong class="info-strong">{{ startItemIndex() | number }} - {{ endItemIndex() | number }}</strong>
+          <span class="info-text">จากทั้งหมด</span>
+          <strong class="info-strong">{{ totalItems() | number }}</strong>
+          <span class="info-text">รายการ</span>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(1)"
+            title="หน้าแรก"
+          >
+            <span class="material-symbols-rounded">first_page</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(currentPage() - 1)"
+            title="หน้าก่อนหน้า"
+          >
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          <div class="page-pills-list">
+            @for (p of displayedPageNumbers(); track $index) {
+              @if (p === '...') {
+                <span class="page-ellipsis">…</span>
+              } @else {
+                <button
+                  type="button"
+                  class="page-pill-btn"
+                  [class.active]="p === currentPage()"
+                  (click)="setPage(+p)"
+                >
+                  {{ p }}
+                </button>
+              }
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(currentPage() + 1)"
+            title="หน้าถัดไป"
+          >
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagination-nav"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(totalPages())"
+            title="หน้าสุดท้าย"
+          >
+            <span class="material-symbols-rounded">last_page</span>
+          </button>
+        </div>
+      </div>
+      }
+    }
+
+  </div>
+
+</div>

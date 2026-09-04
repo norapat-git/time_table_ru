@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>ตารางสอน — สำนักบริการทางวิชาการและทดสอบประเมินผล</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="ระบบจัดการตารางสอน สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง">
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('app_theme');
+        var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = saved === 'dark' || (!saved && systemDark) || (saved === 'auto' && systemDark);
+        var theme = isDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

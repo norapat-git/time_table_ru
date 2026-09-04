@@ -1,0 +1,94 @@
+@if (tourService.isActive()) {
+  <!-- Clicking anywhere on the backdrop advances to next step (or finishes tour on last step) -->
+  <div
+    class="tour-backdrop"
+    [class.no-spotlight]="!tourService.spotlightRect()"
+    (click)="tourService.nextStep()"
+  >
+
+    <!-- Spotlight Hole Highlight on Target Element (clicking it also advances) -->
+    @if (tourService.spotlightRect(); as spot) {
+      <div
+        class="tour-spotlight-hole"
+        [style.top.px]="spot.top"
+        [style.left.px]="spot.left"
+        [style.width.px]="spot.width"
+        [style.height.px]="spot.height"
+        [style.border-radius.px]="spot.radius || 10"
+      >
+        <!-- Pulsing Ring Beacon -->
+        <span class="spotlight-beacon-pulse"></span>
+      </div>
+    }
+
+    <!-- Floating Tooltip Card (clicking it also advances) -->
+    @if (tourService.currentStep(); as step) {
+      <div
+        class="tour-card"
+        [ngStyle]="cardPositionStyle()"
+      >
+        <!-- Card Header -->
+        <div class="tour-card-header">
+          <div class="tour-step-badge">
+            <span class="material-symbols-rounded badge-icon">{{ step.icon || 'help_outline' }}</span>
+            <span>แนะนำการใช้งาน ({{ tourService.currentStepIndex() + 1 }}/{{ tourService.totalSteps() }})</span>
+          </div>
+          <button
+            type="button"
+            class="btn-close-tour"
+            (click)="$event.stopPropagation(); tourService.skipTour()"
+            title="ปิด / ข้ามคำแนะนำ (ESC)"
+          >
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <!-- Card Body -->
+        <div class="tour-card-body">
+          <h4 class="tour-step-title">{{ step.title }}</h4>
+          <p class="tour-step-desc">{{ step.description }}</p>
+
+          @if (step.actionHint) {
+            <div class="tour-action-hint">
+              <span class="material-symbols-rounded">info</span>
+              <span>{{ step.actionHint }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Card Footer (No next button - click anywhere hint) -->
+        <div class="tour-card-footer">
+          <button
+            type="button"
+            class="btn-tour-skip"
+            (click)="$event.stopPropagation(); tourService.skipTour()"
+            title="ข้ามคำแนะนำทั้งหมด"
+          >
+            ข้าม
+          </button>
+
+          <!-- Click Anywhere Prompt -->
+          <div class="click-anywhere-hint" [class.is-last]="tourService.isLastStep()">
+            <span class="material-symbols-rounded">
+              {{ tourService.isLastStep() ? 'check_circle' : 'touch_app' }}
+            </span>
+            <span>{{ tourService.isLastStep() ? 'แตะที่ใดก็ได้เพื่อเริ่มใช้งาน' : 'แตะที่ใดก็ได้เพื่อดูต่อ' }}</span>
+          </div>
+
+          @if (!tourService.isFirstStep()) {
+            <button
+              type="button"
+              class="btn-tour-prev"
+              (click)="$event.stopPropagation(); tourService.prevStep()"
+              title="ย้อนกลับไปขั้นตอนก่อนหน้า"
+            >
+              <span class="material-symbols-rounded">arrow_back</span>
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+
+  </div>
+}
