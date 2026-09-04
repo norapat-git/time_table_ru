@@ -254,9 +254,7 @@
 
   </div>
 
-  <!-- ============================================================
-       MODAL: เพิ่มอาจารย์ผู้สอน (ADD INSTRUCTORS MODAL)
-       ============================================================ -->
+  <!-- MODAL: เพิ่มอาจารย์ผู้สอน (ADD INSTRUCTORS MODAL) -->
   @if (isModalOpen()) {
   <div class="modal-backdrop" (click)="closeModal()">
     <div class="modal-card modal-instructor-card" (click)="$event.stopPropagation()">
@@ -415,9 +413,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: รายละเอียดอาจารย์ผู้สอน (INSTRUCTOR DETAIL MODAL)
-       ============================================================ -->
+  <!-- MODAL: รายละเอียดอาจารย์ผู้สอน (INSTRUCTOR DETAIL MODAL) -->
   @if (isDetailModalOpen() && selectedInstructorDetail()) {
   @let d = selectedInstructorDetail()!;
   <div class="modal-backdrop" (click)="closeDetailModal()">

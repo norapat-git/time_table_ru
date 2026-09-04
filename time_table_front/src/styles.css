@@ -1,30 +1,28 @@
-/* ============================================================
-   GLOBAL DESIGN TOKENS — Apple Minimalist Theme (White & Gray)
-   Aesthetics: Apple macOS / iOS Cupertino Clean Monochrome & Blue Accent
-   ============================================================ */
+/* GLOBAL DESIGN TOKENS — Apple Minimalist Theme (White & Gray)
+   Aesthetics: Apple macOS / iOS Cupertino Clean Monochrome & Blue Accent */
 
 :root {
-  /* --- Apple Canvas & Surfaces --- */
+  /* Apple Canvas & Surfaces */
   --apple-canvas:      #f5f5f7;
   --apple-surface:     #ffffff;
   --apple-surface-sub: #fafafc;
   --apple-sidebar-bg:  #f8f9fa;
   --apple-sidebar-alt: #f1f2f4;
 
-  /* --- Apple Monochrome Palette --- */
+  /* Apple Monochrome Palette */
   --apple-text-primary:   #1d1d1f;
   --apple-text-secondary: #6e6e73;
   --apple-text-tertiary:  #86868b;
   --apple-text-quaternary:#aeaeb2;
 
-  /* --- Apple Accent --- */
+  /* Apple Accent */
   --apple-blue:       #0071e3;
   --apple-blue-hover: #0077ed;
   --apple-blue-soft:  #e8f2fc;
   --apple-dark:       #1d1d1f;
   --apple-dark-hover: #333336;
 
-  /* --- Semantic Aliases --- */
+  /* Semantic Aliases */
   --color-bg:             var(--apple-canvas);
   --color-surface:        var(--apple-surface);
   --color-border:         #e5e5ea;
@@ -33,11 +31,11 @@
   --color-text-secondary: var(--apple-text-secondary);
   --color-text-muted:     var(--apple-text-tertiary);
 
-  /* --- Typography --- */
+  /* Typography */
   --font-sans:   'SF Pro Display', 'SF Pro Text', 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-thai:   'Sarabun', 'SF Pro Text', 'Inter', -apple-system, sans-serif;
 
-  /* --- Spacing --- */
+  /* Spacing */
   --space-1:  0.25rem;
   --space-2:  0.5rem;
   --space-3:  0.75rem;
@@ -48,53 +46,51 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* --- Border Radius --- */
+  /* Border Radius */
   --radius-sm:   0.375rem;  /* 6px */
   --radius-md:   0.625rem;  /* 10px */
   --radius-lg:   0.875rem;  /* 14px */
   --radius-xl:   1.125rem;  /* 18px */
   --radius-full: 9999px;
 
-  /* --- Apple Soft Diffuse Shadows --- */
+  /* Apple Soft Diffuse Shadows */
   --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
   --shadow-lg:     0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-  /* --- Apple Spring Transitions --- */
+  /* Apple Spring Transitions */
   --spring-apple: cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast:   150ms var(--spring-apple);
   --transition-normal: 280ms var(--spring-apple);
   --transition-slow:   400ms var(--spring-apple);
 }
 
-/* ============================================================
-   GLOBAL DESIGN TOKENS — Apple Cupertino Dark Theme
-   Deep Charcoal Surfaces, High-Contrast Text & Crisp Accents
-   ============================================================ */
+/* GLOBAL DESIGN TOKENS — Apple Cupertino Dark Theme
+   Deep Charcoal Surfaces, High-Contrast Text & Crisp Accents */
 [data-theme="dark"] {
-  /* --- Apple Dark Canvas & Surfaces --- */
+  /* Apple Dark Canvas & Surfaces */
   --apple-canvas:      #0b0f17;
   --apple-surface:     #131924;
   --apple-surface-sub: #1c2433;
   --apple-sidebar-bg:  #111620;
   --apple-sidebar-alt: #19212e;
 
-  /* --- Apple Dark Monochrome Palette --- */
+  /* Apple Dark Monochrome Palette */
   --apple-text-primary:   #f8fafc;
   --apple-text-secondary: #94a3b8;
   --apple-text-tertiary:  #64748b;
   --apple-text-quaternary:#475569;
 
-  /* --- Apple Dark Accent --- */
+  /* Apple Dark Accent */
   --apple-blue:       #38bdf8;
   --apple-blue-hover: #0ea5e9;
   --apple-blue-soft:  rgba(56, 189, 248, 0.12);
   --apple-dark:       #f8fafc;
   --apple-dark-hover: #e2e8f0;
 
-  /* --- Semantic Aliases --- */
+  /* Semantic Aliases */
   --color-bg:             var(--apple-canvas);
   --color-surface:        var(--apple-surface);
   --color-border:         #242e3f;
@@ -103,7 +99,7 @@
   --color-text-secondary: var(--apple-text-secondary);
   --color-text-muted:     var(--apple-text-tertiary);
 
-  /* --- Dark Diffuse Shadows --- */
+  /* Dark Diffuse Shadows */
   --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.55);
@@ -111,9 +107,7 @@
   --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* ============================================================
-   GLOBAL RESET & BASE
-   ============================================================ */
+/* GLOBAL RESET & BASE */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -156,9 +150,7 @@ input, select, textarea {
   font-family: var(--font-thai);
 }
 
-/* ============================================================
-   APPLE CLEAN SCROLLBAR
-   ============================================================ */
+/* APPLE CLEAN SCROLLBAR */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -174,9 +166,7 @@ input, select, textarea {
   background: rgba(0, 0, 0, 0.28);
 }
 
-/* ============================================================
-   MATERIAL SYMBOLS (MODERN ICONS)
-   ============================================================ */
+/* MATERIAL SYMBOLS (MODERN ICONS) */
 .material-symbols-rounded {
   font-family: 'Material Symbols Rounded';
   font-weight: normal;
@@ -202,9 +192,7 @@ input, select, textarea {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ============================================================
-   APPLE ANIMATED CUSTOM CHECKBOX (SPRING 60FPS)
-   ============================================================ */
+/* APPLE ANIMATED CUSTOM CHECKBOX (SPRING 60FPS) */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -306,9 +294,7 @@ input[type="checkbox"]:checked::before {
   font-size: 0.95rem;
 }
 
-/* ============================================================
-   FETCH LOCK & DOUBLE-CLICK PREVENTION (60FPS ACCELERATED)
-   ============================================================ */
+/* FETCH LOCK & DOUBLE-CLICK PREVENTION (60FPS ACCELERATED) */
 .is-fetching-locked {
   pointer-events: none !important;
   user-select: none !important;
@@ -319,9 +305,7 @@ input[type="checkbox"]:checked::before {
   pointer-events: none !important;
 }
 
-/* ============================================================
-   GLOBAL MODAL FOOTER & STANDARD BUTTONS (APPLE BLUE ACCENT)
-   ============================================================ */
+/* GLOBAL MODAL FOOTER & STANDARD BUTTONS (APPLE BLUE ACCENT) */
 .modal-footer {
   display: flex;
   align-items: center;
@@ -480,9 +464,7 @@ input[type="checkbox"]:checked::before {
   height: 0 !important;
 }
 
-/* ============================================================
-   CUSTOM CHECKBOX (checkbox-container & checkAnim)
-   ============================================================ */
+/* CUSTOM CHECKBOX (checkbox-container & checkAnim) */
 .checkbox-container {
   display: inline-block;
   position: relative;
@@ -592,9 +574,7 @@ input[type="checkbox"]:checked::before {
   line-height: 1;
 }
 
-/* ============================================================
-   GLOBAL APPLE-STYLE PAGINATION BAR
-   ============================================================ */
+/* GLOBAL APPLE-STYLE PAGINATION BAR */
 .pagination-bar {
   display: flex;
   align-items: center;
@@ -711,9 +691,7 @@ input[type="checkbox"]:checked::before {
   user-select: none;
 }
 
-/* ============================================================
-   GLOBAL MODAL SCROLL LOCK & SCROLL CHAINING PREVENTION
-   ============================================================ */
+/* GLOBAL MODAL SCROLL LOCK & SCROLL CHAINING PREVENTION */
 html:has(.modal-backdrop),
 html:has(.dialog-backdrop),
 html:has(.drawer-backdrop),
@@ -756,10 +734,8 @@ body:has(.dialog-backdrop) .dashboard-view-content {
   overscroll-behavior: contain !important;
 }
 
-/* ============================================================
-   NATIVE DARK MODE & EXTENSION ANTI-SINKING RULES
-   Guarantees readable text contrast across all dark modes & extensions
-   ============================================================ */
+/* NATIVE DARK MODE & EXTENSION ANTI-SINKING RULES
+   Guarantees readable text contrast across all dark modes & extensions */
 [data-theme="dark"] body {
   background-color: var(--apple-canvas) !important;
   color: var(--apple-text-primary) !important;

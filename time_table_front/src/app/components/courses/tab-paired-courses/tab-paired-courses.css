@@ -1,6 +1,4 @@
-/* ============================================================
-   TAB PAIRED COURSES (APPLE WHITE & GRAY THEME)
-   ============================================================ */
+/* TAB PAIRED COURSES (APPLE WHITE & GRAY THEME) */
 
 .page-layout {
   max-width: 1240px;
@@ -383,9 +381,7 @@
   font-weight: 700;
 }
 
-/* ============================================================
-   DETAIL MODAL STYLES (OPTION 1)
-   ============================================================ */
+/* DETAIL MODAL STYLES (OPTION 1) */
 .detail-modal-card {
   background: #ffffff;
   border-radius: 18px;
@@ -529,9 +525,7 @@
   color: var(--apple-text-quaternary);
 }
 
-/* ============================================================
-   MODAL DIALOG: เพิ่มวิชาคู่ (APPLE MOCKUP THEME)
-   ============================================================ */
+/* MODAL DIALOG: เพิ่มวิชาคู่ (APPLE MOCKUP THEME) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -764,9 +758,7 @@
   box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
 }
 
-/* ============================================================
-   INLINE SEARCHABLE COURSE INPUT & DROPDOWN (INSIDE MODAL)
-   ============================================================ */
+/* INLINE SEARCHABLE COURSE INPUT & DROPDOWN (INSIDE MODAL) */
 .inline-picker-group {
   position: relative;
 }
@@ -1064,9 +1056,7 @@
   cursor: not-allowed;
 }
 
-/* ============================================================
-   RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER
-   ============================================================ */
+/* RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER */
 .drawer-backdrop {
   position: fixed;
   inset: 0;

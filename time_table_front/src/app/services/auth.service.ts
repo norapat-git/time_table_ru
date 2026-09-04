@@ -12,6 +12,7 @@ import {
   getTokenRemainingSeconds,
   isTokenExpired,
 } from '../utils/jwt.util';
+import { environment } from '../../environment/env';
 
 const STORAGE_KEY_TOKEN = 'app_auth_token';
 const STORAGE_KEY_USER = 'app_auth_user';
@@ -70,7 +71,7 @@ export class AuthService {
    * Login with real Backend API (Microsoft 365 + RG_SCHEDULE_ACCOUNT)
    */
   login(email: string, password: string): Observable<{ success: boolean; message: string; results?: any }> {
-    const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/login' : '/api/service/login';
+    const targetUrl = window.location.port === '4200' ? `${environment.apiUrl}/login` : '/api/service/login';
     return this.http.post<{ success: boolean; message: string; token?: string; results?: any }>(targetUrl, { email, password }).pipe(
       tap((res) => {
         if (res && res.success && res.results) {

@@ -1,8 +1,6 @@
 <div class="page-layout">
 
-  <!-- ============================================================ -->
   <!-- 1. HEADER SECTION & EXPORT/PRINT TOOLBAR -->
-  <!-- ============================================================ -->
   <div class="header-section">
     <div class="header-titles">
       <div class="breadcrumb">
@@ -45,9 +43,7 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- 2. FILTER & ROOM SELECTOR CARD -->
-  <!-- ============================================================ -->
   <div class="filter-card">
     <div class="filter-controls-grid">
 
@@ -89,9 +85,7 @@
   </div>
 
 
-  <!-- ============================================================ -->
   <!-- 3. TIMETABLE SCHEDULE MATRIX SECTION -->
-  <!-- ============================================================ -->
   <div class="matrix-section-wrapper">
 
     <!-- Dedicated Grid Control Bar Directly Above Grid -->
@@ -346,9 +340,7 @@
 
   </div>
 
-  <!-- ============================================================ -->
   <!-- 4. CLASS DETAIL MODAL (APPLE FROSTED GLASS) -->
-  <!-- ============================================================ -->
   @if (isDetailModalOpen() && selectedClassDetail(); as detail) {
   <div class="modal-backdrop" (click)="closeDetailModal()">
     <div class="modal-card detail-modal-card" (click)="$event.stopPropagation()">
@@ -481,9 +473,7 @@
   </div>
   }
 
-  <!-- ============================================================ -->
   <!-- 5. MODERN VERTICAL FROSTED GLASS CONTEXT MENU (60 FPS) -->
-  <!-- ============================================================ -->
   @if (isContextMenuOpen() && contextMenuItem(); as menuCourse) {
   <div class="card-context-menu-backdrop" (click)="closeContextMenu()" (contextmenu)="closeContextMenu(); $event.preventDefault()">
     <div class="vertical-glass-menu"
@@ -545,9 +535,7 @@
   </div>
   }
 
-  <!-- ============================================================ -->
   <!-- 5.2 EMPTY SLOT FROSTED GLASS CONTEXT MENU (ADD AT DAY/TIME) -->
-  <!-- ============================================================ -->
   @if (isEmptySlotMenuOpen() && emptySlotContext(); as slot) {
   <div class="card-context-menu-backdrop" (click)="closeEmptySlotMenu()" (contextmenu)="closeEmptySlotMenu(); $event.preventDefault()">
     <div class="vertical-glass-menu"
@@ -580,9 +568,7 @@
   </div>
   }
 
-  <!-- ============================================================ -->
   <!-- 6. ADD / EDIT CLASS MODAL (SMART AVAILABILITY COMPANION) -->
-  <!-- ============================================================ -->
   @if (isEditModalOpen() && (isAddMode() || editingItem())) {
   <div class="modal-backdrop" (click)="closeEditModal()">
     <div class="modal-companion-layout" (click)="$event.stopPropagation()">
@@ -993,9 +979,7 @@
 
       </div>
 
-      <!-- ============================================================
-           COMPANION FLOATING AVAILABILITY CARD (RIGHT: กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ)
-           ============================================================ -->
+      <!-- COMPANION FLOATING AVAILABILITY CARD (RIGHT: กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ) -->
       <div class="modal-availability-companion-card" [class.is-collapsed]="editInstructorCodes().length === 0">
         <div class="companion-inner-content">
           <div class="avail-panel-header">
@@ -1107,9 +1091,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL)
-       ============================================================ -->
+  <!-- MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL) -->
   @if (isCloneModalOpen()) {
   <div class="modal-backdrop" (click)="closeCloneModal()">
     <div class="modal-card modal-clone-card" (click)="$event.stopPropagation()">

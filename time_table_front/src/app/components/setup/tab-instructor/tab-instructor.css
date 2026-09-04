@@ -1,6 +1,4 @@
-/* ============================================================
-   TAB INSTRUCTOR (APPLE WHITE & GRAY THEME)
-   ============================================================ */
+/* TAB INSTRUCTOR (APPLE WHITE & GRAY THEME) */
 
 .page-layout {
   max-width: 1240px;
@@ -419,9 +417,7 @@
   border-color: #fecaca;
 }
 
-/* ============================================================
-   INSTRUCTOR DETAIL MODAL STYLING
-   ============================================================ */
+/* INSTRUCTOR DETAIL MODAL STYLING */
 .instructor-detail-modal-card {
   width: 680px;
   max-width: 95vw;
@@ -590,9 +586,7 @@
   max-width: 460px;
 }
 
-/* ============================================================
-   MODAL STYLING (ADD INSTRUCTORS MODAL)
-   ============================================================ */
+/* MODAL STYLING (ADD INSTRUCTORS MODAL) */
 .modal-backdrop {
   position: fixed;
   inset: 0;

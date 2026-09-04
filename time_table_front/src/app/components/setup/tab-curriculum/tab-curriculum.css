@@ -1,7 +1,5 @@
-/* ============================================================
-   TAB: จัดการหลักสูตร (RG_SCHEDULE_CURRICULUM)
-   Aesthetics: Apple White & Gray Minimalist Theme
-   ============================================================ */
+/* TAB: จัดการหลักสูตร (RG_SCHEDULE_CURRICULUM)
+   Aesthetics: Apple White & Gray Minimalist Theme */
 
 .page-layout {
   max-width: 1240px;
@@ -442,9 +440,7 @@
   color: #dc2626;
 }
 
-/* ============================================================
-   EYE DETAIL MODAL STYLES (APPLE FROSTED GLASS)
-   ============================================================ */
+/* EYE DETAIL MODAL STYLES (APPLE FROSTED GLASS) */
 .detail-group-modal-card {
   width: 95vw;
   max-width: 880px;
@@ -578,9 +574,7 @@
   color: var(--apple-text-quaternary);
 }
 
-/* ============================================================
-   MODAL STYLES (MATCHING USER MOCKUP IMAGE 2)
-   ============================================================ */
+/* MODAL STYLES (MATCHING USER MOCKUP IMAGE 2) */
 
 .modal-backdrop {
   position: fixed;

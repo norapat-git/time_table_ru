@@ -1,6 +1,4 @@
-/* ============================================================
-   TAB COURSE SEARCH (APPLE WHITE & GRAY THEME)
-   ============================================================ */
+/* TAB COURSE SEARCH (APPLE WHITE & GRAY THEME) */
 
 .page-layout {
   max-width: 1240px;
@@ -373,9 +371,7 @@
   color: var(--apple-text-quaternary);
 }
 
-/* ============================================================
-   MULTI-LEVEL & MULTI-SELECT COURSE PICKER MODAL
-   ============================================================ */
+/* MULTI-LEVEL & MULTI-SELECT COURSE PICKER MODAL */
 .modal-backdrop {
   position: fixed;
   inset: 0;

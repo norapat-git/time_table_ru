@@ -685,9 +685,7 @@ export class TabCurriculumComponent implements OnInit {
     }
   }
 
-  // ============================================================
   // Modal Handlers & Cascading Lookups (เพิ่ม/จัดการวิชาในหลักสูตร)
-  // ============================================================
   openAddModal(): void {
     this.formError = '';
     this.showAddCoursePicker.set(false);

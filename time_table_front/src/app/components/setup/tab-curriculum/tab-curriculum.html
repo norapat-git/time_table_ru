@@ -190,9 +190,7 @@
 
   </div>
 
-  <!-- ============================================================
-       MODAL: เพิ่ม/จัดการวิชาในหลักสูตร (MATCHING USER MOCKUP IMAGE 2)
-       ============================================================ -->
+  <!-- MODAL: เพิ่ม/จัดการวิชาในหลักสูตร (MATCHING USER MOCKUP IMAGE 2) -->
   @if (isModalOpen()) {
   <div class="modal-backdrop" (click)="closeModal()">
     <div class="modal-card curriculum-modal-card" (click)="$event.stopPropagation()"
@@ -481,9 +479,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: ดูรายละเอียดรายวิชาในกลุ่มหลักสูตร (EYE VIEW BUTTON MODAL)
-       ============================================================ -->
+  <!-- MODAL: ดูรายละเอียดรายวิชาในกลุ่มหลักสูตร (EYE VIEW BUTTON MODAL) -->
   @if (isGroupDetailModalOpen() && selectedGroupDetail(); as detail) {
   <div class="modal-backdrop" (click)="closeGroupDetailModal()">
     <div class="modal-card detail-group-modal-card" (click)="$event.stopPropagation()">

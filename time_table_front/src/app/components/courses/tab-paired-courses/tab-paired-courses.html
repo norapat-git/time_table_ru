@@ -454,9 +454,7 @@
     </div>
   }
 
-  <!-- ============================================================
-       RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER BY LETTER
-       ============================================================ -->
+  <!-- RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER BY LETTER -->
   @if (isDrawerOpen()) {
     <div class="drawer-backdrop" (click)="closeDrawer()">
       <div class="course-side-drawer" (click)="$event.stopPropagation()">
@@ -615,9 +613,7 @@
     </div>
   }
 
-  <!-- ============================================================
-       DETAIL MODAL: รายละเอียดกลุ่มวิชาคู่ (OPTION 1)
-       ============================================================ -->
+  <!-- DETAIL MODAL: รายละเอียดกลุ่มวิชาคู่ (OPTION 1) -->
   @if (isDetailModalOpen() && detailGroup()) {
     <div class="modal-backdrop" (click)="closeDetailModal()">
       <div class="modal-card detail-modal-card" (click)="$event.stopPropagation()">

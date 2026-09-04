@@ -549,9 +549,7 @@ export class TabInstructorComponent implements OnInit {
     });
   }
 
-  // ============================================================
   // Modal Handlers (Add Instructors)
-  // ============================================================
   openAddModal(): void {
     this.formError = '';
     this.modalSearchQuery.set('');
@@ -635,9 +633,7 @@ export class TabInstructorComponent implements OnInit {
     });
   }
 
-  // ============================================================
   // Single Instructor Detail Modal Handlers
-  // ============================================================
   openDetailModal(item: ScheduleInstructorItem): void {
     this.selectedInstructorDetail.set(item);
     this.isDetailModalOpen.set(true);

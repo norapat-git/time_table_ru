@@ -1,7 +1,5 @@
-/* ============================================================
-   Custom Select Dropdown — Apple Cupertino Design
-   Micro-interactions, search bar, smooth animations
-   ============================================================ */
+/* Custom Select Dropdown — Apple Cupertino Design
+   Micro-interactions, search bar, smooth animations */
 
 :host {
   display: block;
@@ -301,9 +299,7 @@
   pointer-events: none;
 }
 
-/* ============================================================
-   DARK MODE — CUSTOM SELECT DROPDOWN
-   ============================================================ */
+/* DARK MODE — CUSTOM SELECT DROPDOWN */
 :host-context([data-theme="dark"]) .select-trigger-btn {
   background: var(--apple-surface, #131924);
   border-color: var(--color-border, #242e3f);

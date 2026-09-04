@@ -289,16 +289,12 @@
 
   </div>
 
-  <!-- ============================================================
-       MODAL: เพิ่มข้อมูลตารางสอน (ADD TIMETABLE MODAL)
-       ============================================================ -->
+  <!-- MODAL: เพิ่มข้อมูลตารางสอน (ADD TIMETABLE MODAL) -->
   @if (isAddModalOpen()) {
   <div class="modal-backdrop" (click)="closeAddModal()">
     <div class="modal-companion-layout" (click)="$event.stopPropagation()">
 
-      <!-- ============================================================
-           MAIN FORM MODAL CARD (LEFT)
-           ============================================================ -->
+      <!-- MAIN FORM MODAL CARD (LEFT) -->
       <div class="modal-card modal-main-form-card">
 
         <!-- Modal Header -->
@@ -700,9 +696,7 @@
 
       </div>
 
-      <!-- ============================================================
-           COMPANION FLOATING AVAILABILITY CARD (RIGHT: กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ)
-           ============================================================ -->
+      <!-- COMPANION FLOATING AVAILABILITY CARD (RIGHT: กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ) -->
       <div class="modal-availability-companion-card" [class.is-collapsed]="formInstructorCodes().length === 0">
         <div class="companion-inner-content">
           <div class="avail-panel-header">
@@ -813,9 +807,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       RIGHT-SIDE DRAWER: MULTI-LEVEL ALPHABETICAL COURSE PICKER
-       ============================================================ -->
+  <!-- RIGHT-SIDE DRAWER: MULTI-LEVEL ALPHABETICAL COURSE PICKER -->
   @if (isDrawerOpen()) {
   <div class="drawer-backdrop" (click)="closeDrawer()">
     <div class="course-side-drawer" (click)="$event.stopPropagation()">
@@ -957,9 +949,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: รายละเอียดตารางสอน (TIMETABLE DETAIL MODAL)
-       ============================================================ -->
+  <!-- MODAL: รายละเอียดตารางสอน (TIMETABLE DETAIL MODAL) -->
   @if (isDetailModalOpen() && selectedClassDetail()) {
   @let d = selectedClassDetail()!;
   <div class="modal-backdrop" (click)="closeDetailModal()">
@@ -1094,9 +1084,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: รายการแนะนำคาบและห้องว่าง (RECOMMENDATION MODAL - Feature 2)
-       ============================================================ -->
+  <!-- MODAL: รายการแนะนำคาบและห้องว่าง (RECOMMENDATION MODAL - Feature 2) -->
   @if (isRecommendModalOpen()) {
   <div class="modal-backdrop" (click)="closeRecommendModal()">
     <div class="modal-card modal-recommend-card" (click)="$event.stopPropagation()">
@@ -1147,9 +1135,7 @@
   </div>
   }
 
-  <!-- ============================================================
-       MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL - Feature 3)
-       ============================================================ -->
+  <!-- MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL - Feature 3) -->
   @if (isCloneModalOpen()) {
   <div class="modal-backdrop" (click)="closeCloneModal()">
     <div class="modal-card modal-clone-card" (click)="$event.stopPropagation()">

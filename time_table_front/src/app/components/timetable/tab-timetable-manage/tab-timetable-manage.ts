@@ -1022,9 +1022,7 @@ export class TabTimetableManageComponent implements OnInit {
     });
   }
 
-  // ============================================================
   // Detail Modal Handlers
-  // ============================================================
   openDetailModal(item: ScheduleClassItem): void {
     this.selectedClassDetail.set(item);
     this.isDetailModalOpen.set(true);
@@ -1035,9 +1033,7 @@ export class TabTimetableManageComponent implements OnInit {
     this.selectedClassDetail.set(null);
   }
 
-  // ============================================================
   // Add / Edit Class Modal Handlers
-  // ============================================================
   openAddModal(): void {
     this.formError.set('');
     this.instructorConflict.set(null);
@@ -1137,9 +1133,7 @@ export class TabTimetableManageComponent implements OnInit {
     this.checkInstructorConflicts();
   }
 
-  // -------------------------------------------------------------
   // Feature 1: Instructor Conflict Check
-  // -------------------------------------------------------------
   checkInstructorConflicts(): void {
     const day = this.formDayCode();
     const time = this.formTimeCode();
@@ -1173,9 +1167,7 @@ export class TabTimetableManageComponent implements OnInit {
       });
   }
 
-  // -------------------------------------------------------------
   // Feature 2: Smart Slot Recommender
-  // -------------------------------------------------------------
   getSlotRecommendations(): void {
     const instCodes = this.formInstructorCodes();
     const year = this.activeYear();
@@ -1232,9 +1224,7 @@ export class TabTimetableManageComponent implements OnInit {
       .join(', ');
   }
 
-  // -------------------------------------------------------------
   // Feature 3: Clone Timetable
-  // -------------------------------------------------------------
   openCloneModal(): void {
     const curYear = Number(this.activeYear());
     this.cloneSourceYear.set(isNaN(curYear) ? '' : String(curYear - 1));
@@ -1307,9 +1297,7 @@ export class TabTimetableManageComponent implements OnInit {
     });
   }
 
-  // -------------------------------------------------------------
   // Feature 4: Export to Excel (CSV with UTF-8 BOM)
-  // -------------------------------------------------------------
   exportToExcel(): void {
     const classes = this.classList();
     if (classes.length === 0) {
@@ -1450,9 +1438,7 @@ export class TabTimetableManageComponent implements OnInit {
     this.startModalTour(force);
   }
 
-  // ============================================================
   // Inline Search Handlers (Matching tab-paired-courses)
-  // ============================================================
   openInlineDropdown(): void {
     this.isInlineDropdownOpen.set(true);
     if (this.inlineSearchResults().length === 0) {
@@ -1552,9 +1538,7 @@ export class TabTimetableManageComponent implements OnInit {
     this.commonFreeSlots.set([]);
   }
 
-  // ============================================================
   // Right-Side Alphabetical Drawer Handlers (Matching tab-paired-courses)
-  // ============================================================
   openDrawer(): void {
     this.isDrawerOpen.set(true);
     this.drawerCodeQuery.set('');
@@ -1682,9 +1666,7 @@ export class TabTimetableManageComponent implements OnInit {
     this.closeDrawer();
   }
 
-  // ============================================================
   // Instructor Selection & Availability Handlers
-  // ============================================================
   fetchInstructorAvailability(): void {
     const codes = this.formInstructorCodes();
     if (codes.length === 0) {

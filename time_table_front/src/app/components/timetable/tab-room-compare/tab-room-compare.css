@@ -1,6 +1,4 @@
-/* ==========================================================================
-   TAB ROOM COMPARE (จัดตารางเทียบ 2 ห้อง) — APPLE SYSTEM DESIGN
-   ========================================================================== */
+/* TAB ROOM COMPARE (จัดตารางเทียบ 2 ห้อง) — APPLE SYSTEM DESIGN */
 
 .page-container {
   display: flex;
@@ -12,9 +10,7 @@
   min-height: calc(100vh - 120px);
 }
 
-/* --------------------------------------------------------------------------
-   Page Header & Control Bar
-   -------------------------------------------------------------------------- */
+/* Page Header & Control Bar */
 .page-header {
   display: flex;
   align-items: center;
@@ -120,9 +116,7 @@
 }
 
 
-/* --------------------------------------------------------------------------
-   Independent Room Day Selector Bar
-   -------------------------------------------------------------------------- */
+/* Independent Room Day Selector Bar */
 .room-day-bar {
   display: flex;
   align-items: center;
@@ -191,9 +185,7 @@
   flex-shrink: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Dual Columns Comparison Grid (Left Room vs Right Room)
-   -------------------------------------------------------------------------- */
+/* Dual Columns Comparison Grid (Left Room vs Right Room) */
 .dual-columns-wrapper {
   position: relative;
   width: 100%;
@@ -332,9 +324,7 @@
   width: 100%;
 }
 
-/* --------------------------------------------------------------------------
-   Timeline Slots Container (Rows 1 to 7)
-   -------------------------------------------------------------------------- */
+/* Timeline Slots Container (Rows 1 to 7) */
 .timeline-slots-container {
   display: flex;
   flex-direction: column;
@@ -569,9 +559,7 @@
   color: #0284c7;
 }
 
-/* --------------------------------------------------------------------------
-   Buttons & Common UI
-   -------------------------------------------------------------------------- */
+/* Buttons & Common UI */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -648,9 +636,7 @@
   100% { transform: rotate(360deg); }
 }
 
-/* --------------------------------------------------------------------------
-   Modal Backdrop & Card
-   -------------------------------------------------------------------------- */
+/* Modal Backdrop & Card */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -823,9 +809,7 @@
   justify-content: flex-end;
 }
 
-/* --------------------------------------------------------------------------
-   Floating Save Bar (Prominent Sticky Bar)
-   -------------------------------------------------------------------------- */
+/* Floating Save Bar (Prominent Sticky Bar) */
 .floating-save-bar-wrapper {
   position: fixed;
   bottom: 1.5rem;
@@ -1069,9 +1053,7 @@
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5);
 }
 
-/* ============================================================
-   PAIRED COURSES STYLES (วิชาคู่ที่เรียนร่วมกัน)
-   ============================================================ */
+/* PAIRED COURSES STYLES (วิชาคู่ที่เรียนร่วมกัน) */
 .paired-courses-pill-box {
   display: inline-flex;
   align-items: center;
@@ -1174,9 +1156,7 @@
   color: #7e22ce;
 }
 
-/* ============================================================
-   DARK MODE — ROOM COMPARE
-   ============================================================ */
+/* DARK MODE — ROOM COMPARE */
 :host-context([data-theme="dark"]) .compare-layout {
   color: var(--apple-text-primary, #f8fafc) !important;
 }

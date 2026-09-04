@@ -90,9 +90,7 @@ export class TabReportCompulsoryComponent implements OnInit {
   readonly selectedCourseDetail = signal<CurriculumReportRow | null>(null);
   readonly isDetailModalOpen = signal<boolean>(false);
 
-  // ============================================================
   // Select Options (Computed)
-  // ============================================================
 
   readonly facultySelectOptions = computed<SelectOption[]>(() => {
     const list: SelectOption[] = [
@@ -151,9 +149,7 @@ export class TabReportCompulsoryComponent implements OnInit {
     { value: '3', label: 'ภาคฤดูร้อน (Summer)', badge: 'ฤดูร้อน' },
   ]);
 
-  // ============================================================
   // Filtered Results & KPI Stats
-  // ============================================================
 
   readonly filteredCourses = computed<CurriculumReportRow[]>(() => {
     const fac = this.selectedFaculty();
@@ -284,9 +280,7 @@ export class TabReportCompulsoryComponent implements OnInit {
     return Array.from(facultyMap.values());
   });
 
-  // ============================================================
   // Lifecycle & API Calls
-  // ============================================================
 
   ngOnInit(): void {
     this.loadFaculties();
@@ -376,9 +370,7 @@ export class TabReportCompulsoryComponent implements OnInit {
     this.currentPage.set(1);
   }
 
-  // ============================================================
   // Formatting Helpers
-  // ============================================================
 
   getYearLevelBadgeClass(year: string): string {
     switch (year) {
@@ -399,9 +391,7 @@ export class TabReportCompulsoryComponent implements OnInit {
     }
   }
 
-  // ============================================================
   // Modal & Export Actions
-  // ============================================================
 
   openDetailModal(item: CurriculumReportRow): void {
     this.selectedCourseDetail.set(item);

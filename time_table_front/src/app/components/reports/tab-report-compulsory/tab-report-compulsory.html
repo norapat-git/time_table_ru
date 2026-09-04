@@ -1,7 +1,5 @@
 <div class="page-layout">
-  <!-- ============================================================ -->
   <!-- 1. HEADER SECTION (Breadcrumb, Title & Top Actions) -->
-  <!-- ============================================================ -->
   <div class="header-section">
     <div class="breadcrumb">
       <span>รายงาน</span>
@@ -40,9 +38,7 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- 2. MAIN CONTENT CARD (Filters, Views & Table) -->
-  <!-- ============================================================ -->
   <div class="content-card">
 
     <!-- Multi-Level Filter Toolbar -->
@@ -182,9 +178,7 @@
       </p>
     </div>
 
-    <!-- ============================================================ -->
     <!-- 4. DATA PRESENTATION -->
-    <!-- ============================================================ -->
     @if (isLoading()) {
       <div class="skeleton-wrapper">
         <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
@@ -444,9 +438,7 @@
 
   </div>
 
-  <!-- ============================================================ -->
   <!-- 5. COURSE DETAIL MODAL -->
-  <!-- ============================================================ -->
   @if (isDetailModalOpen() && selectedCourseDetail()) {
     @let d = selectedCourseDetail()!;
     <div class="modal-backdrop" (click)="closeDetailModal()">

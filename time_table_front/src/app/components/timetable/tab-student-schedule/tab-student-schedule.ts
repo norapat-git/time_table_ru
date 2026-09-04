@@ -958,9 +958,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.loadScheduleForRoom();
   }
 
-  // ============================================================
   // DRAG AND DROP & EDIT MODE METHODS
-  // ============================================================
   async toggleEditMode(): Promise<void> {
     if (this.isEditMode()) {
       if (this.pendingMoves().length > 0) {
@@ -1538,9 +1536,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       .join(', ');
   }
 
-  // ============================================================
   // CUSTOM CONTEXT MENU & MODAL ACTIONS
-  // ============================================================
   @HostListener('document:click', ['$event'])
   onDocumentClick(event?: MouseEvent): void {
     if (this.isContextMenuOpen()) {
@@ -1682,9 +1678,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     await this.deleteClassFromMenu(item);
   }
 
-  // ============================================================
   // EDIT MODAL METHODS
-  // ============================================================
   loadInstructors(): void {
     const year = this.activeYear();
     const sem = this.activeSemester();
@@ -1727,9 +1721,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     return `${inst.RANK_NAME_THAI_S || ''} ${inst.INSTRUCTOR_NAME_THAI || code}`.trim();
   }
 
-  // ============================================================
   // INLINE COURSE SEARCH METHODS (FOR ADD MODE)
-  // ============================================================
   openInlineDropdown(): void {
     this.isInlineDropdownOpen.set(true);
     if (this.inlineSearchResults().length === 0) {
@@ -1807,9 +1799,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.commonFreeSlots.set([]);
   }
 
-  // ============================================================
   // ADD / EDIT CLASS MODAL HANDLERS
-  // ============================================================
   openAddClassModal(presetDayCode?: number, presetTimeCode?: number): void {
     this.isAddMode.set(true);
     this.editingItem.set(null);
@@ -1914,9 +1904,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.slotInstructorsStatusMap.set({});
   }
 
-  // ============================================================
   // CLONE TIMETABLE MODAL HANDLERS
-  // ============================================================
   openCloneModal(): void {
     const curYear = Number(this.activeYear());
     this.cloneSourceYear.set(isNaN(curYear) ? '' : String(curYear - 1));
@@ -2285,9 +2273,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ============================================================
   // DELETE CLASS METHOD
-  // ============================================================
   async deleteClassFromMenu(item: ScheduleClassItem): Promise<void> {
     this.closeContextMenu();
 

@@ -1,6 +1,4 @@
-/* ============================================================
-   APP SHELL — Dashboard Layout (Apple White & Gray Theme)
-   ============================================================ */
+/* APP SHELL — Dashboard Layout (Apple White & Gray Theme) */
 
 :host {
   display: block;
@@ -215,9 +213,7 @@
   background: rgba(220, 38, 38, 0.08);
 }
 
-/* ============================================================
-   DARK MODE — APP SHELL & TOPBAR
-   ============================================================ */
+/* DARK MODE — APP SHELL & TOPBAR */
 :host-context([data-theme="dark"]) .dashboard-topbar {
   background: var(--apple-surface) !important;
   border-bottom: 1px solid var(--color-border) !important;

@@ -1,7 +1,5 @@
-/* ============================================================
-   Apple HIG Checkbox — Pure CSS + SVG Checkmark
-   Squircle corners, Apple blue accent, micro-interaction
-   ============================================================ */
+/* Apple HIG Checkbox — Pure CSS + SVG Checkmark
+   Squircle corners, Apple blue accent, micro-interaction */
 
 :host {
   display: inline-flex;

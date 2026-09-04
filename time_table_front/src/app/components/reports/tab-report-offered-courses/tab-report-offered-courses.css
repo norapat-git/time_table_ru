@@ -1,6 +1,4 @@
-/* ============================================================
-   REPORT OFFERED COURSES STYLING (APPLE FROSTED DESIGN SYSTEM)
-   ============================================================ */
+/* REPORT OFFERED COURSES STYLING (APPLE FROSTED DESIGN SYSTEM) */
 
 .page-layout {
   max-width: 1400px;
@@ -302,9 +300,7 @@
   display: none;
 }
 
-/* ============================================================
-   PRINT STYLES (@media print)
-   ============================================================ */
+/* PRINT STYLES (@media print) */
 @media print {
   body {
     background: #ffffff !important;

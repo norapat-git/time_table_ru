@@ -1,7 +1,5 @@
-/* ============================================================
-   APPLE-STYLE SIDEBAR NAVIGATION (WHITE & GRAY THEME)
-   Theme: macOS / iPadOS Cupertino Clean Minimalist
-   ============================================================ */
+/* APPLE-STYLE SIDEBAR NAVIGATION (WHITE & GRAY THEME)
+   Theme: macOS / iPadOS Cupertino Clean Minimalist */
 
 .sidebar-wrapper {
   width: 270px;
@@ -87,9 +85,7 @@
   border-radius: 4px;
 }
 
-/* ============================================================
-   APPLE-STYLE FLUID WHITE GLIDING CAPSULE (SEGMENTED PILL)
-   ============================================================ */
+/* APPLE-STYLE FLUID WHITE GLIDING CAPSULE (SEGMENTED PILL) */
 .apple-glass-capsule {
   position: absolute;
   top: 0;
@@ -372,9 +368,7 @@
   }
 }
 
-/* ============================================================
-   DARK MODE — SIDEBAR TAB NAV
-   ============================================================ */
+/* DARK MODE — SIDEBAR TAB NAV */
 :host-context([data-theme="dark"]) .sidebar-header {
   border-bottom-color: var(--color-border);
 }

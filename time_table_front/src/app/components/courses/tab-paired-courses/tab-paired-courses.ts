@@ -242,17 +242,13 @@ export class TabPairedCoursesComponent implements OnInit {
     { value: '2', label: 'ภาค 2', icon: 'looks_two' },
   ];
 
-  // ============================================================
   // Inline Dropdown Course Search State (inside Modal Cards)
-  // ============================================================
   readonly activeDropdownIndex = signal<number | null>(null);
   readonly inlineSearchQuery = signal<string>('');
   readonly inlineCourseResults = signal<UgbCourseOption[]>([]);
   readonly isInlineLoading = signal<boolean>(false);
 
-  // ============================================================
   // Right Side Drawer State: Multi-Level Course Picker
-  // ============================================================
   readonly isDrawerOpen = signal<boolean>(false);
   readonly targetItemIndex = signal<number | null>(null);
 
@@ -461,9 +457,7 @@ export class TabPairedCoursesComponent implements OnInit {
     }
   }
 
-  // ============================================================
   // Inline Dropdown Course Search Handlers (Direct Input Typing)
-  // ============================================================
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (this.activeDropdownIndex() !== null) {

@@ -1,6 +1,4 @@
-/* ============================================================
-   TAB TIMETABLE MANAGE (APPLE WHITE & GRAY THEME)
-   ============================================================ */
+/* TAB TIMETABLE MANAGE (APPLE WHITE & GRAY THEME) */
 
 .page-layout {
   max-width: 1240px;
@@ -513,9 +511,7 @@
   max-width: 460px;
 }
 
-/* ============================================================
-   MODAL STYLING (ADD TIMETABLE MODAL)
-   ============================================================ */
+/* MODAL STYLING (ADD TIMETABLE MODAL) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -582,9 +578,7 @@
   gap: 1.25rem;
 }
 
-/* ============================================================
-   COMPANION FLOATING AVAILABILITY CARD (กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ)
-   ============================================================ */
+/* COMPANION FLOATING AVAILABILITY CARD (กดแล้วงอกตรงนี้ / unselect แล้วพับเก็บ) */
 .modal-availability-companion-card {
   width: 410px;
   max-height: 92vh;
@@ -1096,9 +1090,7 @@
   font-weight: 500;
 }
 
-/* ============================================================
-   INLINE SEARCHABLE COURSE PICKER (MATCHING TAB-PAIRED-COURSES)
-   ============================================================ */
+/* INLINE SEARCHABLE COURSE PICKER (MATCHING TAB-PAIRED-COURSES) */
 .inline-picker-group {
   position: relative;
   display: flex;
@@ -1402,9 +1394,7 @@
   margin: 0;
 }
 
-/* ============================================================
-   FORM SECTIONS & RU30 SUGGESTION
-   ============================================================ */
+/* FORM SECTIONS & RU30 SUGGESTION */
 .form-section {
   display: flex;
   flex-direction: column;
@@ -1473,9 +1463,7 @@
   flex-shrink: 0;
 }
 
-/* ============================================================
-   RU30 RECOMMENDATIONS SECTION (SUGGESTED SCHEDULE)
-   ============================================================ */
+/* RU30 RECOMMENDATIONS SECTION (SUGGESTED SCHEDULE) */
 .ru30-suggestion-container {
   background: linear-gradient(135deg, rgba(240, 249, 255, 0.7) 0%, rgba(248, 250, 252, 0.9) 100%);
   border: 1px solid #bae6fd;
@@ -1793,9 +1781,7 @@
   color: var(--apple-text-primary);
 }
 
-/* ============================================================
-   STEP 3: SELECTED INSTRUCTORS PREVIEW BAR
-   ============================================================ */
+/* STEP 3: SELECTED INSTRUCTORS PREVIEW BAR */
 .selected-instructors-bar {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 1px solid #bae6fd;
@@ -1925,9 +1911,7 @@
   font-size: 0.85rem;
 }
 
-/* ============================================================
-   STEP 3: INSTRUCTOR PICKER CONTAINER & GRID
-   ============================================================ */
+/* STEP 3: INSTRUCTOR PICKER CONTAINER & GRID */
 .instructor-picker-container {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -2417,9 +2401,7 @@
   background: #fafafc;
 }
 
-/* ============================================================
-   RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER (MATCHING TAB 4)
-   ============================================================ */
+/* RIGHT-SIDE DRAWER: MULTI-LEVEL COURSE PICKER (MATCHING TAB 4) */
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -2778,9 +2760,7 @@
   justify-content: flex-end;
 }
 
-/* ============================================================
-   DETAIL MODAL STYLING
-   ============================================================ */
+/* DETAIL MODAL STYLING */
 .modal-detail-card {
   width: 680px;
   max-width: 95vw;
@@ -2938,9 +2918,7 @@
   color: var(--apple-text-tertiary);
 }
 
-/* ============================================================
-   PAIRED COURSES IN TABLE & DETAIL MODAL
-   ============================================================ */
+/* PAIRED COURSES IN TABLE & DETAIL MODAL */
 .course-code-cell {
   display: flex;
   flex-direction: column;
@@ -3051,9 +3029,7 @@
   color: #7e22ce;
 }
 
-/* ============================================================
-   MODAL: CONFIRM ADD MISSING INSTRUCTORS FROM RU30
-   ============================================================ */
+/* MODAL: CONFIRM ADD MISSING INSTRUCTORS FROM RU30 */
 .confirm-modal-backdrop {
   z-index: 11000;
   background: rgba(15, 23, 42, 0.6);
@@ -3332,9 +3308,7 @@
   font-weight: 600;
 }
 
-/* -------------------------------------------------------------
-   Action Bar Tools (Clone & Export)
-   ------------------------------------------------------------- */
+/* Action Bar Tools (Clone & Export) */
 .btn-action-tool {
   display: inline-flex;
   align-items: center;
@@ -3363,9 +3337,7 @@
   color: #0284c7;
 }
 
-/* -------------------------------------------------------------
-   Section 2 Recommender Button & Conflict Alert
-   ------------------------------------------------------------- */
+/* Section 2 Recommender Button & Conflict Alert */
 .section-header-with-action {
   display: flex;
   align-items: center;
@@ -3440,9 +3412,7 @@
   color: #7f1d1d;
 }
 
-/* -------------------------------------------------------------
-   Recommendation Modal
-   ------------------------------------------------------------- */
+/* Recommendation Modal */
 .modal-recommend-card {
   max-width: 600px;
   width: 92vw;
@@ -3554,9 +3524,7 @@
   font-size: 0.95rem;
 }
 
-/* -------------------------------------------------------------
-   Clone Semester Modal
-   ------------------------------------------------------------- */
+/* Clone Semester Modal */
 .modal-clone-card {
   max-width: 540px;
   width: 92vw;
@@ -3692,9 +3660,7 @@
   line-height: 1.4;
 }
 
-/* ============================================================
-   MULTI-PERIOD PICKER & ADVANCED TIME SELECTION
-   ============================================================ */
+/* MULTI-PERIOD PICKER & ADVANCED TIME SELECTION */
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3898,9 +3864,7 @@
   display: inline-flex !important;
 }
 
-/* ============================================================
-   DARK MODE — TIMETABLE MANAGEMENT
-   ============================================================ */
+/* DARK MODE — TIMETABLE MANAGEMENT */
 :host-context([data-theme="dark"]) .timetable-manage-card,
 :host-context([data-theme="dark"]) .filter-card {
   background: var(--apple-surface, #131924) !important;
