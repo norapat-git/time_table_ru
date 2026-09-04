@@ -27,8 +27,43 @@
   <!-- 60fps SlideDown Menu Popup -->
   @if (isOpen()) {
     <div class="select-dropdown-menu" role="listbox">
+      
+      <!-- Optional Search Bar inside dropdown -->
+      @if (searchable()) {
+        <div class="select-search-header" (click)="$event.stopPropagation()">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input
+            type="text"
+            class="select-search-input"
+            [placeholder]="searchPlaceholder()"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="onSearchChange($event)"
+            (click)="$event.stopPropagation()"
+            autofocus
+          />
+          @if (searchQuery()) {
+            <button type="button" class="btn-clear-search" (click)="onSearchChange('')">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          }
+        </div>
+      }
+
       <div class="menu-scroll-area">
-        @for (opt of options(); track opt.value) {
+        <!-- Option: Custom Value (if allowCustom is true and not exact matched) -->
+        @if (allowCustom() && searchQuery().trim() && !isExactMatchFound()) {
+          <div class="dropdown-option-item custom-option-item" (click)="selectCustom($event)">
+            <div class="option-left">
+              <span class="material-symbols-rounded opt-icon add-custom-icon">add_circle</span>
+              <div class="option-text-group">
+                <span class="opt-label">ใช้ค่า: "<strong>{{ searchQuery().trim() }}</strong>"</span>
+                <span class="opt-sublabel">กำหนดห้องนี้โดยตรง</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        @for (opt of filteredOptions(); track opt.value) {
           <div
             class="dropdown-option-item"
             [class.selected]="opt.value === value()"
@@ -54,6 +89,13 @@
                 <span class="material-symbols-rounded check-icon">check</span>
               }
             </div>
+          </div>
+        }
+
+        @if (filteredOptions().length === 0 && (!allowCustom() || !searchQuery().trim())) {
+          <div class="empty-options-msg">
+            <span class="material-symbols-rounded empty-icon">search_off</span>
+            <span>ไม่พบตัวเลือกที่ตรงกับคำค้นหา</span>
           </div>
         }
       </div>

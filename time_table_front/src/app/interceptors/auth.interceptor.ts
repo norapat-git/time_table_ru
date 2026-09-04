@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
 const BYPASS_URLS = [
   '/api/auth/login',
   '/api/auth/register',
+  '/api/service/login',
   '/assets/',
 ];
 

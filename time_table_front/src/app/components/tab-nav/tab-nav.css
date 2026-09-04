@@ -221,6 +221,17 @@
   transform: scale(1.05);
 }
 
+/* Locked Tab State (During Drag & Drop) */
+.nav-item-btn.is-locked {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.nav-item-btn.is-locked:hover {
+  background: transparent !important;
+  color: var(--apple-text-secondary) !important;
+}
+
 /* Active Press Effect */
 .nav-item-btn:active {
   transform: scale(0.985);
@@ -359,4 +370,80 @@
     backdrop-filter: blur(4px);
     z-index: 98;
   }
+}
+
+/* ============================================================
+   DARK MODE — SIDEBAR TAB NAV
+   ============================================================ */
+:host-context([data-theme="dark"]) .sidebar-header {
+  border-bottom-color: var(--color-border);
+}
+
+:host-context([data-theme="dark"]) .brand-logo-box {
+  background: var(--apple-surface-sub);
+  border-color: var(--color-border);
+}
+
+:host-context([data-theme="dark"]) .apple-glass-capsule {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn {
+  color: var(--apple-text-secondary);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn:hover {
+  color: var(--apple-text-primary);
+}
+
+:host-context([data-theme="dark"]) .nav-item-btn.active {
+  color: #38bdf8;
+}
+
+:host-context([data-theme="dark"]) .sidebar-footer {
+  border-top-color: var(--color-border);
+  background: var(--apple-sidebar-bg) !important;
+}
+
+:host-context([data-theme="dark"]) .semester-box {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+}
+
+:host-context([data-theme="dark"]) .sem-title {
+  color: var(--apple-text-tertiary) !important;
+}
+
+:host-context([data-theme="dark"]) .sem-value {
+  color: var(--apple-text-primary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-profile-box {
+  background: var(--apple-surface-sub) !important;
+  border-color: var(--color-border) !important;
+}
+
+:host-context([data-theme="dark"]) .user-name {
+  color: var(--apple-text-primary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-email {
+  color: var(--apple-text-secondary) !important;
+}
+
+:host-context([data-theme="dark"]) .user-avatar-circle {
+  background: var(--apple-surface);
+  border: 1px solid var(--color-border);
+  color: #38bdf8;
+}
+
+:host-context([data-theme="dark"]) .btn-logout-sidebar {
+  color: var(--apple-text-tertiary);
+}
+
+:host-context([data-theme="dark"]) .btn-logout-sidebar:hover {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
 }

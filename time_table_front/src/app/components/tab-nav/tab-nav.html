@@ -7,7 +7,7 @@
     </div>
     <div class="brand-info">
       <h1 class="brand-title">ระบบจัดตารางสอน</h1>
-      <p class="brand-subtitle">สถาบันภาษา ม.รามคำแหง</p>
+      <p class="brand-subtitle" title="สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.)">สำนักบริการทางวิชาการฯ (สวป.)</p>
     </div>
   </div>
 
@@ -25,20 +25,22 @@
       <div class="capsule-border-highlight"></div>
     </div>
 
-    <!-- Group 1: จัดการข้อมูล (DATA MANAGEMENT) -->
+    <!-- Group 1: ข้อมูลตั้งต้น (SETUP / PREREQUISITES) -->
     <div class="menu-group">
       <div class="group-label">
-        <span class="material-symbols-rounded group-icon">database</span>
-        <span>จัดการข้อมูล</span>
+        <span class="material-symbols-rounded group-icon">settings</span>
+        <span>ข้อมูลตั้งต้น</span>
       </div>
 
       <nav class="menu-list">
-        @for (tab of dataManageTabs(); track tab.id) {
+        @for (tab of setupTabs(); track tab.id) {
           <button
             #navBtn
             class="nav-item-btn"
             [attr.data-tab-id]="tab.id"
             [class.active]="activeTab() === tab.id"
+            [class.is-locked]="tabLockService.isLocked() && activeTab() !== tab.id"
+            [title]="tabLockService.isLocked() && activeTab() !== tab.id ? tabLockService.lockReason() : ''"
             (click)="onTabClick(tab.id)"
           >
             <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>
@@ -48,7 +50,57 @@
       </nav>
     </div>
 
-    <!-- Group 2: รายงาน (REPORTS) -->
+    <!-- Group 2: จัดการรายวิชา (COURSES MANAGEMENT) -->
+    <div class="menu-group">
+      <div class="group-label">
+        <span class="material-symbols-rounded group-icon">menu_book</span>
+        <span>จัดการรายวิชา</span>
+      </div>
+
+      <nav class="menu-list">
+        @for (tab of courseTabs(); track tab.id) {
+          <button
+            #navBtn
+            class="nav-item-btn"
+            [attr.data-tab-id]="tab.id"
+            [class.active]="activeTab() === tab.id"
+            [class.is-locked]="tabLockService.isLocked() && activeTab() !== tab.id"
+            [title]="tabLockService.isLocked() && activeTab() !== tab.id ? tabLockService.lockReason() : ''"
+            (click)="onTabClick(tab.id)"
+          >
+            <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>
+            <span class="item-label">{{ tab.label }}</span>
+          </button>
+        }
+      </nav>
+    </div>
+
+    <!-- Group 3: ตารางสอน (TIMETABLE) -->
+    <div class="menu-group">
+      <div class="group-label">
+        <span class="material-symbols-rounded group-icon">calendar_month</span>
+        <span>ตารางสอน</span>
+      </div>
+
+      <nav class="menu-list">
+        @for (tab of timetableTabs(); track tab.id) {
+          <button
+            #navBtn
+            class="nav-item-btn"
+            [attr.data-tab-id]="tab.id"
+            [class.active]="activeTab() === tab.id"
+            [class.is-locked]="tabLockService.isLocked() && activeTab() !== tab.id"
+            [title]="tabLockService.isLocked() && activeTab() !== tab.id ? tabLockService.lockReason() : ''"
+            (click)="onTabClick(tab.id)"
+          >
+            <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>
+            <span class="item-label">{{ tab.label }}</span>
+          </button>
+        }
+      </nav>
+    </div>
+
+    <!-- Group 4: รายงาน (REPORTS) -->
     <div class="menu-group">
       <div class="group-label">
         <span class="material-symbols-rounded group-icon">monitoring</span>
@@ -62,6 +114,8 @@
             class="nav-item-btn"
             [attr.data-tab-id]="tab.id"
             [class.active]="activeTab() === tab.id"
+            [class.is-locked]="tabLockService.isLocked() && activeTab() !== tab.id"
+            [title]="tabLockService.isLocked() && activeTab() !== tab.id ? tabLockService.lockReason() : ''"
             (click)="onTabClick(tab.id)"
           >
             <span class="material-symbols-rounded item-icon">{{ tab.icon }}</span>

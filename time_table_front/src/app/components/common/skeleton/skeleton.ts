@@ -1,30 +1,31 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Skeleton, SkeletonModule } from 'primeng/skeleton';
 
 export type SkeletonVariant = 'text' | 'rect' | 'circle' | 'card' | 'badge' | 'avatar';
 
 @Component({
   selector: 'app-skeleton',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Skeleton, SkeletonModule],
   template: `
     <div class="skeleton-wrapper">
       @for (line of lineArray; track $index) {
-        <div
-          class="skeleton-item"
-          [class.animated]="animated"
-          [class]="'variant-' + variant"
-          [style.width]="getLineWidth($index)"
-          [style.height]="height"
-          [style.borderRadius]="borderRadius || null"
-        ></div>
+        <p-skeleton
+          [shape]="variant === 'circle' || variant === 'avatar' ? 'circle' : 'rectangle'"
+          [width]="getLineWidth($index)"
+          [height]="height"
+          [borderRadius]="borderRadius || (variant === 'circle' || variant === 'avatar' ? '50%' : '8px')"
+          [animation]="animated ? 'wave' : 'none'"
+          styleClass="apple-p-skeleton"
+        />
       }
     </div>
   `,
   styleUrl: './skeleton.css',
 })
 export class SkeletonComponent {
-  @Input() variant: SkeletonVariant = 'text';
+  @Input() variant: SkeletonVariant = 'rect';
   @Input() width: string = '100%';
   @Input() height: string = '1rem';
   @Input() lines: number = 1;
@@ -41,7 +42,7 @@ export class SkeletonComponent {
     }
     // Stagger multiline paragraph widths for realistic skeleton feel
     if (index === this.lines - 1) {
-      return '65%'; // Last line shorter
+      return '65%';
     } else if (index % 2 === 1) {
       return '92%';
     }

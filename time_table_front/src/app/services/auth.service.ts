@@ -71,7 +71,7 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<{ success: boolean; message: string; results?: any }> {
     const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/login' : '/api/service/login';
-    return this.http.post<{ success: boolean; message: string; results?: any }>(targetUrl, { email, password }).pipe(
+    return this.http.post<{ success: boolean; message: string; token?: string; results?: any }>(targetUrl, { email, password }).pipe(
       tap((res) => {
         if (res && res.success && res.results) {
           const userResult = res.results;
@@ -79,7 +79,6 @@ export class AuthService {
           const engFullName = userResult.USER_ENGNAME || 'TODSOB PATTANARABOB';
           const userEmail = userResult.USER_EMAIL || email;
 
-          // Generate JWT token with user claims
           const payload: Partial<JwtPayload> = {
             userId: 'USER-' + userEmail.split('@')[0],
             username: userEmail,
@@ -88,18 +87,21 @@ export class AuthService {
             lastNameTH: '',
             role: 'ADMIN',
             roles: ['ADMIN'],
-            department: 'สถาบันภาษา มหาวิทยาลัยรามคำแหง',
+            department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
           };
-          const token = generateMockJwt(payload, 480); // 8 hours session
 
-          const userObj: DecodedUser = {
+          // Use real signed JWT from backend, fallback to mock if missing
+          const token = res.token || generateMockJwt(payload, 480);
+          const decodedUser = extractUserFromToken(token);
+
+          const userObj: DecodedUser = decodedUser || {
             userId: 'USER-' + userEmail.split('@')[0],
             username: userEmail,
             email: userEmail,
             displayName: thaiFullName,
             role: 'ADMIN',
             roles: ['ADMIN'],
-            department: 'สถาบันภาษา มหาวิทยาลัยรามคำแหง',
+            department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
             rawPayload: payload as JwtPayload,
           };
 
@@ -139,7 +141,7 @@ export class AuthService {
           lastNameTH: 'พัฒนาระบบ',
           role: 'ADMIN',
           roles: ['ADMIN', 'STAFF'],
-          department: 'สถาบันภาษา มหาวิทยาลัยรามคำแหง',
+          department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
         };
         expiresInMinutes = 480;
         break;
@@ -196,17 +198,36 @@ export class AuthService {
         break;
     }
 
-    const token = generateMockJwt(mockClaims, expiresInMinutes);
     if (preset === 'EXPIRED') {
+      const token = generateMockJwt(mockClaims, -10);
       this._token.set(token);
       this._user.set(extractUserFromToken(token));
       this._remainingSeconds.set(0);
       try {
         localStorage.setItem(STORAGE_KEY_TOKEN, token);
       } catch {}
-    } else {
-      this.loginWithToken(token);
+      return;
     }
+
+    const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/login/preset' : '/api/service/login/preset';
+    this.http.post<{ success: boolean; token?: string }>(targetUrl, {
+      role: preset,
+      email: mockClaims.email,
+      name: `${mockClaims.firstNameTH || ''} ${mockClaims.lastNameTH || ''}`.trim()
+    }).subscribe({
+      next: (res) => {
+        if (res && res.success && res.token) {
+          this.loginWithToken(res.token);
+        } else {
+          const token = generateMockJwt(mockClaims, expiresInMinutes);
+          this.loginWithToken(token);
+        }
+      },
+      error: () => {
+        const token = generateMockJwt(mockClaims, expiresInMinutes);
+        this.loginWithToken(token);
+      }
+    });
   }
 
   /**

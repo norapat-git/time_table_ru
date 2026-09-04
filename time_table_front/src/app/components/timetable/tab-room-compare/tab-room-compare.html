@@ -1,0 +1,522 @@
+<div class="page-container">
+  <!-- Header & Breadcrumb -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="breadcrumb">
+        <span>ตารางสอน</span>
+        <span class="separator">/</span>
+        <span class="active">จัดตารางเทียบ 2 ห้อง (รายวัน)</span>
+      </div>
+      <h1 class="page-title">
+        <span class="material-symbols-rounded title-icon">compare_arrows</span>
+        จัดตารางเทียบ 2 ห้อง (Focus Day View)
+      </h1>
+      <p class="page-subtitle">เปรียบเทียบตารางสอน 2 ห้องเรียนพร้อมกัน สามารถเลือกวันของแต่ละห้องได้อิสระ และลากย้ายสลับวิชาข้ามห้อง/ข้ามวัน (Drag & Drop) ได้ทันที</p>
+    </div>
+
+    <div class="header-right">
+      <!-- Year/Sem Selector Dropdown -->
+      <div class="header-yearsem-picker">
+        <app-custom-select
+          [options]="yearSemSelectOptions()"
+          [value]="selectedYearSem()"
+          (valueChange)="onYearSemChange($event)"
+          placeholder="เลือกปี/ภาคการศึกษา"
+          icon="event_available"
+        />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons-group">
+        @if (hasChanges()) {
+          <div class="pending-badge">
+            <span class="material-symbols-rounded badge-icon">edit_note</span>
+            <span>รอการบันทึก {{ pendingMoves().length }} รายการ</span>
+          </div>
+        }
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="resetChanges()"
+          [disabled]="!hasChanges() || isSaving()"
+          title="ยกเลิกการเปลี่ยนแปลงทั้งหมด"
+        >
+          <span class="material-symbols-rounded">undo</span>
+          <span>ยกเลิก</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="saveChanges()"
+          [disabled]="!hasChanges() || isSaving()"
+          title="บันทึกการจัดตารางลงฐานข้อมูล"
+        >
+          @if (isSaving()) {
+            <span class="material-symbols-rounded spin">progress_activity</span>
+            <span>กำลังบันทึก...</span>
+          } @else {
+            <span class="material-symbols-rounded">save</span>
+            <span>บันทึกการจัดตาราง {{ hasChanges() ? '(' + pendingMoves().length + ')' : '' }}</span>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="btn-icon-secondary"
+          (click)="loadScheduleClasses()"
+          [disabled]="isLoading() || isSaving()"
+          title="รีเฟรชข้อมูล"
+        >
+          <span class="material-symbols-rounded" [class.spin]="isLoading()">refresh</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dual Comparison Grid Container -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="dual-columns-grid">
+        <app-skeleton height="600px" />
+        <app-skeleton height="600px" />
+      </div>
+    </div>
+  } @else {
+    <div class="dual-columns-wrapper">
+      <!-- Center Swap Button between the 2 columns -->
+      <button
+        type="button"
+        class="center-swap-btn"
+        (click)="swapRooms()"
+        title="สลับห้องและวันระหว่างฝั่งซ้ายและขวา"
+      >
+        <span class="material-symbols-rounded">swap_horiz</span>
+      </button>
+
+      <div class="dual-columns-grid">
+        <!-- ================= LEFT ROOM COLUMN ================= -->
+      <div class="room-column left-room">
+        <!-- Room Column Header -->
+        <div class="room-column-header">
+          <div class="room-header-top">
+            <div class="room-tag left-tag">
+              <span class="material-symbols-rounded">meeting_room</span>
+              <span>ห้องที่ 1 (ซ้าย)</span>
+            </div>
+            <div class="room-stats-pill">
+              <span class="stat-count">{{ statsLeft().count }} คาบ</span>
+              <span class="stat-divider">•</span>
+              <span class="stat-credits">{{ statsLeft().credits }} นก.</span>
+            </div>
+          </div>
+
+          <!-- Room Selector -->
+          <div class="room-selector-wrapper">
+            <app-custom-select
+              [options]="roomOptions()"
+              [value]="selectedRoomLeft()"
+              (valueChange)="selectedRoomLeft.set($event)"
+              placeholder="เลือกห้องเรียนที่ 1..."
+              icon="meeting_room"
+            />
+          </div>
+
+          <!-- Independent Day Selector for Left Room -->
+          <div class="room-day-bar">
+            <span class="room-day-label">
+              <span class="material-symbols-rounded">calendar_month</span>
+              <span>วันเรียน:</span>
+            </span>
+            <div class="day-pills-row">
+              @for (d of days; track d.code) {
+                <button
+                  type="button"
+                  class="day-pill-chip"
+                  [class.active]="selectedDayLeft() === d.code"
+                  (click)="selectDayLeft(d.code)"
+                  [style.--pill-accent]="d.accentColor"
+                  [title]="d.label"
+                >
+                  <span class="day-dot" [style.background-color]="d.accentColor"></span>
+                  <span>{{ d.shortLabel }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Timeline Slots (1 to 7) -->
+        <div class="timeline-slots-container">
+          @for (slot of leftRoomSlots(); track slot.timeCode) {
+            <div
+              class="time-slot-row"
+              [class.drop-hovered]="slot.isDropHovered"
+              (dragover)="onDragOver($event, selectedRoomLeft(), slot.timeCode)"
+              (dragleave)="onDragLeave($event, selectedRoomLeft(), slot.timeCode)"
+              (drop)="onDrop($event, selectedRoomLeft(), slot.timeCode, selectedDayLeft())"
+            >
+              <!-- Period Time Badge -->
+              <div class="slot-time-badge">
+                <span class="slot-period-num">{{ slot.config.label }}</span>
+                <span class="slot-period-time">{{ slot.config.period }}</span>
+              </div>
+
+              <!-- Slot Content Card or Empty Drop Target -->
+              <div class="slot-content-area">
+                @if (slot.classItem) {
+                  @let item = slot.classItem;
+                  <div
+                    class="class-item-card"
+                    [class.moved]="item.isMoved"
+                    draggable="true"
+                    (dragstart)="onDragStart($event, item, selectedRoomLeft(), slot.timeCode, selectedDayLeft())"
+                    (dragend)="onDragEnd()"
+                    (click)="openClassDetail(item, $event)"
+                  >
+                    <div class="card-drag-handle" title="ลากเพื่อย้ายหรือสลับห้อง/วัน">
+                      <span class="material-symbols-rounded">drag_indicator</span>
+                    </div>
+
+                    <div class="card-main-info">
+                      <div class="card-top-row">
+                        <span class="course-code-badge">{{ item.COURSE_NO }}</span>
+                        @if (item.CREDIT) {
+                          <span class="course-credit-badge">{{ item.CREDIT }} นก.</span>
+                        }
+                        @if (item.isMoved) {
+                          <span class="status-badge-draft">
+                            <span class="material-symbols-rounded draft-icon">edit_note</span>
+                            <span>รอการบันทึก</span>
+                          </span>
+                        }
+                        @if (item.PAIRED_COURSES && item.PAIRED_COURSES.length > 0) {
+                          <div class="paired-courses-pill-box"
+                            [title]="'วิชาคู่ที่เรียนร่วมกัน: ' + getPairedCoursesTooltip(item.PAIRED_COURSES)">
+                            <span class="material-symbols-rounded pair-icon">link</span>
+                            <span class="pair-label">วิชาคู่:</span>
+                            <div class="pair-codes-list">
+                              @for (p of item.PAIRED_COURSES; track p.courseNo) {
+                                <span class="paired-code-badge">{{ p.courseNo }}</span>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="course-name-thai" [title]="item.COURSE_NAME_THAI || ''">
+                        {{ item.COURSE_NAME_THAI || 'ไม่มีชื่อวิชา' }}
+                      </div>
+
+                      @if (item.INSTRUCTORS && item.INSTRUCTORS.length > 0) {
+                        <div class="instructors-info">
+                          <span class="material-symbols-rounded inst-icon">person</span>
+                          <span class="inst-name">
+                            {{ item.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }}{{ item.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || item.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            @if (item.INSTRUCTORS.length > 1) {
+                              <span class="more-inst-badge">+{{ item.INSTRUCTORS.length - 1 }}</span>
+                            }
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Empty Drop Target -->
+                  <div class="empty-drop-slot">
+                    <span class="material-symbols-rounded empty-plus-icon">add_circle</span>
+                    <span class="empty-text">ว่าง (ลากวิชามาวางที่นี่)</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ================= RIGHT ROOM COLUMN ================= -->
+      <div class="room-column right-room">
+        <!-- Room Column Header -->
+        <div class="room-column-header">
+          <div class="room-header-top">
+            <div class="room-tag right-tag">
+              <span class="material-symbols-rounded">meeting_room</span>
+              <span>ห้องที่ 2 (ขวา)</span>
+            </div>
+            <div class="room-stats-pill">
+              <span class="stat-count">{{ statsRight().count }} คาบ</span>
+              <span class="stat-divider">•</span>
+              <span class="stat-credits">{{ statsRight().credits }} นก.</span>
+            </div>
+          </div>
+
+          <!-- Room Selector -->
+          <div class="room-selector-wrapper">
+            <app-custom-select
+              [options]="roomOptions()"
+              [value]="selectedRoomRight()"
+              (valueChange)="selectedRoomRight.set($event)"
+              placeholder="เลือกห้องเรียนที่ 2..."
+              icon="meeting_room"
+            />
+          </div>
+
+          <!-- Independent Day Selector for Right Room -->
+          <div class="room-day-bar">
+            <span class="room-day-label">
+              <span class="material-symbols-rounded">calendar_month</span>
+              <span>วันเรียน:</span>
+            </span>
+            <div class="day-pills-row">
+              @for (d of days; track d.code) {
+                <button
+                  type="button"
+                  class="day-pill-chip"
+                  [class.active]="selectedDayRight() === d.code"
+                  (click)="selectDayRight(d.code)"
+                  [style.--pill-accent]="d.accentColor"
+                  [title]="d.label"
+                >
+                  <span class="day-dot" [style.background-color]="d.accentColor"></span>
+                  <span>{{ d.shortLabel }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Timeline Slots (1 to 7) -->
+        <div class="timeline-slots-container">
+          @for (slot of rightRoomSlots(); track slot.timeCode) {
+            <div
+              class="time-slot-row"
+              [class.drop-hovered]="slot.isDropHovered"
+              (dragover)="onDragOver($event, selectedRoomRight(), slot.timeCode)"
+              (dragleave)="onDragLeave($event, selectedRoomRight(), slot.timeCode)"
+              (drop)="onDrop($event, selectedRoomRight(), slot.timeCode, selectedDayRight())"
+            >
+              <!-- Period Time Badge -->
+              <div class="slot-time-badge">
+                <span class="slot-period-num">{{ slot.config.label }}</span>
+                <span class="slot-period-time">{{ slot.config.period }}</span>
+              </div>
+
+              <!-- Slot Content Card or Empty Drop Target -->
+              <div class="slot-content-area">
+                @if (slot.classItem) {
+                  @let item = slot.classItem;
+                  <div
+                    class="class-item-card"
+                    [class.moved]="item.isMoved"
+                    draggable="true"
+                    (dragstart)="onDragStart($event, item, selectedRoomRight(), slot.timeCode, selectedDayRight())"
+                    (dragend)="onDragEnd()"
+                    (click)="openClassDetail(item, $event)"
+                  >
+                    <div class="card-drag-handle" title="ลากเพื่อย้ายหรือสลับห้อง/วัน">
+                      <span class="material-symbols-rounded">drag_indicator</span>
+                    </div>
+
+                    <div class="card-main-info">
+                      <div class="card-top-row">
+                        <span class="course-code-badge">{{ item.COURSE_NO }}</span>
+                        @if (item.CREDIT) {
+                          <span class="course-credit-badge">{{ item.CREDIT }} นก.</span>
+                        }
+                        @if (item.isMoved) {
+                          <span class="status-badge-draft">
+                            <span class="material-symbols-rounded draft-icon">edit_note</span>
+                            <span>รอการบันทึก</span>
+                          </span>
+                        }
+                        @if (item.PAIRED_COURSES && item.PAIRED_COURSES.length > 0) {
+                          <div class="paired-courses-pill-box"
+                            [title]="'วิชาคู่ที่เรียนร่วมกัน: ' + getPairedCoursesTooltip(item.PAIRED_COURSES)">
+                            <span class="material-symbols-rounded pair-icon">link</span>
+                            <span class="pair-label">วิชาคู่:</span>
+                            <div class="pair-codes-list">
+                              @for (p of item.PAIRED_COURSES; track p.courseNo) {
+                                <span class="paired-code-badge">{{ p.courseNo }}</span>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="course-name-thai" [title]="item.COURSE_NAME_THAI || ''">
+                        {{ item.COURSE_NAME_THAI || 'ไม่มีชื่อวิชา' }}
+                      </div>
+
+                      @if (item.INSTRUCTORS && item.INSTRUCTORS.length > 0) {
+                        <div class="instructors-info">
+                          <span class="material-symbols-rounded inst-icon">person</span>
+                          <span class="inst-name">
+                            {{ item.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }}{{ item.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || item.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            @if (item.INSTRUCTORS.length > 1) {
+                              <span class="more-inst-badge">+{{ item.INSTRUCTORS.length - 1 }}</span>
+                            }
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Empty Drop Target -->
+                  <div class="empty-drop-slot">
+                    <span class="material-symbols-rounded empty-plus-icon">add_circle</span>
+                    <span class="empty-text">ว่าง (ลากวิชามาวางที่นี่)</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    </div>
+  }
+
+  <!-- Floating Save Bar (Appears when there are unsaved moves) -->
+  @if (hasChanges()) {
+    <div class="floating-save-bar-wrapper">
+      @if (isDraftListOpen()) {
+        <div class="draft-moves-popover">
+          <div class="draft-popover-header">
+            <div class="draft-header-title">
+              <span class="material-symbols-rounded">format_list_bulleted</span>
+              <strong>รายการจัดตารางที่รอการบันทึก ({{ pendingMoves().length }} รายการ)</strong>
+            </div>
+            <button type="button" class="btn-close-draft-popover" (click)="isDraftListOpen.set(false)">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+          <div class="draft-popover-list">
+            @for (m of pendingMoves(); track m.courseNo + '_' + m.newDayCode + '_' + m.newTimeCode) {
+              <div class="draft-popover-item">
+                <span class="draft-course-badge">{{ m.courseNo }}</span>
+                <div class="draft-path">
+                  <span class="path-from">{{ getRoomLabel(m.oldRoomCode) }} คาบ {{ m.oldTimeCode }} ({{ getDayLabel(m.oldDayCode) }})</span>
+                  <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+                  <span class="path-to">{{ getRoomLabel(m.newRoomCode) }} คาบ {{ m.newTimeCode }} ({{ getDayLabel(m.newDayCode) }})</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="floating-save-bar">
+        <div class="floating-bar-info">
+          <span class="material-symbols-rounded bar-icon">edit_note</span>
+          <span class="bar-text">
+            มีการจัดตารางใหม่ <strong>{{ pendingMoves().length }}</strong> รายการ (สถานะแบบร่าง: ยังไม่ได้บันทึกลงระบบ)
+          </span>
+          <button type="button" class="btn-toggle-draft-list" (click)="toggleDraftListPopover()">
+            <span class="material-symbols-rounded">{{ isDraftListOpen() ? 'expand_more' : 'visibility' }}</span>
+            <span>{{ isDraftListOpen() ? 'ซ่อนรายการ' : 'ดูรายการที่ย้าย' }}</span>
+          </button>
+        </div>
+        <div class="floating-bar-actions">
+          <button type="button" class="btn-floating-cancel" (click)="resetChanges()" [disabled]="isSaving()">
+            <span class="material-symbols-rounded">undo</span>
+            <span>ยกเลิกที่ย้าย</span>
+          </button>
+          <button type="button" class="btn-floating-save" (click)="saveChanges()" [disabled]="isSaving()">
+            @if (isSaving()) {
+              <span class="material-symbols-rounded spin">progress_activity</span>
+              <span>กำลังบันทึก...</span>
+            } @else {
+              <span class="material-symbols-rounded">save</span>
+              <span>กดยืนยันบันทึกข้อมูล ({{ pendingMoves().length }})</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Detail Modal -->
+  @if (isDetailModalOpen() && selectedClassDetail()) {
+    @let detail = selectedClassDetail()!;
+    <div class="modal-backdrop" (click)="closeDetailModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon material-symbols-rounded">menu_book</span>
+            <div>
+              <h3 class="modal-title">{{ detail.COURSE_NO }}</h3>
+              <p class="modal-subtitle">{{ detail.COURSE_NAME_THAI || detail.COURSE_NAME_ENG || 'ไม่มีชื่อวิชา' }}</p>
+            </div>
+          </div>
+          <button class="btn-close-modal" (click)="closeDetailModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">ห้องเรียน</span>
+              <span class="detail-value highlight">{{ getRoomLabel(detail.ROOM_CODE) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">วันเรียน</span>
+              <span class="detail-value">{{ getDayLabel(detail.DAY_CODE) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">คาบเรียน</span>
+              <span class="detail-value">คาบที่ {{ detail.TIME_CODE }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">หน่วยกิต</span>
+              <span class="detail-value">{{ detail.CREDIT || '-' }} หน่วยกิต</span>
+            </div>
+          </div>
+
+          @if (detail.INSTRUCTORS && detail.INSTRUCTORS.length > 0) {
+            <div class="instructors-detail-section">
+              <h4 class="section-title">อาจารย์ผู้สอน ({{ detail.INSTRUCTORS.length }} ท่าน)</h4>
+              <div class="inst-list">
+                @for (inst of detail.INSTRUCTORS; track inst.INSTRUCTOR_CODE) {
+                  <div class="inst-card">
+                    <span class="material-symbols-rounded inst-avatar">person</span>
+                    <div>
+                      <div class="inst-fullname">{{ inst.RANK_NAME_THAI_S || '' }}{{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}</div>
+                      <div class="inst-code">รหัส: {{ inst.INSTRUCTOR_CODE }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (detail.PAIRED_COURSES && detail.PAIRED_COURSES.length > 0) {
+            <div class="paired-courses-detail-section">
+              <h4 class="section-title paired-title">
+                <span class="material-symbols-rounded">link</span>
+                <span>วิชาคู่ที่เปิดสอนร่วมกัน ({{ detail.PAIRED_COURSES.length }} วิชา)</span>
+              </h4>
+              <div class="paired-courses-cards-list">
+                @for (p of detail.PAIRED_COURSES; track p.courseNo) {
+                  <div class="paired-course-profile-card">
+                    <span class="paired-code-badge large">{{ p.courseNo }}</span>
+                    <div class="paired-course-names">
+                      <strong class="paired-th-name">{{ p.courseNameThai || '-' }}</strong>
+                      @if (p.courseNameEng) {
+                        <span class="paired-en-name">{{ p.courseNameEng }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="closeDetailModal()">ปิดหน้าต่าง</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

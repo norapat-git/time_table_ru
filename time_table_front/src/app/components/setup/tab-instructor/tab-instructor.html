@@ -1,0 +1,544 @@
+<div class="page-layout">
+
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="breadcrumb">
+      <span>หน้าหลัก</span>
+      <span class="separator">/</span>
+      <span class="current">จัดการอาจารย์ผู้สอน</span>
+    </div>
+    <div class="header-title-row">
+      <div>
+        <h1 class="page-title">จัดการอาจารย์ผู้สอน</h1>
+        <p class="page-subtitle">จัดการรายชื่ออาจารย์ผู้สอนประจำภาคการศึกษา พร้อมเชื่อมโยงข้อมูลคณะและตำแหน่งทางวิชาการ
+        </p>
+      </div>
+
+      <!-- Active Semester Badge -->
+      @if (activeYear() && activeSemester()) {
+      <div class="active-sem-badge">
+        <span class="material-symbols-rounded">calendar_today</span>
+        <span>ปีการศึกษา {{ activeYear() }} ภาค {{ activeSemester() }}</span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="action-bar-left">
+        <!-- Search Input -->
+        <div class="search-box">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input type="text" class="search-input" placeholder="ค้นหารหัสอาจารย์, ชื่อ-นามสกุล หรือตำแหน่ง..."
+            [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
+          @if (searchQuery()) {
+          <button class="btn-clear-search" (click)="clearSearch()" title="ล้างการค้นหา">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+          }
+        </div>
+
+        <!-- Faculty Filter Select -->
+        <div class="filter-select-wrapper">
+          <app-custom-select [options]="facultySelectOptions()" [value]="selectedFacultyNo()"
+            (valueChange)="onFacultyChange($event)" placeholder="ทุกคณะ" />
+        </div>
+      </div>
+
+      <div class="action-bar-right">
+        <!-- Bulk Delete Button -->
+        @if (selectedCodes().length > 0) {
+        <button class="btn-bulk-delete" [disabled]="isBulkDeleting()" (click)="deleteBulk()"
+          title="ลบรายการที่เลือก (เก็บประวัติลง HIS)">
+          <span class="material-symbols-rounded">delete_sweep</span>
+          <span>ลบที่เลือก ({{ selectedCodes().length }})</span>
+        </button>
+        }
+
+        <!-- Refresh Button -->
+        <button class="btn-refresh" (click)="loadInstructorList()" [disabled]="isLoading()" title="รีเฟรชข้อมูล">
+          <span class="material-symbols-rounded" [class.spin-loading]="isLoading()">refresh</span>
+        </button>
+
+        <!-- Add Instructors Button -->
+        <button class="btn-primary btn-icon-only" (click)="openAddModal()" title="เพิ่มอาจารย์ผู้สอน" aria-label="เพิ่มอาจารย์ผู้สอน">
+          <span class="material-symbols-rounded">person_add</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+    <div class="skeleton-container">
+      <app-skeleton variant="rect" width="100%" height="48px" borderRadius="8px" [lines]="6" />
+    </div>
+    } @else {
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 48px; text-align: center;">
+              <app-custom-checkbox [checked]="isAllSelected()" (checkedChange)="toggleSelectAll()" />
+            </th>
+            <th style="width: 120px;">รหัสอาจารย์</th>
+            <th>ชื่อ-สกุลอาจารย์ (ภาษาไทย / อังกฤษ)</th>
+            <th style="width: 180px;">คณะ</th>
+            <th style="width: 110px; text-align: center;">ประเภท</th>
+            <th style="width: 170px; text-align: center;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredInstructors().length === 0) {
+          <tr>
+            <td colspan="6" class="empty-cell">
+              <div class="empty-state">
+                <span class="material-symbols-rounded empty-icon">person_off</span>
+                <p class="empty-text">ไม่พบข้อมูลอาจารย์ผู้สอน</p>
+                <p class="empty-subtext">
+                  @if (searchQuery() || selectedFacultyNo()) {
+                  ลองเปลี่ยนคำค้นหาหรือตัวกรองคณะใหม่อีกครั้ง
+                  } @else {
+                  ยังไม่มีอาจารย์ผู้สอนในปีการศึกษา {{ activeYear() }} ภาค {{ activeSemester() }} กดปุ่ม "+
+                  เพิ่มอาจารย์ผู้สอน" ด้านบนเพื่อเริ่มเพิ่มข้อมูล
+                  }
+                </p>
+              </div>
+            </td>
+          </tr>
+          }
+
+          @for (item of paginatedInstructors(); track item.INSTRUCTOR_CODE) {
+          <tr [class.row-selected]="isRowSelected(item.INSTRUCTOR_CODE)" class="context-clickable-row" (contextmenu)="onRowContextMenu($event, item)">
+            <!-- Checkbox -->
+            <td style="text-align: center;">
+              <app-custom-checkbox
+                [checked]="isRowSelected(item.INSTRUCTOR_CODE)"
+                [disabled]="!!item.IS_SCHEDULED"
+                [title]="item.IS_SCHEDULED ? 'อาจารย์ถูกจัดในตารางสอนแล้ว ไม่สามารถเลือกลบได้' : ''"
+                (checkedChange)="toggleSelectRow(item.INSTRUCTOR_CODE)"
+              />
+            </td>
+
+            <!-- Instructor Code -->
+            <td>
+              <span class="instructor-code-pill">{{ item.INSTRUCTOR_CODE }}</span>
+            </td>
+
+            <!-- Instructor Names & Rank -->
+            <td>
+              <div class="instructor-names-cell">
+                <div class="name-th-row">
+                  @if (item.RANK_NAME_THAI_S) {
+                  <span class="rank-badge">{{ item.RANK_NAME_THAI_S }}</span>
+                  }
+                  <strong class="name-th">{{ item.INSTRUCTOR_NAME_THAI || '-' }}</strong>
+                  @if (item.IS_SCHEDULED) {
+                  <span class="instructor-scheduled-badge" title="มีตารางสอนในปี/ภาคนี้จำนวน {{ item.SCHEDULE_COUNT }} คาบ">
+                    <span class="material-symbols-rounded">event_seat</span>
+                    <span>จัดในตารางแล้ว ({{ item.SCHEDULE_COUNT }} คาบ)</span>
+                  </span>
+                  }
+                </div>
+                @if (item.INSTRUCTOR_NAME_ENG) {
+                <span class="name-en">{{ item.INSTRUCTOR_NAME_ENG }}</span>
+                }
+              </div>
+            </td>
+
+            <!-- Faculty -->
+            <td>
+              @if (item.FACULTY_NAME_THAI) {
+              <span class="faculty-pill" title="{{ item.FACULTY_NAME_THAI }}">
+                {{ item.FACULTY_NAME_SHORT || item.FACULTY_NAME_THAI }}
+              </span>
+              } @else {
+              <span class="text-muted">-</span>
+              }
+            </td>
+
+            <!-- Type -->
+            <td style="text-align: center;">
+              <span class="type-pill" [ngClass]="getInstructorTypeClass(item.INSTRUCTOR_TYPE)">
+                {{ getInstructorTypeLabel(item.INSTRUCTOR_TYPE) }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td style="text-align: center; white-space: nowrap;">
+              <button class="btn-action btn-more" (click)="openMenuFromBtn($event, item)" title="การจัดการ (หรือคลิกขวาที่แถว)">
+                <span class="material-symbols-rounded">more_vert</span>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls (Apple Style Pills) -->
+    @if (totalPages() > 1) {
+    <div class="pagination-bar">
+      <div class="pagination-info">
+        <span class="info-text">แสดง</span>
+        <strong class="info-strong">{{ startItemIndex() | number }} - {{ endItemIndex() | number }}</strong>
+        <span class="info-text">จากทั้งหมด</span>
+        <strong class="info-strong">{{ totalItems() | number }}</strong>
+        <span class="info-text">รายการ</span>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(1)"
+          title="หน้าแรก"
+        >
+          <span class="material-symbols-rounded">first_page</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)"
+          title="หน้าก่อนหน้า"
+        >
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+
+        <div class="page-pills-list">
+          @for (p of displayedPageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button
+                type="button"
+                class="page-pill-btn"
+                [class.active]="p === currentPage()"
+                (click)="setPage(+p)"
+              >
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === totalPages()"
+          (click)="setPage(currentPage() + 1)"
+          title="หน้าถัดไป"
+        >
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-pagination-nav"
+          [disabled]="currentPage() === totalPages()"
+          (click)="setPage(totalPages())"
+          title="หน้าสุดท้าย"
+        >
+          <span class="material-symbols-rounded">last_page</span>
+        </button>
+      </div>
+    </div>
+    }
+    }
+
+  </div>
+
+  <!-- ============================================================
+       MODAL: เพิ่มอาจารย์ผู้สอน (ADD INSTRUCTORS MODAL)
+       ============================================================ -->
+  @if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card modal-instructor-card" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">person_add</span>
+          <div class="title-with-sem">
+            <h2 class="modal-title">เพิ่มอาจารย์ผู้สอน</h2>
+            <span class="modal-sem-tag">ปี {{ activeYear() }} ภาค {{ activeSemester() }}</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" (click)="closeModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Error Alert -->
+        @if (formError) {
+        <div class="alert-error-box">
+          <span class="material-symbols-rounded">error</span>
+          <span>{{ formError }}</span>
+        </div>
+        }
+
+        <!-- Search & Filter Controls -->
+        <div class="modal-controls-row">
+          <div class="modal-search-box">
+            <span class="material-symbols-rounded">search</span>
+            <input type="text" class="modal-search-input" placeholder="ค้นหารหัสอาจารย์, ชื่อ-สกุล (ภาษาไทย/อังกฤษ)..."
+              [ngModel]="modalSearchQuery()" (ngModelChange)="onModalSearch($event)" />
+            @if (modalSearchQuery()) {
+            <button class="btn-clear-modal-search" (click)="onModalSearch('')">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+            }
+          </div>
+
+          <div class="modal-faculty-filter">
+            <app-custom-select [options]="modalFacultySelectOptions()" [value]="modalFacultyFilter()"
+              (valueChange)="onModalFaculty($event)" placeholder="เลือกคณะ" />
+          </div>
+        </div>
+
+        <!-- Selected Instructors Preview Chips -->
+        @if (selectedMasterCodes().length > 0) {
+        <div class="selected-summary-bar">
+          <div class="selected-summary-header">
+            <span class="selected-count-badge">
+              เลือกแล้ว {{ selectedMasterCodes().length }} ท่าน
+            </span>
+            <button type="button" class="btn-clear-all-selected" (click)="clearSelectedMaster()">
+              ล้างรายการที่เลือก
+            </button>
+          </div>
+          <div class="selected-chips-scroll">
+            @for (item of selectedMasterItems(); track item.INSTRUCTOR_CODE) {
+            <div class="selected-chip">
+              <span class="chip-code">{{ item.INSTRUCTOR_CODE }}</span>
+              <span class="chip-name">{{ item.RANK_NAME_THAI_S || '' }} {{ item.INSTRUCTOR_NAME_THAI }}</span>
+              <button type="button" class="btn-remove-chip" (click)="removeMasterSelect(item.INSTRUCTOR_CODE)">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Master Instructor List -->
+        <div class="master-list-wrapper">
+          @if (isMasterLoading()) {
+          <div class="modal-loading-box">
+            <app-skeleton variant="rect" width="100%" height="44px" borderRadius="8px" [lines]="5" />
+          </div>
+          } @else {
+          <div class="master-list-scroll">
+            @if (filteredMasterInstructors().length === 0) {
+            <div class="master-empty-box">
+              <span class="material-symbols-rounded">search_off</span>
+              <p>ไม่พบข้อมูลอาจารย์ที่ตรงกับเงื่อนไข</p>
+            </div>
+            } @else {
+            <div class="master-grid">
+              @for (m of displayedMasterInstructors(); track m.INSTRUCTOR_CODE) {
+              @let alreadyAdded = isAlreadyAdded(m.INSTRUCTOR_CODE);
+              <div class="master-item-card" [class.is-selected]="isMasterSelected(m.INSTRUCTOR_CODE)"
+                [class.is-already-added]="alreadyAdded"
+                (click)="!alreadyAdded && toggleMasterSelect(m.INSTRUCTOR_CODE)">
+                <div class="item-card-left">
+                  <app-custom-checkbox
+                    [checked]="isMasterSelected(m.INSTRUCTOR_CODE)"
+                    [disabled]="alreadyAdded"
+                    (checkedChange)="!alreadyAdded && toggleMasterSelect(m.INSTRUCTOR_CODE)"
+                  />
+                  <span class="card-code-pill">{{ m.INSTRUCTOR_CODE }}</span>
+                  <div class="card-info">
+                    <div class="card-name-row">
+                      @if (m.RANK_NAME_THAI_S) {
+                      <span class="card-rank">{{ m.RANK_NAME_THAI_S }}</span>
+                      }
+                      <strong class="card-name-th">{{ m.INSTRUCTOR_NAME_THAI }}</strong>
+                    </div>
+                    @if (m.INSTRUCTOR_NAME_ENG) {
+                    <span class="card-name-en">{{ m.INSTRUCTOR_NAME_ENG }}</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="item-card-right">
+                  @if (alreadyAdded) {
+                  <span class="badge-already-added">มีในระบบแล้ว</span>
+                  } @else if (m.FACULTY_NAME_SHORT || m.FACULTY_NAME_THAI) {
+                  <span class="card-faculty-tag">{{ m.FACULTY_NAME_SHORT || m.FACULTY_NAME_THAI }}</span>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+
+            @if (filteredMasterInstructors().length > modalDisplayLimit()) {
+            <div class="load-more-section">
+              <button type="button" class="btn-load-more" (click)="loadMoreMaster()">
+                <span class="material-symbols-rounded">expand_more</span>
+                <span>แสดงเพิ่มอีก 40 ท่าน (กำลังแสดง {{ displayedMasterInstructors().length }} จาก {{ filteredMasterInstructors().length }} ท่าน)</span>
+              </button>
+              <button type="button" class="btn-show-all" (click)="showAllMaster()">
+                แสดงทั้งหมด ({{ filteredMasterInstructors().length }})
+              </button>
+            </div>
+            }
+            }
+          </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" [disabled]="isSaving()" (click)="closeModal()">ยกเลิก</button>
+        <button type="button" class="btn-primary" [disabled]="isSaving() || selectedMasterCodes().length === 0"
+          (click)="saveScheduleInstructors()">
+          <span class="material-symbols-rounded" [class.spin-loading]="isSaving()">
+            {{ isSaving() ? 'sync' : 'save' }}
+          </span>
+          <span>{{ isSaving() ? 'กำลังบันทึก...' : ('บันทึกข้อมูล (' + selectedMasterCodes().length + ')') }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ============================================================
+       MODAL: รายละเอียดอาจารย์ผู้สอน (INSTRUCTOR DETAIL MODAL)
+       ============================================================ -->
+  @if (isDetailModalOpen() && selectedInstructorDetail()) {
+  @let d = selectedInstructorDetail()!;
+  <div class="modal-backdrop" (click)="closeDetailModal()">
+    <div class="modal-card instructor-detail-modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="material-symbols-rounded modal-title-icon">badge</span>
+          <div class="title-with-sem">
+            <h2 class="modal-title">รายละเอียดข้อมูลอาจารย์</h2>
+            <span class="modal-sem-tag">รหัส {{ d.INSTRUCTOR_CODE }}</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" (click)="closeDetailModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Hero Profile Card -->
+        <div class="profile-hero-card">
+          <div class="profile-avatar">
+            <img [src]="getInstructorAvatar(d)" [alt]="d.INSTRUCTOR_NAME_THAI || 'อาจารย์'" class="avatar-cartoon-img" />
+          </div>
+          <div class="profile-main-info">
+            <div class="profile-name-row">
+              @if (d.RANK_NAME_THAI_S) {
+              <span class="profile-rank-badge">{{ d.RANK_NAME_THAI_S }}</span>
+              }
+              <h3 class="profile-name-th">{{ d.INSTRUCTOR_NAME_THAI || '-' }}</h3>
+            </div>
+            @if (d.INSTRUCTOR_NAME_ENG) {
+            <p class="profile-name-en">{{ d.INSTRUCTOR_NAME_ENG }}</p>
+            }
+            <div class="profile-tags-row">
+              <span class="profile-tag-pill" [ngClass]="getInstructorTypeClass(d.INSTRUCTOR_TYPE)">
+                {{ getInstructorTypeLabel(d.INSTRUCTOR_TYPE) }}
+              </span>
+              @if (d.FACULTY_NAME_THAI) {
+              <span class="profile-tag-faculty">{{ d.FACULTY_NAME_THAI }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Information Grid -->
+        <div class="detail-info-grid">
+          <div class="info-item">
+            <span class="info-label">รหัสอาจารย์</span>
+            <strong class="info-val code-highlight">{{ d.INSTRUCTOR_CODE }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ชื่อในระบบ RU30</span>
+            <strong class="info-val">{{ d.INSTRUCTOR_NAME_RU30 || '-' }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ตำแหน่งทางวิชาการ (เต็ม)</span>
+            <strong class="info-val">{{ d.RANK_NAME_THAI_L || d.RANK_NAME_THAI_S || '-' }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">คณะ</span>
+            <strong class="info-val">{{ d.FACULTY_NO ? (d.FACULTY_NO + ' - ' + (d.FACULTY_NAME_THAI || '')) : '-'
+              }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ภาควิชา</span>
+            <strong class="info-val">{{ d.DEPARTMENT_NO || '-' }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ประเภทอาจารย์</span>
+            <strong class="info-val">{{ getInstructorTypeLabel(d.INSTRUCTOR_TYPE) }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">หมายเลขประจำตัวบัตร ปชช. / Passport</span>
+            <strong class="info-val">{{ d.PERSONAL_ID || '-' }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ภาคการศึกษาที่เปิดสอน</span>
+            <strong class="info-val">ปีการศึกษา {{ d.STUDY_YEAR }} ภาค {{ d.STUDY_SEMESTER }}</strong>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">วันที่บันทึกข้อมูล</span>
+            <span class="info-val text-muted">{{ d.INSERT_DATE || '-' }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">ผู้บันทึกข้อมูล</span>
+            <span class="info-val text-muted">{{ d.USER_INSERT || '-' }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" (click)="closeDetailModal()">ปิดหน้าต่าง</button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- Reusable Custom Context Menu -->
+  <app-custom-context-menu
+    [isOpen]="isContextMenuOpen()"
+    [position]="contextMenuPos()"
+    [headerBadge]="selectedContextMenuInstructor()?.INSTRUCTOR_CODE"
+    [headerTitle]="selectedContextMenuInstructor() ? ((selectedContextMenuInstructor()!.RANK_NAME_THAI_S || '') + ' ' + (selectedContextMenuInstructor()!.INSTRUCTOR_NAME_THAI || selectedContextMenuInstructor()!.INSTRUCTOR_CODE)) : undefined"
+    [items]="contextMenuItems()"
+    (close)="isContextMenuOpen.set(false)"
+  />
+
+</div>

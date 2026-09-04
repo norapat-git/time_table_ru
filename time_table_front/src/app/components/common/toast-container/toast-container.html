@@ -1,35 +1,76 @@
-<div class="toast-viewport" aria-live="polite">
-  @for (toast of toastService.toasts(); track toast.id) {
+<div
+  class="sonner-toaster"
+  [class.expanded]="isExpanded()"
+  (mouseenter)="isExpanded.set(true)"
+  (mouseleave)="isExpanded.set(false)"
+  aria-live="polite"
+>
+  @for (toast of toastService.toasts(); track toast.id; let idx = $index) {
     <div
-      class="toast-pill-card"
-      [class.toast-success]="toast.type === 'success'"
-      [class.toast-error]="toast.type === 'error'"
-      [class.toast-info]="toast.type === 'info'"
-      [class.toast-warning]="toast.type === 'warning'"
-      [class.toast-loading]="toast.type === 'loading'"
-      (click)="onDismiss(toast)"
+      class="sonner-toast"
+      [attr.data-type]="toast.type"
+      [attr.data-index]="idx"
+      [style.--index]="idx"
+      [style.--total]="toastService.toasts().length"
+      (mouseenter)="onMouseEnter(toast)"
+      (mouseleave)="onMouseLeave(toast)"
     >
-      <!-- Left Icon / Spinner -->
-      <div class="toast-icon-circle">
-        <span class="material-symbols-rounded" [class.spin-loading]="toast.type === 'loading'">
-          {{ getIcon(toast.type) }}
-        </span>
-      </div>
+      <!-- Icon Indicator -->
+      @if (toast.type !== 'default') {
+        <div class="sonner-icon-wrap">
+          <span
+            class="material-symbols-rounded"
+            [class.spin-loading]="toast.type === 'loading'"
+          >
+            {{ getIcon(toast.type) }}
+          </span>
+        </div>
+      }
 
-      <!-- Text Content -->
-      <div class="toast-body">
+      <!-- Message Content -->
+      <div class="sonner-content">
         @if (toast.title) {
-          <strong class="toast-title">{{ toast.title }}</strong>
+          <div class="sonner-title">{{ toast.title }}</div>
+          <div class="sonner-description">{{ toast.message }}</div>
+        } @else {
+          <div class="sonner-title">{{ toast.message }}</div>
+          @if (toast.description) {
+            <div class="sonner-description">{{ toast.description }}</div>
+          }
         }
-        <span class="toast-message">{{ toast.message }}</span>
       </div>
 
-      <!-- Close Button -->
-      @if (toast.type !== 'loading') {
-        <button class="btn-close-toast" (click)="onDismiss(toast)">
-          <span class="material-symbols-rounded">close</span>
+      <!-- Action Button (if any) -->
+      @if (toast.action) {
+        <button
+          type="button"
+          class="sonner-action-btn"
+          (click)="onAction(toast, $event)"
+        >
+          {{ toast.action.label }}
         </button>
       }
+
+      <!-- Cancel Button (if any) -->
+      @if (toast.cancel) {
+        <button
+          type="button"
+          class="sonner-cancel-btn"
+          (click)="onCancel(toast, $event)"
+        >
+          {{ toast.cancel.label }}
+        </button>
+      }
+
+      <!-- Close Button -->
+      <button
+        type="button"
+        class="sonner-close-btn"
+        (click)="onDismiss(toast, $event)"
+        title="ปิด"
+      >
+        <span class="material-symbols-rounded">close</span>
+      </button>
     </div>
   }
 </div>

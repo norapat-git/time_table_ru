@@ -4,6 +4,9 @@
 <!-- Global Product Tour & Onboarding Walkthrough -->
 <app-onboarding-tour />
 
+<!-- Global Apple Frosted Confirm Dialog -->
+<app-confirm-dialog />
+
 @if (!authService.isAuthenticated()) {
   <!-- Dedicated Full-Screen Login Page -->
   <app-login-page />
@@ -43,6 +46,19 @@
             <span>แนะนำการใช้งาน</span>
           </button>
 
+          <!-- Theme Toggle (Light / Dark Mode) -->
+          <button
+            type="button"
+            class="topbar-theme-toggle"
+            (click)="themeService.toggleTheme()"
+            [title]="themeService.isDark() ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode)'"
+            [attr.aria-label]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          >
+            <span class="material-symbols-rounded theme-icon" [class.is-dark]="themeService.isDark()">
+              {{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}
+            </span>
+          </button>
+
           <!-- Active Semester Pill -->
           <div class="topbar-sem-badge">
             <span class="material-symbols-rounded sem-icon">event_available</span>
@@ -65,15 +81,9 @@
       <!-- Main Business Content Area -->
       <main class="dashboard-view-content" role="main">
         @switch (activeTab()) {
-          <!-- 1. จัดการข้อมูล -->
+          <!-- 1. ข้อมูลตั้งต้น -->
           @case ('academic-year') {
             <app-tab-academic-year />
-          }
-          @case ('course-search') {
-            <app-tab-course-search />
-          }
-          @case ('paired-courses') {
-            <app-tab-paired-courses />
           }
           @case ('curriculum') {
             <app-tab-curriculum />
@@ -81,11 +91,24 @@
           @case ('instructor') {
             <app-tab-instructor />
           }
-          @case ('timetable-manage') {
-            <app-tab-timetable-manage />
+
+          <!-- 2. จัดการรายวิชา -->
+          @case ('course-search') {
+            <app-tab-course-search />
+          }
+          @case ('paired-courses') {
+            <app-tab-paired-courses />
           }
 
-          <!-- 2. รายงาน -->
+          <!-- 3. ตารางสอน -->
+          @case ('timetable-manage') {
+            <app-tab-student-schedule />
+          }
+          @case ('student-schedule') {
+            <app-tab-student-schedule />
+          }
+
+          <!-- 4. รายงาน -->
           @case ('report-compulsory') {
             <app-tab-report-compulsory />
           }
@@ -94,9 +117,6 @@
           }
           @case ('report-mr30') {
             <app-tab-report-mr30 />
-          }
-          @case ('student-schedule') {
-            <app-tab-student-schedule />
           }
           @case ('report-offered-courses') {
             <app-tab-report-offered-courses />

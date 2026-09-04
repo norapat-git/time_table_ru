@@ -56,14 +56,17 @@ export class OnboardingTourService {
     } catch { }
   }
 
+  private onTourFinishedCallback?: () => void;
+
   // Start Tour (Skip if already completed unless force = true)
-  async startTour(tourKey: string, tourSteps: TourStep[], force: boolean = false): Promise<void> {
+  async startTour(tourKey: string, tourSteps: TourStep[], force: boolean = false, onFinished?: () => void): Promise<void> {
     if (!force && this.isTourCompleted(tourKey)) {
       return;
     }
 
     if (!tourSteps || tourSteps.length === 0) return;
 
+    this.onTourFinishedCallback = onFinished;
     this.currentTourKey.set(tourKey);
     this.steps.set(tourSteps);
     this.currentStepIndex.set(0);
@@ -110,6 +113,14 @@ export class OnboardingTourService {
   }
 
   private cleanup(): void {
+    if (this.onTourFinishedCallback) {
+      try {
+        this.onTourFinishedCallback();
+      } catch (e) {
+        console.error('[OnboardingTour] onFinished callback error:', e);
+      }
+      this.onTourFinishedCallback = undefined;
+    }
     this.isActive.set(false);
     this.spotlightRect.set(null);
     this.steps.set([]);
@@ -141,11 +152,26 @@ export class OnboardingTourService {
     let el: HTMLElement | null = null;
 
     for (const sel of selectors) {
-      el = document.querySelector(sel) as HTMLElement | null;
-      if (el) break;
+      const found = document.querySelector(sel) as HTMLElement | null;
+      if (found) {
+        const rect = found.getBoundingClientRect();
+        // Ignore collapsed/hidden elements with 0 width or height unless no other option
+        if (rect.width > 20 && rect.height > 20) {
+          el = found;
+          break;
+        } else if (!el) {
+          el = found;
+        }
+      }
     }
 
     if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 20 && retryCount < 4) {
+        setTimeout(() => this.updateSpotlight(selector, retryCount + 1), 80);
+        return;
+      }
+
       // Smoothly scroll element into view (center of scroll container / viewport)
       el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
 
@@ -155,14 +181,14 @@ export class OnboardingTourService {
 
       const trackSpotlight = () => {
         if (!this.isActive() || !el) return;
-        const rect = el.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
         const padding = 6;
 
         this.spotlightRect.set({
-          top: Math.max(0, rect.top - padding),
-          left: Math.max(0, rect.left - padding),
-          width: rect.width + padding * 2,
-          height: rect.height + padding * 2,
+          top: Math.max(0, r.top - padding),
+          left: Math.max(0, r.left - padding),
+          width: r.width + padding * 2,
+          height: r.height + padding * 2,
           radius: 10,
         });
 

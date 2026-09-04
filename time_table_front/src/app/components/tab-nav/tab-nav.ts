@@ -13,8 +13,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { TabLockService } from '../../services/tab-lock.service';
+import { ToastService } from '../../services/toast.service';
 
-export type TabGroupKey = 'data-manage' | 'reports';
+export type TabGroupKey = 'setup' | 'courses' | 'timetable' | 'reports';
 
 export interface TabItem {
   id: string;
@@ -34,6 +36,8 @@ export interface TabItem {
 })
 export class TabNavComponent implements AfterViewInit {
   readonly authService = inject(AuthService);
+  readonly tabLockService = inject(TabLockService);
+  readonly toastService = inject(ToastService);
 
   readonly tabs = input.required<TabItem[]>();
   readonly activeTab = input.required<string>();
@@ -50,12 +54,22 @@ export class TabNavComponent implements AfterViewInit {
   readonly indicatorHeight = signal<number>(42);
   readonly isInitialized = signal<boolean>(false);
 
-  // Group 1: Data Management tabs
-  readonly dataManageTabs = computed(() => {
-    return this.tabs().filter((t) => t.groupId === 'data-manage');
+  // Group 1: ข้อมูลตั้งต้น
+  readonly setupTabs = computed(() => {
+    return this.tabs().filter((t) => t.groupId === 'setup');
   });
 
-  // Group 2: Report tabs
+  // Group 2: จัดการรายวิชา
+  readonly courseTabs = computed(() => {
+    return this.tabs().filter((t) => t.groupId === 'courses');
+  });
+
+  // Group 3: ตารางสอน
+  readonly timetableTabs = computed(() => {
+    return this.tabs().filter((t) => t.groupId === 'timetable');
+  });
+
+  // Group 4: รายงาน
   readonly reportTabs = computed(() => {
     return this.tabs().filter((t) => t.groupId === 'reports');
   });
@@ -64,7 +78,9 @@ export class TabNavComponent implements AfterViewInit {
     // Whenever activeTab signal changes, glide to that tab smoothly
     effect(() => {
       const active = this.activeTab();
-      this.glideToTab(active);
+      setTimeout(() => {
+        this.glideToTab(active);
+      }, 0);
     });
   }
 
@@ -95,6 +111,16 @@ export class TabNavComponent implements AfterViewInit {
   }
 
   onTabClick(tabId: string): void {
+    if (this.activeTab() === tabId) return;
+
+    if (this.tabLockService.isLocked()) {
+      this.toastService.warning(
+        this.tabLockService.lockReason() ||
+        'ไม่สามารถเปลี่ยนแท็บได้ในขณะนี้ เนื่องจากกำลังเปิดโหมดปรับตาราง (Drag & Drop) อยู่'
+      );
+      return;
+    }
+
     this.tabChange.emit(tabId);
     this.isMobileOpen.set(false);
     this.glideToTab(tabId);
@@ -105,6 +131,10 @@ export class TabNavComponent implements AfterViewInit {
   }
 
   onLogout(): void {
+    if (this.tabLockService.isLocked()) {
+      this.toastService.warning('กรุณาบันทึกหรือยกเลิกการปรับตารางก่อนออกจากระบบ');
+      return;
+    }
     this.authService.logout();
   }
 }

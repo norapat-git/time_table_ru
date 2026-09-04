@@ -186,7 +186,7 @@ export function extractUserFromToken(token: string): DecodedUser | null {
     role,
     roles,
     citizenId: (payload.citizenId || payload['CITIZEN_ID'] || payload['PER_CITIZEN_ID']) as string | undefined,
-    department: (payload.department || payload['FACULTY_NAME'] || 'สถาบันภาษา') as string | undefined,
+    department: (payload.department || payload['FACULTY_NAME'] || 'สำนักบริการทางวิชาการและทดสอบประเมินผล') as string | undefined,
     facultyNo: (payload.facultyNo || payload['FACULTY_NO']) as string | undefined,
     majorNo: (payload.majorNo || payload['MAJOR_NO']) as string | undefined,
     rawPayload: payload,

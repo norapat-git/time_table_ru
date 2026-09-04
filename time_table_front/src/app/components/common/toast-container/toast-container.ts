@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService, ToastMessage } from '../../../services/toast.service';
+import { ToastService, ToastItem } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-toast-container',
@@ -9,8 +9,14 @@ import { ToastService, ToastMessage } from '../../../services/toast.service';
   templateUrl: './toast-container.html',
   styleUrl: './toast-container.css',
 })
-export class ToastContainerComponent {
+export class ToastContainerComponent implements OnInit {
   readonly toastService = inject(ToastService);
+  readonly isExpanded = signal<boolean>(false);
+
+  ngOnInit(): void {
+    // Expose service for global `toast.success(...)` helper if needed
+    (window as any).__ru_toast_service = this.toastService;
+  }
 
   getIcon(type: string): string {
     switch (type) {
@@ -29,7 +35,32 @@ export class ToastContainerComponent {
     }
   }
 
-  onDismiss(toast: ToastMessage): void {
+  onDismiss(toast: ToastItem, event?: MouseEvent): void {
+    if (event) event.stopPropagation();
     this.toastService.dismiss(toast.id);
+  }
+
+  onAction(toast: ToastItem, event: MouseEvent): void {
+    event.stopPropagation();
+    if (toast.action?.onClick) {
+      toast.action.onClick(event);
+    }
+    this.toastService.dismiss(toast.id);
+  }
+
+  onCancel(toast: ToastItem, event: MouseEvent): void {
+    event.stopPropagation();
+    if (toast.cancel?.onClick) {
+      toast.cancel.onClick();
+    }
+    this.toastService.dismiss(toast.id);
+  }
+
+  onMouseEnter(toast: ToastItem): void {
+    this.toastService.pause(toast.id);
+  }
+
+  onMouseLeave(toast: ToastItem): void {
+    this.toastService.resume(toast.id);
   }
 }
