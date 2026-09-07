@@ -1,30 +1,13 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
+import { CurriculumService } from '../../../services/curriculum.service';
+import { FacultyItem, ProgramGroupItem, ProgramSubGroupItem } from '../../../models/curriculum.model';
 
-export interface FacultyItem {
-  FACULTY_NO: string;
-  FACULTY_NAME_THAI: string;
-  FACULTY_NAME_SHORT?: string;
-  FACULTY_NAME_ENG?: string;
-}
 
-export interface ProgramGroupItem {
-  FACULTY_NO: string;
-  GROUP_NO: string;
-  GROUP_NAME: string;
-}
-
-export interface ProgramSubGroupItem {
-  FACULTY_NO: string;
-  GROUP_NO: string;
-  SUB_GROUP_NO: string;
-  SUB_GROUP_NAME: string;
-}
 
 export interface CurriculumReportRow {
   FACULTY_NO: string;
@@ -64,7 +47,7 @@ export interface GroupedFacultySection {
   styleUrl: './tab-report-compulsory.css',
 })
 export class TabReportCompulsoryComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly curriculumService = inject(CurriculumService);
   private readonly toastService = inject(ToastService);
 
   readonly isLoading = signal<boolean>(false);
@@ -287,12 +270,8 @@ export class TabReportCompulsoryComponent implements OnInit {
     this.loadCurriculumReport();
   }
 
-  private getBaseUrl(): string {
-    return window.location.port === '4200' ? 'http://localhost:4000/api/service/curriculum' : '/api/service/curriculum';
-  }
-
   loadFaculties(): void {
-    this.http.get<{ success: boolean; results: FacultyItem[] }>(`${this.getBaseUrl()}/faculties`).subscribe({
+    this.curriculumService.getFaculties().subscribe({
       next: (res) => {
         if (res && res.success && Array.isArray(res.results)) {
           this.facultiesList.set(res.results);
@@ -304,7 +283,7 @@ export class TabReportCompulsoryComponent implements OnInit {
 
   loadCurriculumReport(): void {
     this.isLoading.set(true);
-    this.http.get<{ success: boolean; results: CurriculumReportRow[] }>(`${this.getBaseUrl()}/list`).subscribe({
+    this.curriculumService.listCurriculumCourses().subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -330,7 +309,7 @@ export class TabReportCompulsoryComponent implements OnInit {
     this.currentPage.set(1);
 
     if (facultyNo && facultyNo !== 'ALL') {
-      this.http.get<{ success: boolean; results: ProgramGroupItem[] }>(`${this.getBaseUrl()}/groups/${facultyNo}`).subscribe({
+      this.curriculumService.getGroupsByFaculty(facultyNo).subscribe({
         next: (res) => {
           if (res && res.success && Array.isArray(res.results)) {
             this.groupsList.set(res.results);
@@ -348,7 +327,7 @@ export class TabReportCompulsoryComponent implements OnInit {
 
     const fac = this.selectedFaculty();
     if (fac && fac !== 'ALL' && groupNo && groupNo !== 'ALL') {
-      this.http.get<{ success: boolean; results: ProgramSubGroupItem[] }>(`${this.getBaseUrl()}/sub-groups/${fac}/${groupNo}`).subscribe({
+      this.curriculumService.getSubGroups(fac, groupNo).subscribe({
         next: (res) => {
           if (res && res.success && Array.isArray(res.results)) {
             this.subGroupsList.set(res.results);

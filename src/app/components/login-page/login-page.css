@@ -201,37 +201,6 @@
   color: #1d1d1f;
 }
 
-/* Quick Action Row */
-.quick-action-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -0.25rem;
-}
-
-.btn-preset-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  background: none;
-  border: none;
-  color: #0071e3;
-  font-size: 0.8rem;
-  font-weight: 500;
-  font-family: var(--font-thai);
-  cursor: pointer;
-  padding: 0.2rem 0;
-  transition: color 0.15s ease;
-}
-
-.btn-preset-link:hover {
-  color: #005bb5;
-  text-decoration: underline;
-}
-
-.btn-preset-link .material-symbols-rounded {
-  font-size: 0.95rem;
-}
-
 /* Submit Button */
 .btn-submit-login {
   display: flex;

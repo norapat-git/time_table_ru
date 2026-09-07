@@ -1,85 +1,63 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Course, CoursePrefix } from '../models/course.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environment/env';
+import { CourseItem } from '../models/course.model';
 
-const MOCK_COURSES: Course[] = [
-  // A — English
-  { id: 'a001', code: 'A101', nameEN: 'English for Communication 1', nameTH: 'ภาษาอังกฤษเพื่อการสื่อสาร 1', prefix: 'A', credits: 3, section: 1, totalStudents: 40 },
-  { id: 'a002', code: 'A102', nameEN: 'English for Communication 2', nameTH: 'ภาษาอังกฤษเพื่อการสื่อสาร 2', prefix: 'A', credits: 3, section: 2, totalStudents: 38 },
-  { id: 'a003', code: 'A201', nameEN: 'Academic English Writing', nameTH: 'การเขียนภาษาอังกฤษเชิงวิชาการ', prefix: 'A', credits: 3, section: 1, totalStudents: 35 },
-  { id: 'a004', code: 'A202', nameEN: 'English for Business', nameTH: 'ภาษาอังกฤษเพื่อธุรกิจ', prefix: 'A', credits: 3, section: 3, totalStudents: 42 },
-  { id: 'a005', code: 'A301', nameEN: 'Advanced English Reading', nameTH: 'การอ่านภาษาอังกฤษขั้นสูง', prefix: 'A', credits: 3, section: 1, totalStudents: 30 },
-  { id: 'a006', code: 'A302', nameEN: 'English Presentation Skills', nameTH: 'ทักษะการนำเสนอภาษาอังกฤษ', prefix: 'A', credits: 3, section: 2, totalStudents: 28 },
-  { id: 'a007', code: 'A401', nameEN: 'TOEIC Preparation', nameTH: 'เตรียมสอบ TOEIC', prefix: 'A', credits: 3, section: 4, totalStudents: 50 },
-
-  // B — Japanese
-  { id: 'b001', code: 'B101', nameEN: 'Japanese 1', nameTH: 'ภาษาญี่ปุ่น 1', prefix: 'B', credits: 3, section: 1, totalStudents: 35 },
-  { id: 'b002', code: 'B102', nameEN: 'Japanese 2', nameTH: 'ภาษาญี่ปุ่น 2', prefix: 'B', credits: 3, section: 1, totalStudents: 30 },
-  { id: 'b003', code: 'B201', nameEN: 'Japanese Reading and Writing', nameTH: 'การอ่านและการเขียนภาษาญี่ปุ่น', prefix: 'B', credits: 3, section: 2, totalStudents: 25 },
-  { id: 'b004', code: 'B202', nameEN: 'Japanese for Business', nameTH: 'ภาษาญี่ปุ่นเพื่อธุรกิจ', prefix: 'B', credits: 3, section: 1, totalStudents: 20 },
-  { id: 'b005', code: 'B301', nameEN: 'Advanced Japanese Communication', nameTH: 'การสื่อสารภาษาญี่ปุ่นขั้นสูง', prefix: 'B', credits: 3, section: 1, totalStudents: 18 },
-
-  // S — Spanish
-  { id: 's001', code: 'S101', nameEN: 'Spanish 1', nameTH: 'ภาษาสเปน 1', prefix: 'S', credits: 3, section: 1, totalStudents: 32 },
-  { id: 's002', code: 'S102', nameEN: 'Spanish 2', nameTH: 'ภาษาสเปน 2', prefix: 'S', credits: 3, section: 1, totalStudents: 28 },
-  { id: 's003', code: 'S201', nameEN: 'Spanish Conversation', nameTH: 'การสนทนาภาษาสเปน', prefix: 'S', credits: 3, section: 2, totalStudents: 24 },
-  { id: 's004', code: 'S202', nameEN: 'Spanish Culture and Society', nameTH: 'วัฒนธรรมและสังคมสเปน', prefix: 'S', credits: 3, section: 1, totalStudents: 20 },
-
-  // F — French
-  { id: 'f001', code: 'F101', nameEN: 'French 1', nameTH: 'ภาษาฝรั่งเศส 1', prefix: 'F', credits: 3, section: 1, totalStudents: 30 },
-  { id: 'f002', code: 'F102', nameEN: 'French 2', nameTH: 'ภาษาฝรั่งเศส 2', prefix: 'F', credits: 3, section: 1, totalStudents: 26 },
-  { id: 'f003', code: 'F201', nameEN: 'French Reading and Composition', nameTH: 'การอ่านและการเรียบเรียงภาษาฝรั่งเศส', prefix: 'F', credits: 3, section: 1, totalStudents: 22 },
-  { id: 'f004', code: 'F202', nameEN: 'French for Tourism', nameTH: 'ภาษาฝรั่งเศสเพื่อการท่องเที่ยว', prefix: 'F', credits: 3, section: 2, totalStudents: 18 },
-
-  // G — German
-  { id: 'g001', code: 'G101', nameEN: 'German 1', nameTH: 'ภาษาเยอรมัน 1', prefix: 'G', credits: 3, section: 1, totalStudents: 28 },
-  { id: 'g002', code: 'G102', nameEN: 'German 2', nameTH: 'ภาษาเยอรมัน 2', prefix: 'G', credits: 3, section: 1, totalStudents: 24 },
-  { id: 'g003', code: 'G201', nameEN: 'German Conversation and Grammar', nameTH: 'การสนทนาและไวยากรณ์ภาษาเยอรมัน', prefix: 'G', credits: 3, section: 2, totalStudents: 20 },
-  { id: 'g004', code: 'G301', nameEN: 'German for Science and Technology', nameTH: 'ภาษาเยอรมันเพื่อวิทยาศาสตร์และเทคโนโลยี', prefix: 'G', credits: 3, section: 1, totalStudents: 15 },
-];
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class CourseService {
-  private readonly _allCourses = signal<Course[]>(MOCK_COURSES);
-  private readonly _selectedPrefix = signal<CoursePrefix | null>(null);
-  private readonly _searchQuery = signal<string>('');
-  private readonly _selectedCourse = signal<Course | null>(null);
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/course`;
 
-  readonly allCourses = this._allCourses.asReadonly();
-  readonly selectedPrefix = this._selectedPrefix.asReadonly();
-  readonly searchQuery = this._searchQuery.asReadonly();
-  readonly selectedCourse = this._selectedCourse.asReadonly();
-
-  readonly filteredCourses = computed(() => {
-    const prefix = this._selectedPrefix();
-    const query = this._searchQuery().toLowerCase().trim();
-    let courses = this._allCourses();
-
-    if (prefix) {
-      courses = courses.filter(c => c.prefix === prefix);
+  listCourses(year: string, semester: string, search?: string): Observable<{ success: boolean; results: CourseItem[] }> {
+    let params = new HttpParams().set('year', year).set('semester', semester);
+    if (search) {
+      params = params.set('search', search.trim());
     }
-    if (query) {
-      courses = courses.filter(c =>
-        c.code.toLowerCase().includes(query) ||
-        c.nameEN.toLowerCase().includes(query) ||
-        c.nameTH.includes(query)
-      );
-    }
-    return courses;
-  });
-
-  setPrefix(prefix: CoursePrefix | null): void {
-    this._selectedPrefix.set(prefix);
+    return this.http.get<{ success: boolean; results: CourseItem[] }>(`${this.baseUrl}/list`, { params });
   }
 
-  setSearchQuery(query: string): void {
-    this._searchQuery.set(query);
+  getFirstLetters(): Observable<{ success: boolean; results: string[] }> {
+    return this.http.get<{ success: boolean; results: string[] }>(`${this.baseUrl}/letters`);
   }
 
-  selectCourse(course: Course | null): void {
-    this._selectedCourse.set(course);
+  getPrefixGroups(letter: string): Observable<{ success: boolean; results: any[] }> {
+    return this.http.get<{ success: boolean; results: any[] }>(`${this.baseUrl}/prefixes/${encodeURIComponent(letter)}`);
   }
 
-  getCourseById(id: string): Course | undefined {
-    return this._allCourses().find(c => c.id === id);
+  searchUgbCourses(filters?: {
+    year?: string;
+    semester?: string;
+    prefix?: string;
+    search?: string;
+    code?: string;
+    name?: string;
+  }): Observable<{ success: boolean; results: any[] }> {
+    let params = new HttpParams();
+    if (filters?.year) params = params.set('year', filters.year);
+    if (filters?.semester) params = params.set('semester', filters.semester);
+    if (filters?.prefix) params = params.set('prefix', filters.prefix);
+    if (filters?.search) params = params.set('search', filters.search.trim());
+    if (filters?.code) params = params.set('code', filters.code.trim());
+    if (filters?.name) params = params.set('name', filters.name.trim());
+    return this.http.get<{ success: boolean; results: any[] }>(`${this.baseUrl}/search-ugb`, { params });
+  }
+
+  addCourse(payload: any): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/add`, payload);
+  }
+
+  updateCourse(payload: any): Observable<{ success: boolean; message: string }> {
+    return this.http.put<{ success: boolean; message: string }>(`${this.baseUrl}/update`, payload);
+  }
+
+  deleteCourse(year: string, semester: string, courseNo: string): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/delete/${year}/${semester}/${courseNo}`);
+  }
+
+  deleteCoursesBulk(payload: { items: any[]; userDelete?: string }): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/delete-bulk`, payload);
   }
 }

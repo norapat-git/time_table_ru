@@ -7,8 +7,8 @@
         <div class="header-brand">
           <span class="material-symbols-rounded header-icon">vpn_key</span>
           <div>
-            <h2 class="header-title" id="modal-title">JWT Decoder & Authentication Manager</h2>
-            <p class="header-subtitle">ระบบตรวจสอบ Token, Decode ข้อมูล, และจัดการสิทธิ์ผู้ใช้งาน</p>
+            <h2 class="header-title" id="modal-title">JWT Decoder & Token Inspector</h2>
+            <p class="header-subtitle">ระบบตรวจสอบ Token, Decode ข้อมูล และจัดการ Session ผู้ใช้งาน</p>
           </div>
         </div>
         <button class="btn-close" (click)="close()" aria-label="ปิดหน้าต่าง">
@@ -18,62 +18,6 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-
-        <!-- Role Preset Switcher for Fast Testing -->
-        <div class="presets-card">
-          <h3 class="section-title">
-            <span class="material-symbols-rounded section-icon">switch_account</span>
-            สลับสิทธิ์ทดสอบจำลอง (Quick Role Presets)
-          </h3>
-          <p style="font-size: 0.8rem; color: var(--gray-600); margin-bottom: 0.5rem;">
-            เลือกบทบาทเพื่อสร้างและใช้งาน Mock JWT Token สำหรับทดสอบ Auth Guard, Role Guard และ Interceptor ได้ทันที:
-          </p>
-          <div class="preset-buttons">
-            <button
-              class="preset-btn"
-              [class.active]="authService.userRole() === 'ADMIN'"
-              (click)="applyPreset('ADMIN')"
-            >
-              <span class="material-symbols-rounded">admin_panel_settings</span>
-              ผู้ดูแลระบบ (Admin)
-            </button>
-
-            <button
-              class="preset-btn"
-              [class.active]="authService.userRole() === 'INSTRUCTOR'"
-              (click)="applyPreset('INSTRUCTOR')"
-            >
-              <span class="material-symbols-rounded">school</span>
-              อาจารย์ผู้สอน (Instructor)
-            </button>
-
-            <button
-              class="preset-btn"
-              [class.active]="authService.userRole() === 'STAFF'"
-              (click)="applyPreset('STAFF')"
-            >
-              <span class="material-symbols-rounded">badge</span>
-              เจ้าหน้าที่ (Staff)
-            </button>
-
-            <button
-              class="preset-btn"
-              [class.active]="authService.userRole() === 'STUDENT'"
-              (click)="applyPreset('STUDENT')"
-            >
-              <span class="material-symbols-rounded">person</span>
-              นักศึกษา (Student)
-            </button>
-
-            <button
-              class="preset-btn btn-danger"
-              (click)="applyPreset('EXPIRED')"
-            >
-              <span class="material-symbols-rounded">timer_off</span>
-              Token หมดอายุ (Expired Demo)
-            </button>
-          </div>
-        </div>
 
         <!-- Current Status Banner -->
         <div class="status-banner">

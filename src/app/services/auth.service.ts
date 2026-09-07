@@ -5,7 +5,6 @@ import { DecodedUser, JwtHeader, JwtPayload, UserRole } from '../models/auth.mod
 import {
   extractUserFromToken,
   formatRemainingTime,
-  generateMockJwt,
   getJwtHeader,
   getJwtPayload,
   getTokenExpirationDate,
@@ -71,51 +70,23 @@ export class AuthService {
    * Login with real Backend API (Microsoft 365 + RG_SCHEDULE_ACCOUNT)
    */
   login(email: string, password: string): Observable<{ success: boolean; message: string; results?: any }> {
-    const targetUrl = window.location.port === '4200' ? `${environment.apiUrl}/login` : '/api/service/login';
+    const targetUrl = `${environment.apiUrl}/login`;
     return this.http.post<{ success: boolean; message: string; token?: string; results?: any }>(targetUrl, { email, password }).pipe(
       tap((res) => {
-        if (res && res.success && res.results) {
-          const userResult = res.results;
-          const thaiFullName = userResult.USER_THAINAME || 'นายทดสอบ พัฒนาระบบ';
-          const engFullName = userResult.USER_ENGNAME || 'TODSOB PATTANARABOB';
-          const userEmail = userResult.USER_EMAIL || email;
+        if (res && res.success && res.token) {
+          const decodedUser = extractUserFromToken(res.token);
+          if (decodedUser) {
+            this._token.set(res.token);
+            this._user.set(decodedUser);
+            this._remainingSeconds.set(getTokenRemainingSeconds(res.token));
 
-          const payload: Partial<JwtPayload> = {
-            userId: 'USER-' + userEmail.split('@')[0],
-            username: userEmail,
-            email: userEmail,
-            firstNameTH: thaiFullName,
-            lastNameTH: '',
-            role: 'ADMIN',
-            roles: ['ADMIN'],
-            department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
-          };
+            try {
+              localStorage.setItem(STORAGE_KEY_TOKEN, res.token);
+              localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(decodedUser));
+            } catch {}
 
-          // Use real signed JWT from backend, fallback to mock if missing
-          const token = res.token || generateMockJwt(payload, 480);
-          const decodedUser = extractUserFromToken(token);
-
-          const userObj: DecodedUser = decodedUser || {
-            userId: 'USER-' + userEmail.split('@')[0],
-            username: userEmail,
-            email: userEmail,
-            displayName: thaiFullName,
-            role: 'ADMIN',
-            roles: ['ADMIN'],
-            department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
-            rawPayload: payload as JwtPayload,
-          };
-
-          this._token.set(token);
-          this._user.set(userObj);
-          this._remainingSeconds.set(getTokenRemainingSeconds(token));
-
-          try {
-            localStorage.setItem(STORAGE_KEY_TOKEN, token);
-            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userObj));
-          } catch {}
-
-          this.startTimer();
+            this.startTimer();
+          }
         }
       }),
       catchError((err) => {
@@ -123,112 +94,6 @@ export class AuthService {
         return of({ success: false, message: errorMsg });
       })
     );
-  }
-
-  /**
-   * Quick login using preset roles (Admin, Instructor, Staff, Student, Expired)
-   */
-  loginWithPreset(preset: 'ADMIN' | 'INSTRUCTOR' | 'STAFF' | 'STUDENT' | 'EXPIRED'): void {
-    let mockClaims: Partial<JwtPayload> = {};
-    let expiresInMinutes = 60;
-
-    switch (preset) {
-      case 'ADMIN':
-        mockClaims = {
-          userId: 'ADM-001',
-          username: 'dev07@ru.ac.th',
-          email: 'dev07@ru.ac.th',
-          firstNameTH: 'นายทดสอบ',
-          lastNameTH: 'พัฒนาระบบ',
-          role: 'ADMIN',
-          roles: ['ADMIN', 'STAFF'],
-          department: 'สำนักบริการทางวิชาการและทดสอบประเมินผล (สวป.) มหาวิทยาลัยรามคำแหง',
-        };
-        expiresInMinutes = 480;
-        break;
-      case 'INSTRUCTOR':
-        mockClaims = {
-          userId: 'INS-101',
-          username: 'somchai.j@ru.ac.th',
-          email: 'somchai.j@ru.ac.th',
-          firstNameTH: 'อาจารย์สมชาย',
-          lastNameTH: 'ใจดี',
-          role: 'INSTRUCTOR',
-          roles: ['INSTRUCTOR'],
-          department: 'สาขาวิชาภาษาอังกฤษ',
-        };
-        expiresInMinutes = 120;
-        break;
-      case 'STAFF':
-        mockClaims = {
-          userId: 'STF-201',
-          username: 'wilai.k@ru.ac.th',
-          email: 'wilai.k@ru.ac.th',
-          firstNameTH: 'วิไล',
-          lastNameTH: 'กิจเจริญ',
-          role: 'STAFF',
-          roles: ['STAFF'],
-          department: 'งานบริการการศึกษา',
-        };
-        expiresInMinutes = 90;
-        break;
-      case 'STUDENT':
-        mockClaims = {
-          userId: 'STD-65001',
-          username: 'tanawat.p@rumail.ru.ac.th',
-          email: 'tanawat.p@rumail.ru.ac.th',
-          firstNameTH: 'ธนวัฒน์',
-          lastNameTH: 'ปัญญาดี',
-          role: 'STUDENT',
-          roles: ['STUDENT'],
-          department: 'นักศึกษา',
-        };
-        expiresInMinutes = 60;
-        break;
-      case 'EXPIRED':
-        mockClaims = {
-          userId: 'EXP-999',
-          username: 'expired.user',
-          email: 'expired@ru.ac.th',
-          firstNameTH: 'โทเค็น',
-          lastNameTH: 'หมดอายุ',
-          role: 'INSTRUCTOR',
-          roles: ['INSTRUCTOR'],
-        };
-        expiresInMinutes = -10; // Expired 10 minutes ago
-        break;
-    }
-
-    if (preset === 'EXPIRED') {
-      const token = generateMockJwt(mockClaims, -10);
-      this._token.set(token);
-      this._user.set(extractUserFromToken(token));
-      this._remainingSeconds.set(0);
-      try {
-        localStorage.setItem(STORAGE_KEY_TOKEN, token);
-      } catch {}
-      return;
-    }
-
-    const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/login/preset' : '/api/service/login/preset';
-    this.http.post<{ success: boolean; token?: string }>(targetUrl, {
-      role: preset,
-      email: mockClaims.email,
-      name: `${mockClaims.firstNameTH || ''} ${mockClaims.lastNameTH || ''}`.trim()
-    }).subscribe({
-      next: (res) => {
-        if (res && res.success && res.token) {
-          this.loginWithToken(res.token);
-        } else {
-          const token = generateMockJwt(mockClaims, expiresInMinutes);
-          this.loginWithToken(token);
-        }
-      },
-      error: () => {
-        const token = generateMockJwt(mockClaims, expiresInMinutes);
-        this.loginWithToken(token);
-      }
-    });
   }
 
   /**
@@ -277,7 +142,7 @@ export class AuthService {
   logout(): void {
     const userEmail = this._user()?.email;
     if (userEmail) {
-      const targetUrl = window.location.port === '4200' ? 'http://localhost:4000/api/service/logout' : '/api/service/logout';
+      const targetUrl = `${environment.apiUrl}/logout`;
       this.http.post(targetUrl, { email: userEmail }).subscribe({
         next: () => {},
         error: () => {},

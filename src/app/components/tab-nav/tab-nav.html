@@ -146,8 +146,8 @@
       </div>
 
       <div class="user-meta">
-        <span class="user-name">{{ authService.currentUser()?.displayName || 'นายทดสอบ พัฒนาระบบ' }}</span>
-        <span class="user-email">{{ authService.currentUser()?.email || 'dev07@ru.ac.th' }}</span>
+        <span class="user-name">{{ authService.currentUser()?.displayName || 'ผู้ใช้งานระบบ' }}</span>
+        <span class="user-email">{{ authService.currentUser()?.email || '' }}</span>
       </div>
 
       <button class="btn-logout-sidebar" (click)="onLogout()" title="ออกจากระบบ">

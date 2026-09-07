@@ -1,20 +1,13 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
-
-export interface YearSemItem {
-  STUDY_YEAR: string;     // ปีการศึกษา เช่น '2569'
-  STUDY_SEMESTER: string; // ภาคการศึกษา เช่น '1', '2', 'S'
-  STUDY_ACTIVE: string;   // '1' = ปีภาคที่ใช้งาน, '0' = ไม่ได้ใช้งาน
-  INSERT_DATE?: string;   // วันที่และเวลาที่บันทึก
-  USER_INSERT?: string;   // ผู้บันทึกข้อมูล
-}
+import { YearSemService } from '../../../services/yearsem.service';
+import { YearSemItem } from '../../../models/yearsem.model';
 
 import { CustomCheckboxComponent } from '../../common/custom-checkbox/custom-checkbox';
 import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom-context-menu/custom-context-menu.component';
@@ -27,7 +20,7 @@ import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom
   styleUrl: './tab-academic-year.css',
 })
 export class TabAcademicYearComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
@@ -177,13 +170,9 @@ export class TabAcademicYearComponent implements OnInit {
     this.loadYearSemList();
   }
 
-  private getBaseUrl(): string {
-    return window.location.port === '4200' ? 'http://localhost:4000/api/service/yearsem' : '/api/service/yearsem';
-  }
-
   loadYearSemList(): void {
     this.isLoading.set(true);
-    this.http.get<{ success: boolean; results: YearSemItem[] }>(`${this.getBaseUrl()}/list`).subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -278,7 +267,7 @@ export class TabAcademicYearComponent implements OnInit {
         userInsert: currentUserEmail,
       };
 
-      this.http.put<{ success: boolean; message: string }>(`${this.getBaseUrl()}/update`, payload).subscribe({
+      this.yearSemService.updateYearSem(payload).subscribe({
         next: (res) => {
           this.isSaving.set(false);
           if (res && res.success === false) {
@@ -306,7 +295,7 @@ export class TabAcademicYearComponent implements OnInit {
         userInsert: currentUserEmail,
       };
 
-      this.http.post<{ success: boolean; message: string }>(`${this.getBaseUrl()}/add`, payload).subscribe({
+      this.yearSemService.addYearSem(payload).subscribe({
         next: (res) => {
           this.isSaving.set(false);
           if (res && res.success === false) {
@@ -333,7 +322,7 @@ export class TabAcademicYearComponent implements OnInit {
     if (this.isSettingActive()) return;
     this.isSettingActive.set(true);
     const payload = { studyYear: item.STUDY_YEAR, studySemester: item.STUDY_SEMESTER };
-    this.http.put<{ success: boolean; message: string }>(`${this.getBaseUrl()}/set-active`, payload).subscribe({
+    this.yearSemService.setActiveYearSem(payload).subscribe({
       next: () => {
         this.isSettingActive.set(false);
         this.toastService.success(`กำหนดปี ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER} เป็นปีภาคที่ใช้งานปัจจุบัน`, 'ตั้งค่าสำเร็จ');
@@ -360,7 +349,7 @@ export class TabAcademicYearComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.http.delete<{ success: boolean; message: string }>(`${this.getBaseUrl()}/delete/${item.STUDY_YEAR}/${item.STUDY_SEMESTER}`).subscribe({
+    this.yearSemService.deleteYearSem(item.STUDY_YEAR, item.STUDY_SEMESTER).subscribe({
       next: (res) => {
         this.toastService.success(`ลบปีการศึกษา ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER} สำเร็จ`);
         this.records.update((items) =>

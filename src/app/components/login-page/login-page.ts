@@ -15,25 +15,16 @@ export class LoginPageComponent {
   readonly authService = inject(AuthService);
   readonly toastService = inject(ToastService);
 
-  // Form State
-  email = signal<string>('dev07@ru.ac.th');
-  password = signal<string>('dev@24aug2026');
+  email = signal<string>('');
+  password = signal<string>('');
   showPassword = signal<boolean>(false);
   rememberMe = signal<boolean>(true);
 
-  // Loading & Alert
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
 
   togglePasswordVisibility(): void {
     this.showPassword.set(!this.showPassword());
-  }
-
-  fillTestAccount(): void {
-    this.email.set('dev07@ru.ac.th');
-    this.password.set('dev@24aug2026');
-    this.errorMessage.set('');
-    this.toastService.info('กรอกข้อมูลบัญชีทดสอบเรียบร้อย', 'บัญชีทดสอบ');
   }
 
   onSubmit(): void {

@@ -1,63 +1,17 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
 import { AuthService } from '../../../services/auth.service';
 import { OnboardingTourService } from '../../../services/onboarding-tour.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
-
-export interface ScheduleInstructorItem {
-  STUDY_YEAR: string;
-  STUDY_SEMESTER: string;
-  INSTRUCTOR_CODE: string;
-  INSTRUCTOR_NAME_THAI?: string;
-  INSTRUCTOR_NAME_ENG?: string;
-  INSTRUCTOR_NAME_RU30?: string;
-  RANK_NO?: string;
-  RANK_NAME_THAI_S?: string;
-  RANK_NAME_THAI_L?: string;
-  FACULTY_NO?: string;
-  FACULTY_NAME_THAI?: string;
-  FACULTY_NAME_SHORT?: string;
-  DEPARTMENT_NO?: string;
-  INSTRUCTOR_TYPE?: string;
-  INSTRUCTOR_SEX?: string;
-  PRENAME_NO?: string;
-  FLAG_DISPLAY?: string;
-  PERSONAL_ID?: string;
-  INSERT_DATE?: string;
-  USER_INSERT?: string;
-  SCHEDULE_COUNT?: number;
-  IS_SCHEDULED?: boolean;
-}
-
-export interface MasterInstructorOption {
-  INSTRUCTOR_CODE: string;
-  INSTRUCTOR_NAME_THAI: string;
-  INSTRUCTOR_NAME_ENG?: string;
-  INSTRUCTOR_NAME_RU30?: string;
-  RANK_NO?: string;
-  RANK_NAME_THAI_S?: string;
-  RANK_NAME_THAI_L?: string;
-  FACULTY_NO?: string;
-  FACULTY_NAME_THAI?: string;
-  FACULTY_NAME_SHORT?: string;
-  DEPARTMENT_NO?: string;
-  INSTRUCTOR_TYPE?: string;
-  INSTRUCTOR_SEX?: string;
-  PRENAME_NO?: string;
-  FLAG_DISPLAY?: string;
-  PERSONAL_ID?: string;
-}
-
-export interface FacultyOption {
-  FACULTY_NO: string;
-  FACULTY_NAME_THAI: string;
-  FACULTY_NAME_SHORT?: string;
-}
+import { InstructorService } from '../../../services/instructor.service';
+import { CurriculumService } from '../../../services/curriculum.service';
+import { ScheduleInstructorItem, MasterInstructorOption } from '../../../models/instructor.model';
+import { FacultyItem } from '../../../models/curriculum.model';
+import { YearSemService } from '../../../services/yearsem.service';
 
 import { CustomCheckboxComponent } from '../../common/custom-checkbox/custom-checkbox';
 import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom-context-menu/custom-context-menu.component';
@@ -70,7 +24,9 @@ import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom
   styleUrl: './tab-instructor.css',
 })
 export class TabInstructorComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly instructorService = inject(InstructorService);
+  private readonly curriculumService = inject(CurriculumService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly tourService = inject(OnboardingTourService);
@@ -150,7 +106,7 @@ export class TabInstructorComponent implements OnInit {
   readonly selectedInstructorDetail = signal<ScheduleInstructorItem | null>(null);
 
   // Master Faculties Lookup
-  readonly faculties = signal<FacultyOption[]>([]);
+  readonly faculties = signal<FacultyItem[]>([]);
   readonly isFacultiesLoading = signal<boolean>(false);
 
   // Modal State (Add Instructors)
@@ -324,10 +280,6 @@ export class TabInstructorComponent implements OnInit {
     return deletable.every((item) => selectedSet.has(item.INSTRUCTOR_CODE));
   });
 
-  private getBaseUrl(): string {
-    return '/api/service/instructor';
-  }
-
   ngOnInit(): void {
     this.loadActiveSemesterAndData();
     this.loadFaculties();
@@ -336,7 +288,7 @@ export class TabInstructorComponent implements OnInit {
   // Load Active Year/Semester, then load Instructor List
   loadActiveSemesterAndData(): void {
     this.isLoading.set(true);
-    this.http.get<{ success: boolean; results: { STUDY_YEAR: string; STUDY_SEMESTER: string } | null }>('/api/service/yearsem/active').subscribe({
+    this.yearSemService.getActiveYearSem().subscribe({
       next: (res) => {
         if (res && res.results) {
           this.activeYear.set(res.results.STUDY_YEAR);
@@ -359,12 +311,7 @@ export class TabInstructorComponent implements OnInit {
     const year = this.activeYear();
     const sem = this.activeSemester();
 
-    let url = `${this.getBaseUrl()}/list?year=${year}&semester=${sem}`;
-    if (this.selectedFacultyNo()) {
-      url += `&facultyNo=${encodeURIComponent(this.selectedFacultyNo())}`;
-    }
-
-    this.http.get<{ success: boolean; results: ScheduleInstructorItem[] }>(url).subscribe({
+    this.instructorService.listInstructors(year, sem, this.selectedFacultyNo() || undefined).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success) {
@@ -383,7 +330,7 @@ export class TabInstructorComponent implements OnInit {
   // Load Faculties for dropdown
   loadFaculties(): void {
     this.isFacultiesLoading.set(true);
-    this.http.get<{ success: boolean; results: FacultyOption[] }>('/api/service/curriculum/faculties').subscribe({
+    this.curriculumService.getFaculties().subscribe({
       next: (res) => {
         this.isFacultiesLoading.set(false);
         if (res && res.success) {
@@ -399,7 +346,7 @@ export class TabInstructorComponent implements OnInit {
   // Load Master Instructors from UGB_INSTRUCTOR
   loadMasterInstructors(): void {
     this.isMasterLoading.set(true);
-    this.http.get<{ success: boolean; results: MasterInstructorOption[] }>(`${this.getBaseUrl()}/master-list`).subscribe({
+    this.instructorService.getMasterInstructors().subscribe({
       next: (res) => {
         this.isMasterLoading.set(false);
         if (res && res.success) {
@@ -478,7 +425,7 @@ export class TabInstructorComponent implements OnInit {
       userInsert: this.authService.currentUser()?.email || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string }>(`${this.getBaseUrl()}/delete`, payload).subscribe({
+    this.instructorService.deleteScheduleInstructor(payload).subscribe({
       next: (res) => {
         if (res && res.success) {
           this.toastService.success(`ลบอาจารย์ "${nameDisplay}" สำเร็จ`);
@@ -531,7 +478,7 @@ export class TabInstructorComponent implements OnInit {
       userInsert: this.authService.currentUser()?.email || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string; deletedCount?: number }>(`${this.getBaseUrl()}/delete-bulk`, payload).subscribe({
+    this.instructorService.deleteBulkScheduleInstructors(payload as any).subscribe({
       next: (res) => {
         this.isBulkDeleting.set(false);
         if (res && res.success) {
@@ -613,7 +560,7 @@ export class TabInstructorComponent implements OnInit {
       userInsert: this.authService.currentUser()?.email || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string; insertedCount?: number }>(`${this.getBaseUrl()}/add`, payload).subscribe({
+    this.instructorService.addScheduleInstructors(payload).subscribe({
       next: (res) => {
         this.isSaving.set(false);
         if (res && res.success) {

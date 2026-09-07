@@ -51,12 +51,13 @@
             type="button"
             class="topbar-theme-toggle"
             (click)="themeService.toggleTheme()"
-            [title]="themeService.isDark() ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode)'"
+            [title]="themeService.isDark() ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode - Beta ยังไม่สมบูรณ์)'"
             [attr.aria-label]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
           >
             <span class="material-symbols-rounded theme-icon" [class.is-dark]="themeService.isDark()">
               {{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}
             </span>
+            <span class="theme-beta-badge">Beta</span>
           </button>
 
           <!-- Active Semester Pill -->
@@ -70,7 +71,7 @@
             <div class="topbar-avatar">
               <span class="material-symbols-rounded">person</span>
             </div>
-            <span class="topbar-name">{{ authService.currentUser()?.displayName || 'นายทดสอบ พัฒนาระบบ' }}</span>
+            <span class="topbar-name">{{ authService.currentUser()?.displayName || 'ผู้ใช้งานระบบ' }}</span>
             <button class="topbar-logout-btn" (click)="authService.logout()" title="ออกจากระบบ">
               <span class="material-symbols-rounded">logout</span>
             </button>

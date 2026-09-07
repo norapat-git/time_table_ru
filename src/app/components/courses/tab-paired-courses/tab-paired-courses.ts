@@ -1,24 +1,16 @@
 import { Component, signal, computed, inject, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
 import { OnboardingTourService } from '../../../services/onboarding-tour.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
+import { PairCourseService } from '../../../services/pair-course.service';
+import { PairedCourseDbRow } from '../../../models/pair-course.model';
+import { CourseService } from '../../../services/course.service';
 
-export interface PairedCourseDbRow {
-  PAIR_COURSE_GROUP_ID: number;
-  COURSE_NO: string;
-  START_YEAR?: string | null;
-  STOP_YEAR?: string | null;
-  YEAR_LEVEL?: string | null;
-  SEMESTER?: string | null;
-  COURSE_NAME_THAI?: string | null;
-  COURSE_NAME_ENG_L?: string | null;
-  CREDIT?: number | null;
-}
+
 
 export interface PairedGroupView {
   groupId: number;
@@ -52,7 +44,8 @@ import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom
   styleUrl: './tab-paired-courses.css',
 })
 export class TabPairedCoursesComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly pairCourseService = inject(PairCourseService);
+  private readonly courseService = inject(CourseService);
   private readonly toastService = inject(ToastService);
   private readonly tourService = inject(OnboardingTourService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
@@ -291,17 +284,13 @@ export class TabPairedCoursesComponent implements OnInit {
     this.loadFirstLetters();
   }
 
-  private getBaseUrl(): string {
-    return window.location.port === '4200' ? 'http://localhost:4000/api/service' : '/api/service';
-  }
-
   // Load all paired courses from DB
   loadPairCoursesList(): void {
     this.isLoading.set(true);
     this.selectedGroupIds.set([]);
 
-    this.http
-      .get<{ success: boolean; results: PairedCourseDbRow[] }>(`${this.getBaseUrl()}/pair-course/list`)
+    this.pairCourseService
+      .listPairCourses()
       .subscribe({
         next: (res) => {
           this.isLoading.set(false);
@@ -318,10 +307,9 @@ export class TabPairedCoursesComponent implements OnInit {
       });
   }
 
-  // Load First Letters (A, B, C...)
   loadFirstLetters(): void {
     this.isLettersLoading.set(true);
-    this.http.get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/letters`).subscribe({
+    this.courseService.getFirstLetters().subscribe({
       next: (res) => {
         this.isLettersLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -361,9 +349,7 @@ export class TabPairedCoursesComponent implements OnInit {
     this.ugbCourses.set([]);
     this.isPrefixesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/prefixes/${letter}`)
-      .subscribe({
+    this.courseService.getPrefixGroups(letter).subscribe({
         next: (res) => {
           this.isPrefixesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -385,11 +371,7 @@ export class TabPairedCoursesComponent implements OnInit {
     this.selectedPrefix.set(prefix);
     this.isUgbCoursesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: UgbCourseOption[] }>(
-        `${this.getBaseUrl()}/course/search-ugb?prefix=${prefix}`
-      )
-      .subscribe({
+    this.courseService.searchUgbCourses({ prefix }).subscribe({
         next: (res) => {
           this.isUgbCoursesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -419,16 +401,7 @@ export class TabPairedCoursesComponent implements OnInit {
     const name = this.drawerNameQuery().trim();
 
     if (code.length >= 2 || name.length >= 2) {
-      this.isUgbCoursesLoading.set(true);
-      const params = new URLSearchParams();
-      if (code) params.set('code', code);
-      if (name) params.set('name', name);
-
-      this.http
-        .get<{ success: boolean; results: UgbCourseOption[] }>(
-          `${this.getBaseUrl()}/course/search-ugb?${params.toString()}`
-        )
-        .subscribe({
+      this.courseService.searchUgbCourses({ code, name }).subscribe({
           next: (res) => {
             this.isUgbCoursesLoading.set(false);
             if (res && res.success && Array.isArray(res.results)) {
@@ -487,8 +460,8 @@ export class TabPairedCoursesComponent implements OnInit {
 
   loadInitialInlineCourses(): void {
     this.isInlineLoading.set(true);
-    this.http
-      .get<{ success: boolean; results: UgbCourseOption[] }>(`${this.getBaseUrl()}/course/search-ugb?prefix=A`)
+    this.courseService
+      .searchUgbCourses({ prefix: 'A' })
       .subscribe({
         next: (res) => {
           this.isInlineLoading.set(false);
@@ -506,10 +479,8 @@ export class TabPairedCoursesComponent implements OnInit {
     this.inlineSearchQuery.set(q);
     if (q.trim().length >= 1) {
       this.isInlineLoading.set(true);
-      this.http
-        .get<{ success: boolean; results: UgbCourseOption[] }>(
-          `${this.getBaseUrl()}/course/search-ugb?query=${encodeURIComponent(q.trim())}`
-        )
+      this.courseService
+        .searchUgbCourses({ search: q.trim() })
         .subscribe({
           next: (res) => {
             this.isInlineLoading.set(false);
@@ -745,11 +716,8 @@ export class TabPairedCoursesComponent implements OnInit {
 
     if (this.modalMode() === 'edit' && this.editingGroupId()) {
       const gId = this.editingGroupId()!;
-      this.http
-        .put<{ success: boolean; message: string; groupId?: number }>(
-          `${this.getBaseUrl()}/pair-course/update/${gId}`,
-          payload
-        )
+      this.pairCourseService
+        .updatePairGroup(gId, payload)
         .subscribe({
           next: (res) => {
             this.isSaving.set(false);
@@ -770,11 +738,8 @@ export class TabPairedCoursesComponent implements OnInit {
           },
         });
     } else {
-      this.http
-        .post<{ success: boolean; message: string; groupId?: number }>(
-          `${this.getBaseUrl()}/pair-course/add`,
-          payload
-        )
+      this.pairCourseService
+        .addPairGroup(payload)
         .subscribe({
           next: (res) => {
             this.isSaving.set(false);
@@ -812,8 +777,7 @@ export class TabPairedCoursesComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.isDeleting.set(true);
-    this.http.delete(`${this.getBaseUrl()}/pair-course/delete/${groupId}`).subscribe({
+    this.pairCourseService.deletePairGroup(groupId).subscribe({
       next: () => {
         this.isDeleting.set(false);
         this.toastService.success(`ลบกลุ่มวิชาคู่ที่ ${groupId} สำเร็จ`);
@@ -844,12 +808,8 @@ export class TabPairedCoursesComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.isDeleting.set(true);
-    this.http
-      .post<{ success: boolean; message: string; deletedCount?: number }>(
-        `${this.getBaseUrl()}/pair-course/delete-bulk`,
-        { groupIds: ids }
-      )
+    this.pairCourseService
+      .deletePairGroupsBulk({ groupIds: ids })
       .subscribe({
         next: (res) => {
           this.isDeleting.set(false);

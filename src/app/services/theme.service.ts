@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 
-export type AppTheme = 'light' | 'dark' | 'auto';
+export type AppTheme = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'app_theme';
 
@@ -9,19 +9,14 @@ const THEME_STORAGE_KEY = 'app_theme';
 })
 export class ThemeService {
   private readonly _theme = signal<AppTheme>(this.getInitialTheme());
-  private readonly _systemDark = signal<boolean>(this.checkSystemDark());
 
   readonly currentTheme = this._theme.asReadonly();
 
   readonly isDark = computed<boolean>(() => {
-    const t = this._theme();
-    if (t === 'dark') return true;
-    if (t === 'light') return false;
-    return this._systemDark();
+    return this._theme() === 'dark';
   });
 
   constructor() {
-    this.initSystemListener();
     this.applyThemeToDom(this.isDark());
   }
 
@@ -41,30 +36,11 @@ export class ThemeService {
   private getInitialTheme(): AppTheme {
     try {
       const saved = localStorage.getItem(THEME_STORAGE_KEY) as AppTheme;
-      if (saved === 'light' || saved === 'dark' || saved === 'auto') {
-        return saved;
+      if (saved === 'dark') {
+        return 'dark';
       }
     } catch {}
-    return 'auto';
-  }
-
-  private checkSystemDark(): boolean {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  }
-
-  private initSystemListener(): void {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', (e) => {
-        this._systemDark.set(e.matches);
-        if (this._theme() === 'auto') {
-          this.applyThemeToDom(this.isDark());
-        }
-      });
-    }
+    return 'light';
   }
 
   private applyThemeToDom(dark: boolean): void {
@@ -75,3 +51,4 @@ export class ThemeService {
     root.style.colorScheme = themeStr;
   }
 }
+

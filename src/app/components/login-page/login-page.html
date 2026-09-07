@@ -38,7 +38,7 @@
             id="login-email"
             type="email"
             class="form-control"
-            placeholder="เช่น dev07@ru.ac.th"
+            placeholder="เช่น name@ru.ac.th"
             [ngModel]="email()"
             (ngModelChange)="email.set($event)"
             name="email"
@@ -76,14 +76,6 @@
             </span>
           </button>
         </div>
-      </div>
-
-      <!-- Quick Fill Test Account Button -->
-      <div class="quick-action-row">
-        <button type="button" class="btn-preset-link" (click)="fillTestAccount()">
-          <span class="material-symbols-rounded">touch_app</span>
-          <span>ใช้บัญชีทดสอบ (dev07@ru.ac.th)</span>
-        </button>
       </div>
 
       <!-- Sign In Submit Button -->

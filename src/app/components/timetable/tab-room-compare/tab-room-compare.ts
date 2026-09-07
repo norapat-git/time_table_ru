@@ -1,13 +1,14 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { ToastService } from '../../../services/toast.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { TabLockService } from '../../../services/tab-lock.service';
+import { TimetableService } from '../../../services/timetable.service';
+import { YearSemService } from '../../../services/yearsem.service';
 
 export interface InstructorMeta {
   INSTRUCTOR_CODE: string;
@@ -80,7 +81,8 @@ export interface RoomSlotCell {
   styleUrl: './tab-room-compare.css',
 })
 export class TabRoomCompareComponent implements OnInit, OnDestroy {
-  private readonly http = inject(HttpClient);
+  private readonly timetableService = inject(TimetableService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
@@ -101,10 +103,6 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.tabLockService.unlock();
-  }
-
-  private getBaseUrl(): string {
-    return '/api/service/timetable';
   }
 
   // Active Year / Semester
@@ -273,7 +271,7 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
   }
 
   loadYearSemesters(): void {
-    this.http.get<{ success: boolean; results: { STUDY_YEAR: string; STUDY_SEMESTER: string; STUDY_ACTIVE: string }[] }>('/api/service/yearsem/list').subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         if (res && res.results && res.results.length > 0) {
           this.yearSemList.set(res.results);
@@ -291,9 +289,7 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
   }
 
   loadRooms(): void {
-    this.http.get<{ success: boolean; results: { value: string; label: string; subLabel?: string }[] }>(
-      `${this.getBaseUrl()}/rooms`
-    ).subscribe({
+    this.timetableService.getRoomOptions().subscribe({
       next: (res) => {
         if (res && res.success && res.results && res.results.length > 0) {
           const roomSet = new Set<string>();
@@ -347,13 +343,11 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
     if (!year || !sem) return;
 
     this.isLoading.set(true);
-    const url = `${this.getBaseUrl()}/list?year=${encodeURIComponent(year)}&semester=${encodeURIComponent(sem)}`;
-
-    this.http.get<{ success: boolean; results: ScheduleClassItem[] }>(url).subscribe({
+    this.timetableService.getScheduleClasses(year, sem).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success) {
-          const list = (res.results || []).map((c) => ({
+          const list = (res.results || []).map((c: any) => ({
             ...c,
             originalRoomCode: c.ROOM_CODE,
             originalTimeCode: c.TIME_CODE,
@@ -365,13 +359,13 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
           this.pendingMoves.set([]);
         } else {
           this.allClassesForDay.set([]);
-          this.originalClassesForDay.set([]);
-          this.pendingMoves.set([]);
         }
       },
-      error: (err) => {
+      error: () => {
         this.isLoading.set(false);
-        this.toastService.error(err?.message || 'ไม่สามารถโหลดข้อมูลตารางสอนได้');
+        this.allClassesForDay.set([]);
+        this.originalClassesForDay.set([]);
+        this.pendingMoves.set([]);
       },
     });
   }
@@ -759,10 +753,7 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
       userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string; updatedCount?: number }>(
-      `${this.getBaseUrl()}/update-slots`,
-      payload
-    ).subscribe({
+    this.timetableService.updateScheduleSlots(payload as any).subscribe({
       next: (res) => {
         this.isSaving.set(false);
         if (res && res.success) {

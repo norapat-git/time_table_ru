@@ -1,55 +1,15 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
+import { ReportService } from '../../../services/report.service';
+import { YearSemService } from '../../../services/yearsem.service';
+import { Mr30ReportItem, Mr30FacultyOption } from '../../../models/report.model';
+import { YearSemItem } from '../../../models/yearsem.model';
 
-export interface Mr30Instructor {
-  INSTRUCTOR_CODE: string;
-  INSTRUCTOR_NAME_THAI?: string;
-  INSTRUCTOR_NAME_ENG?: string;
-  RANK_NAME_THAI_S?: string;
-  RANK_NAME_THAI_L?: string;
-  SEQUENCE_INSTRUCTOR?: number;
-}
 
-export interface Mr30ReportItem {
-  key: string;
-  STUDY_YEAR: string;
-  STUDY_SEMESTER: string;
-  COURSE_NO: string;
-  COURSE_NAME_THAI?: string;
-  COURSE_NAME_ENG?: string;
-  CREDIT?: number;
-  SECTION_NO: number;
-  COURSE_METHOD?: number;
-  COURSE_METHOD_NUMBER?: number;
-  DAY_CODE: number;
-  TIME_CODE: number;
-  TIME_START?: string;
-  TIME_END?: string;
-  PERIOD: string;
-  BUILDING_CODE?: string;
-  ROOM_CODE?: string;
-  FACULTY_NO?: string;
-  FACULTY_NAME_THAI?: string;
-  FACULTY_NAME_SHORT?: string;
-  INSTRUCTORS: Mr30Instructor[];
-}
-
-export interface FacultyOption {
-  FACULTY_NO: string;
-  FACULTY_NAME_THAI: string;
-  FACULTY_NAME_SHORT?: string;
-}
-
-export interface YearSemItem {
-  STUDY_YEAR: string;
-  STUDY_SEMESTER: string;
-  STUDY_ACTIVE: string;
-}
 
 @Component({
   selector: 'app-tab-report-mr30',
@@ -59,7 +19,8 @@ export interface YearSemItem {
   styleUrl: './tab-report-mr30.css',
 })
 export class TabReportMr30Component implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly reportService = inject(ReportService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
 
   readonly isLoading = signal<boolean>(false);
@@ -71,7 +32,7 @@ export class TabReportMr30Component implements OnInit {
   readonly yearSemList = signal<YearSemItem[]>([]);
 
   // Filter States
-  readonly facultiesList = signal<FacultyOption[]>([]);
+  readonly facultiesList = signal<Mr30FacultyOption[]>([]);
   readonly selectedFaculty = signal<string>('ALL');
   readonly selectedDay = signal<string>('ALL');
   readonly searchQuery = signal<string>('');
@@ -238,7 +199,7 @@ export class TabReportMr30Component implements OnInit {
   }
 
   loadFaculties(): void {
-    this.http.get<{ success: boolean; results: FacultyOption[] }>('/api/service/report/mr30/faculties').subscribe({
+    this.reportService.getMr30Faculties().subscribe({
       next: (res) => {
         if (res && res.success) {
           this.facultiesList.set(res.results || []);
@@ -249,7 +210,7 @@ export class TabReportMr30Component implements OnInit {
   }
 
   loadYearSemesters(): void {
-    this.http.get<{ success: boolean; results: YearSemItem[] }>('/api/service/yearsem/list').subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         if (res && res.success && res.results) {
           this.yearSemList.set(res.results);
@@ -281,14 +242,8 @@ export class TabReportMr30Component implements OnInit {
     const year = this.activeYear();
     const sem = this.activeSemester();
 
-    let url = `/api/service/report/mr30?year=${year}&semester=${sem}`;
-
-    this.http
-      .get<{
-        success: boolean;
-        results: Mr30ReportItem[];
-        summary: { totalCourses: number; totalSlots: number; totalInstructors: number; totalFaculties: number };
-      }>(url)
+    this.reportService
+      .getMr30Report(year, sem)
       .subscribe({
         next: (res) => {
           this.isLoading.set(false);

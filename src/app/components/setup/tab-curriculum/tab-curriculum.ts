@@ -1,49 +1,14 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
 import { OnboardingTourService } from '../../../services/onboarding-tour.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
-
-export interface FacultyItem {
-  FACULTY_NO: string;
-  FACULTY_NAME_THAI: string;
-  FACULTY_NAME_SHORT?: string;
-  FACULTY_NAME_ENG?: string;
-}
-
-export interface ProgramGroupItem {
-  FACULTY_NO: string;
-  GROUP_NO: string;
-  GROUP_NAME: string;
-}
-
-export interface ProgramSubGroupItem {
-  FACULTY_NO: string;
-  GROUP_NO: string;
-  SUB_GROUP_NO: string;
-  SUB_GROUP_NAME: string;
-}
-
-export interface CurriculumCourseRow {
-  FACULTY_NO: string;
-  GROUP_NO: string;
-  SUB_GROUP_NO?: string;
-  YEAR_LEVEL: string;
-  SEMESTER: string;
-  COURSE_NO: string;
-  YEAR_ENROLL?: string;
-  FACULTY_NAME_THAI?: string;
-  FACULTY_NAME_SHORT?: string;
-  GROUP_NAME?: string;
-  SUB_GROUP_NAME?: string;
-  COURSE_NAME_THAI?: string;
-  COURSE_NAME_ENG_L?: string;
-  CREDIT?: number;
-}
+import { CurriculumService } from '../../../services/curriculum.service';
+import { FacultyItem, ProgramGroupItem, ProgramSubGroupItem, CurriculumCourseRow } from '../../../models/curriculum.model';
+import { CourseService } from '../../../services/course.service';
 
 export interface UgbCourseOption {
   COURSE_NO: string;
@@ -77,7 +42,8 @@ import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom
   styleUrl: './tab-curriculum.css',
 })
 export class TabCurriculumComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly curriculumService = inject(CurriculumService);
+  private readonly courseService = inject(CourseService);
   private readonly toastService = inject(ToastService);
   private readonly tourService = inject(OnboardingTourService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
@@ -551,11 +517,8 @@ export class TabCurriculumComponent implements OnInit {
       courseNo: r.COURSE_NO,
     }));
 
-    this.http
-      .post<{ success: boolean; message: string; deletedCount?: number }>(
-        `${this.getBaseUrl()}/curriculum/delete-bulk`,
-        { items: itemsToDelete }
-      )
+    this.curriculumService
+      .deleteCurriculumBulk({ items: itemsToDelete })
       .subscribe({
         next: () => {
           this.isDeleting.set(false);
@@ -575,13 +538,9 @@ export class TabCurriculumComponent implements OnInit {
     this.loadCurriculumList();
   }
 
-  private getBaseUrl(): string {
-    return '/api/service';
-  }
-
   // Load Faculties from UGB_FACULTY
   loadFaculties(): void {
-    this.http.get<{ success: boolean; results: FacultyItem[] }>(`${this.getBaseUrl()}/curriculum/faculties`).subscribe({
+    this.curriculumService.getFaculties().subscribe({
       next: (res) => {
         if (res && res.success && Array.isArray(res.results)) {
           this.facultiesList.set(res.results);
@@ -602,8 +561,8 @@ export class TabCurriculumComponent implements OnInit {
     this.currentPage.set(1);
 
     if (facNo && facNo !== 'ALL') {
-      this.http
-        .get<{ success: boolean; results: ProgramGroupItem[] }>(`${this.getBaseUrl()}/curriculum/groups/${facNo}`)
+      this.curriculumService
+        .getGroupsByFaculty(facNo)
         .subscribe({
           next: (res) => {
             if (res && res.success && Array.isArray(res.results)) {
@@ -617,12 +576,11 @@ export class TabCurriculumComponent implements OnInit {
     }
   }
 
-  // Load Main Curriculum Courses List
   loadCurriculumList(): void {
     this.isLoading.set(true);
     this.selectedKeys.set([]);
 
-    this.http.get<{ success: boolean; results: CurriculumCourseRow[] }>(`${this.getBaseUrl()}/curriculum/list`).subscribe({
+    this.curriculumService.listCurriculumCourses().subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -765,8 +723,8 @@ export class TabCurriculumComponent implements OnInit {
     this.existingCurriculumCourses.set([]);
 
     if (facNo) {
-      this.http
-        .get<{ success: boolean; results: ProgramGroupItem[] }>(`${this.getBaseUrl()}/curriculum/groups/${facNo}`)
+      this.curriculumService
+        .getGroupsByFaculty(facNo)
         .subscribe({
           next: (res) => {
             if (res && res.success && Array.isArray(res.results)) {
@@ -792,10 +750,8 @@ export class TabCurriculumComponent implements OnInit {
     this.existingCurriculumCourses.set([]);
 
     if (this.modalFacultyNo && grpNo) {
-      this.http
-        .get<{ success: boolean; results: ProgramSubGroupItem[] }>(
-          `${this.getBaseUrl()}/curriculum/sub-groups/${this.modalFacultyNo}/${grpNo}`
-        )
+      this.curriculumService
+        .getSubGroups(this.modalFacultyNo, grpNo)
         .subscribe({
           next: (res) => {
             if (res && res.success && Array.isArray(res.results)) {
@@ -819,18 +775,14 @@ export class TabCurriculumComponent implements OnInit {
     this.isExistingLoading.set(true);
     this.hasQueriedExisting.set(true);
 
-    const params = new URLSearchParams({
-      facultyNo: this.modalFacultyNo,
-      groupNo: this.modalGroupNo,
-      subGroupNo: this.modalSubGroupNo || '00',
-      yearLevel: this.modalYearLevel,
-      semester: this.modalSemester,
-    });
-
-    this.http
-      .get<{ success: boolean; results: CurriculumCourseRow[] }>(
-        `${this.getBaseUrl()}/curriculum/list?${params.toString()}`
-      )
+    this.curriculumService
+      .listCurriculumCourses({
+        facultyNo: this.modalFacultyNo,
+        groupNo: this.modalGroupNo,
+        subGroupNo: this.modalSubGroupNo || '00',
+        yearLevel: this.modalYearLevel,
+        semester: this.modalSemester,
+      })
       .subscribe({
         next: (res) => {
           this.isExistingLoading.set(false);
@@ -858,10 +810,9 @@ export class TabCurriculumComponent implements OnInit {
     }
   }
 
-  // Level 1 Letters
   loadFirstLetters(): void {
     this.isLettersLoading.set(true);
-    this.http.get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/letters`).subscribe({
+    this.courseService.getFirstLetters().subscribe({
       next: (res) => {
         this.isLettersLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -881,9 +832,7 @@ export class TabCurriculumComponent implements OnInit {
     this.ugbCourses.set([]);
     this.isPrefixesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/prefixes/${letter}`)
-      .subscribe({
+    this.courseService.getPrefixGroups(letter).subscribe({
         next: (res) => {
           this.isPrefixesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -904,11 +853,7 @@ export class TabCurriculumComponent implements OnInit {
     this.selectedPrefix.set(prefix);
     this.isUgbCoursesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: UgbCourseOption[] }>(
-        `${this.getBaseUrl()}/course/search-ugb?prefix=${prefix}`
-      )
-      .subscribe({
+    this.courseService.searchUgbCourses({ prefix }).subscribe({
         next: (res) => {
           this.isUgbCoursesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -936,16 +881,7 @@ export class TabCurriculumComponent implements OnInit {
     const name = this.pickerNameQuery().trim();
 
     if (code.length >= 2 || name.length >= 2) {
-      this.isUgbCoursesLoading.set(true);
-      const params = new URLSearchParams();
-      if (code) params.set('code', code);
-      if (name) params.set('name', name);
-
-      this.http
-        .get<{ success: boolean; results: UgbCourseOption[] }>(
-          `${this.getBaseUrl()}/course/search-ugb?${params.toString()}`
-        )
-        .subscribe({
+      this.courseService.searchUgbCourses({ code, name }).subscribe({
           next: (res) => {
             this.isUgbCoursesLoading.set(false);
             if (res && res.success && Array.isArray(res.results)) {
@@ -1010,12 +946,7 @@ export class TabCurriculumComponent implements OnInit {
       courseNos: list.map((c) => c.COURSE_NO),
     };
 
-    this.http
-      .post<{ success: boolean; message: string; addedCount?: number; skippedCount?: number }>(
-        `${this.getBaseUrl()}/curriculum/add`,
-        payload
-      )
-      .subscribe({
+    this.curriculumService.addCurriculumCourses(payload).subscribe({
         next: (res) => {
           this.isSaving.set(false);
           if (res && res.success) {
@@ -1063,7 +994,7 @@ export class TabCurriculumComponent implements OnInit {
       courseNo: row.COURSE_NO,
     };
 
-    this.http.post<{ success: boolean; message: string }>(`${this.getBaseUrl()}/curriculum/delete`, payload).subscribe({
+    this.curriculumService.deleteCurriculumCourse(payload).subscribe({
       next: (res) => {
         this.isDeleting.set(false);
         this.toastService.success(`ลบวิชา ${row.COURSE_NO} สำเร็จ`);
@@ -1108,11 +1039,8 @@ export class TabCurriculumComponent implements OnInit {
         courseNo: r.COURSE_NO,
       }));
 
-    this.http
-      .post<{ success: boolean; message: string; deletedCount?: number }>(
-        `${this.getBaseUrl()}/curriculum/delete-bulk`,
-        { items: itemsToDelete }
-      )
+    this.curriculumService
+      .deleteCurriculumBulk({ items: itemsToDelete })
       .subscribe({
         next: (res) => {
           this.isDeleting.set(false);

@@ -1,7 +1,6 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy, effect, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { CustomCheckboxComponent } from '../../common/custom-checkbox/custom-checkbox';
@@ -10,6 +9,8 @@ import { AuthService } from '../../../services/auth.service';
 import { OnboardingTourService, TourStep } from '../../../services/onboarding-tour.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { TabLockService } from '../../../services/tab-lock.service';
+import { TimetableService } from '../../../services/timetable.service';
+import { YearSemService } from '../../../services/yearsem.service';
 
 export interface InstructorMeta {
   INSTRUCTOR_CODE: string;
@@ -156,7 +157,8 @@ export interface HoveredDropInfo {
   styleUrl: './tab-student-schedule.css',
 })
 export class TabStudentScheduleComponent implements OnInit, OnDestroy {
-  private readonly http = inject(HttpClient);
+  private readonly timetableService = inject(TimetableService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   readonly tourService = inject(OnboardingTourService);
@@ -780,7 +782,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   loadInitialData(): void {
     this.isLoading.set(true);
     // 1. Fetch Year/Semesters
-    this.http.get<{ success: boolean; results: any[] }>('/api/service/yearsem/list').subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         if (res && res.success && res.results) {
           this.yearSemList.set(res.results);
@@ -808,14 +810,14 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   loadTimeSlots(): void {
     const isSummer = this.activeSemester() === '3' || this.activeSemester().toUpperCase() === 'S';
     const flag = isSummer ? '2' : '1';
-    this.http.get<{ success: boolean; results: any[] }>(`/api/service/timetable/times?flag=${flag}`).subscribe({
+    this.timetableService.getTimeSlots(flag).subscribe({
       next: (res) => {
         if (res && res.success && res.results && res.results.length > 0) {
           const list: TimeSlotConfig[] = res.results
-            .filter((r) => Number(r.TIME_CODE || r.code) >= 1 && Number(r.TIME_CODE || r.code) <= 7)
+            .filter((r) => Number(r.TIME_CODE || (r as any).code) >= 1 && Number(r.TIME_CODE || (r as any).code) <= 7)
             .map((r) => ({
-              code: Number(r.TIME_CODE) || r.code,
-              TIME_CODE: String(r.TIME_CODE || r.code),
+              code: Number(r.TIME_CODE) || (r as any).code,
+              TIME_CODE: String(r.TIME_CODE || (r as any).code),
               label: r.label || `คาบที่ ${r.TIME_CODE}`,
               period: r.period || '',
               TIME_START: r.TIME_START,
@@ -836,7 +838,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.isRoomsLoading.set(true);
     const year = this.activeYear();
     const sem = this.activeSemester();
-    this.http.get<{ success: boolean; results: { value: string; label: string }[]; recentRooms?: { value: string; label: string }[] }>(`/api/service/timetable/scheduled-rooms?year=${year}&semester=${sem}`).subscribe({
+    this.timetableService.getScheduledRooms(year, sem).subscribe({
       next: (res) => {
         this.isRoomsLoading.set(false);
         if (res && res.success) {
@@ -889,9 +891,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading.set(true);
-    let url = `/api/service/timetable/list?year=${year}&semester=${sem}&roomCode=${encodeURIComponent(room)}`;
-
-    this.http.get<{ success: boolean; results: ScheduleClassItem[] }>(url).subscribe({
+    this.timetableService.getScheduleClasses(year, sem, { roomCode: room }).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         if (res && res.success) {
@@ -901,7 +901,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
             originalTimeCode: item.TIME_CODE,
             isMoved: false,
           }));
-          this.classList.set(list);
+          this.classList.set(list as any);
           this.originalClassList.set(JSON.parse(JSON.stringify(list)));
           this.pendingMoves.set([]);
         } else {
@@ -1313,15 +1313,9 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
 
     const year = this.activeYear();
     const sem = this.activeSemester();
-    const codesParam = encodeURIComponent(instCodes.join(','));
-    const url = `/api/service/timetable/instructor-availability?year=${year}&semester=${sem}&instructorCodes=${codesParam}&courseNo=${encodeURIComponent(courseNo)}`;
 
-    this.http
-      .get<{
-        success: boolean;
-        hasRu30Schedule?: boolean;
-        slots: InstructorSlotAvailability[];
-      }>(url)
+    this.timetableService
+      .getInstructorAvailability(year, sem, instCodes, courseNo)
       .subscribe({
         next: (res) => {
           if (!res || !res.success || !res.slots) return;
@@ -1411,11 +1405,11 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     const payload = {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
-      moves: moves,
+      moves: moves as any,
       userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string; updatedCount?: number }>('/api/service/timetable/update-slots', payload).subscribe({
+    this.timetableService.updateScheduleSlots(payload).subscribe({
       next: (res) => {
         this.isSavingMoves.set(false);
         if (res && res.success) {
@@ -1683,25 +1677,21 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     const year = this.activeYear();
     const sem = this.activeSemester();
     this.isInstructorsLoading.set(true);
-    this.http
-      .get<{ success: boolean; results: InstructorItem[] }>(
-        `/api/service/timetable/instructors?year=${year}&semester=${sem}`
-      )
-      .subscribe({
-        next: (res) => {
-          this.isInstructorsLoading.set(false);
-          if (res && res.success && res.results) {
-            this.allInstructors.set(res.results);
-          }
-        },
-        error: () => {
-          this.isInstructorsLoading.set(false);
-        },
-      });
+    this.timetableService.getAllInstructors(year, sem).subscribe({
+      next: (res) => {
+        this.isInstructorsLoading.set(false);
+        if (res && res.success && res.results) {
+          this.allInstructors.set(res.results as any);
+        }
+      },
+      error: () => {
+        this.isInstructorsLoading.set(false);
+      },
+    });
   }
 
   loadAllRoomOptions(): void {
-    this.http.get<{ success: boolean; results: any[] }>('/api/service/timetable/rooms').subscribe({
+    this.timetableService.getRoomOptions().subscribe({
       next: (res) => {
         if (res && res.success && res.results) {
           const mapped: SelectOption[] = res.results.map((r: any) => ({
@@ -1760,12 +1750,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     const year = this.activeYear();
     const sem = this.activeSemester();
 
-    let url = `/api/service/timetable/search-ugb?year=${year}&semester=${sem}`;
-    if (q) {
-      url += `&search=${encodeURIComponent(q)}`;
-    }
-
-    this.http.get<{ success: boolean; results: CourseOption[] }>(url).subscribe({
+    this.timetableService.searchUgbCourses(year, sem, { search: q }).subscribe({
       next: (res) => {
         this.isInlineSearching.set(false);
         if (res && res.success) {
@@ -1956,10 +1941,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string; insertedCount?: number }>(
-      '/api/service/timetable/clone-semester',
-      payload
-    ).subscribe({
+    this.timetableService.cloneSemester(payload).subscribe({
       next: (res) => {
         this.isCloning.set(false);
         if (res && res.success) {
@@ -1988,29 +1970,17 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.isAvailabilityLoading.set(true);
     const year = this.activeYear();
     const sem = this.activeSemester();
-    const codesParam = encodeURIComponent(codes.join(','));
-
     const currentCourse = this.editCourseNo().trim();
-    let url = `/api/service/timetable/instructor-availability?year=${year}&semester=${sem}&instructorCodes=${codesParam}`;
-    if (currentCourse) {
-      url += `&courseNo=${encodeURIComponent(currentCourse)}`;
-    }
 
-    this.http
-      .get<{
-        success: boolean;
-        totalInstructors: number;
-        hasRu30Schedule?: boolean;
-        slots: InstructorSlotAvailability[];
-        commonFreeSlots: InstructorSlotAvailability[];
-      }>(url)
+    this.timetableService
+      .getInstructorAvailability(year, sem, codes, currentCourse)
       .subscribe({
         next: (res) => {
           this.isAvailabilityLoading.set(false);
           if (res && res.success && res.slots && res.slots.length > 0) {
             this.hasRu30Schedule.set(!!res.hasRu30Schedule);
-            this.availabilitySlots.set(res.slots);
-            this.commonFreeSlots.set(res.commonFreeSlots || []);
+            this.availabilitySlots.set(res.slots as any);
+            this.commonFreeSlots.set((res.commonFreeSlots || []) as any);
           } else {
             this.hasRu30Schedule.set(false);
             this.availabilitySlots.set([]);
@@ -2038,17 +2008,10 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.isCheckingSlotInstructors.set(true);
     const year = this.activeYear();
     const sem = this.activeSemester();
-    const timesParam = encodeURIComponent(times.join(','));
-    const currentCourse = encodeURIComponent((this.editCourseNo() || '').trim());
-    const url = `/api/service/timetable/slot-available-instructors?year=${year}&semester=${sem}&dayCode=${day}&timeCodes=${timesParam}&courseNo=${currentCourse}`;
+    const currentCourse = (this.editCourseNo() || '').trim();
 
-    this.http
-      .get<{
-        success: boolean;
-        availableCodes: string[];
-        busyCodes: string[];
-        instructorsStatus: Record<string, { isAvailable: boolean; status: string; reason: string }>;
-      }>(url)
+    this.timetableService
+      .getSlotAvailableInstructors(year, sem, day, times, currentCourse)
       .subscribe({
         next: (res) => {
           this.isCheckingSlotInstructors.set(false);
@@ -2228,7 +2191,6 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.editFormError.set('');
 
     const isAdd = this.isAddMode();
-    const endpoint = isAdd ? '/api/service/timetable/add' : '/api/service/timetable/update';
 
     const payload = {
       studyYear: this.activeYear(),
@@ -2242,7 +2204,11 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       userInsert: this.authService.currentUser()?.email || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string }>(endpoint, payload).subscribe({
+    const save$ = isAdd
+      ? this.timetableService.addScheduleClass(payload)
+      : this.timetableService.updateScheduleClass(payload);
+
+    save$.subscribe({
       next: (res) => {
         this.isSavingEdit.set(false);
         if (res && res.success) {
@@ -2311,7 +2277,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       userInsert: this.authService.currentUser()?.email || 'ADMIN',
     };
 
-    this.http.post<{ success: boolean; message: string }>('/api/service/timetable/delete', payload).subscribe({
+    this.timetableService.deleteScheduleClass(payload).subscribe({
       next: (res) => {
         if (res && res.success) {
           this.toastService.success(`ลบตารางสอนวิชา ${item.COURSE_NO} เรียบร้อยแล้ว`);

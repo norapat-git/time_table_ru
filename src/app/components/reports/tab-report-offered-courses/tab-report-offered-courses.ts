@@ -1,10 +1,13 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
+import { CourseService } from '../../../services/course.service';
+import { YearSemService } from '../../../services/yearsem.service';
+import { CourseItem } from '../../../models/course.model';
+import { YearSemItem } from '../../../models/yearsem.model';
 
 export interface ScheduleCourseItem {
   STUDY_YEAR: string;
@@ -30,7 +33,8 @@ export interface YearSemOption {
   styleUrl: './tab-report-offered-courses.css',
 })
 export class TabReportOfferedCoursesComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly courseService = inject(CourseService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
 
   readonly isLoading = signal<boolean>(false);
@@ -127,13 +131,9 @@ export class TabReportOfferedCoursesComponent implements OnInit {
     this.loadYearSemOptions();
   }
 
-  private getBaseUrl(): string {
-    return window.location.port === '4200' ? 'http://localhost:4000/api/service' : '/api/service';
-  }
-
   // Load YearSem list
   loadYearSemOptions(): void {
-    this.http.get<{ success: boolean; results: YearSemOption[] }>(`${this.getBaseUrl()}/yearsem/list`).subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         if (res && res.success && Array.isArray(res.results)) {
           this.yearSemList.set(res.results);
@@ -172,10 +172,8 @@ export class TabReportOfferedCoursesComponent implements OnInit {
     if (!yr || !sem) return;
 
     this.isLoading.set(true);
-    this.http
-      .get<{ success: boolean; results: ScheduleCourseItem[] }>(
-        `${this.getBaseUrl()}/course/list?year=${yr}&semester=${sem}`
-      )
+    this.courseService
+      .listCourses(yr, sem)
       .subscribe({
         next: (res) => {
           this.isLoading.set(false);

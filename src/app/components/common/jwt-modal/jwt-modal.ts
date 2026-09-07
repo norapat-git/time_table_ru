@@ -16,7 +16,7 @@ export class JwtModalComponent implements OnInit {
 
   rawTokenInput: string = '';
   decodedHeaderJson: string = '{\n  "alg": "HS256",\n  "typ": "JWT"\n}';
-  decodedPayloadJson: string = '{\n  "message": "กรุณากรอกหรือเลือก Token"\n}';
+  decodedPayloadJson: string = '{\n  "message": "กรุณากรอก Token"\n}';
 
   ngOnInit(): void {
     this.loadCurrentToken();
@@ -56,11 +56,6 @@ export class JwtModalComponent implements OnInit {
       this.decodedHeaderJson = '{\n  "error": "ไม่สามารถแปลง Token ได้"\n}';
       this.decodedPayloadJson = `{\n  "error": "${e.message || 'Decode Error'}"\n}`;
     }
-  }
-
-  applyPreset(preset: 'ADMIN' | 'INSTRUCTOR' | 'STAFF' | 'STUDENT' | 'EXPIRED'): void {
-    this.authService.loginWithPreset(preset);
-    this.loadCurrentToken();
   }
 
   applyCustomToken(): void {

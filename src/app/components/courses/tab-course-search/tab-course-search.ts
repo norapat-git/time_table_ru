@@ -1,12 +1,13 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
 import { ToastService } from '../../../services/toast.service';
 import { OnboardingTourService } from '../../../services/onboarding-tour.service';
 import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
+import { CourseService } from '../../../services/course.service';
+import { YearSemService } from '../../../services/yearsem.service';
 
 export interface ScheduleCourseItem {
   STUDY_YEAR: string;
@@ -44,7 +45,8 @@ import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom
   styleUrl: './tab-course-search.css',
 })
 export class TabCourseSearchComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly courseService = inject(CourseService);
+  private readonly yearSemService = inject(YearSemService);
   private readonly toastService = inject(ToastService);
   private readonly tourService = inject(OnboardingTourService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
@@ -269,13 +271,9 @@ export class TabCourseSearchComponent implements OnInit {
     this.loadFirstLetters();
   }
 
-  private getBaseUrl(): string {
-    return window.location.port === '4200' ? 'http://localhost:4000/api/service' : '/api/service';
-  }
-
   // Load Year & Semester options from RG_SCHEDULE_YEARSEM
   loadYearSemOptions(): void {
-    this.http.get<{ success: boolean; results: YearSemOption[] }>(`${this.getBaseUrl()}/yearsem/list`).subscribe({
+    this.yearSemService.getYearSemList().subscribe({
       next: (res) => {
         if (res && res.success && Array.isArray(res.results)) {
           this.yearSemList.set(res.results);
@@ -303,11 +301,7 @@ export class TabCourseSearchComponent implements OnInit {
     const year = this.selectedYear();
     const semester = this.selectedSemester();
 
-    this.http
-      .get<{ success: boolean; results: ScheduleCourseItem[] }>(
-        `${this.getBaseUrl()}/course/list?year=${year}&semester=${semester}`
-      )
-      .subscribe({
+    this.courseService.listCourses(year, semester).subscribe({
         next: (res) => {
           this.isLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -367,10 +361,9 @@ export class TabCourseSearchComponent implements OnInit {
     }
   }
 
-  // Load First Letters (A, B, C...)
   loadFirstLetters(): void {
     this.isLettersLoading.set(true);
-    this.http.get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/letters`).subscribe({
+    this.courseService.getFirstLetters().subscribe({
       next: (res) => {
         this.isLettersLoading.set(false);
         if (res && res.success && Array.isArray(res.results)) {
@@ -391,9 +384,7 @@ export class TabCourseSearchComponent implements OnInit {
     this.ugbCourses.set([]);
     this.isPrefixesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: string[] }>(`${this.getBaseUrl()}/course/prefixes/${letter}`)
-      .subscribe({
+    this.courseService.getPrefixGroups(letter).subscribe({
         next: (res) => {
           this.isPrefixesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -415,11 +406,7 @@ export class TabCourseSearchComponent implements OnInit {
     this.selectedPrefix.set(prefix);
     this.isUgbCoursesLoading.set(true);
 
-    this.http
-      .get<{ success: boolean; results: UgbCourseItem[] }>(
-        `${this.getBaseUrl()}/course/search-ugb?prefix=${prefix}`
-      )
-      .subscribe({
+    this.courseService.searchUgbCourses({ prefix }).subscribe({
         next: (res) => {
           this.isUgbCoursesLoading.set(false);
           if (res && res.success && Array.isArray(res.results)) {
@@ -450,16 +437,7 @@ export class TabCourseSearchComponent implements OnInit {
     const name = this.pickerNameQuery().trim();
 
     if (code.length >= 2 || name.length >= 2) {
-      this.isUgbCoursesLoading.set(true);
-      const params = new URLSearchParams();
-      if (code) params.set('code', code);
-      if (name) params.set('name', name);
-
-      this.http
-        .get<{ success: boolean; results: UgbCourseItem[] }>(
-          `${this.getBaseUrl()}/course/search-ugb?${params.toString()}`
-        )
-        .subscribe({
+      this.courseService.searchUgbCourses({ code, name }).subscribe({
           next: (res) => {
             this.isUgbCoursesLoading.set(false);
             if (res && res.success && Array.isArray(res.results)) {
@@ -613,12 +591,7 @@ export class TabCourseSearchComponent implements OnInit {
       courseRemark: null,
     };
 
-    this.http
-      .post<{ success: boolean; message: string; addedCount?: number; skippedCount?: number }>(
-        `${this.getBaseUrl()}/course/add`,
-        payload
-      )
-      .subscribe({
+    this.courseService.addCourse(payload).subscribe({
         next: (res) => {
           this.isSaving.set(false);
           if (res && res.success === false) {
@@ -665,9 +638,8 @@ export class TabCourseSearchComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.isDeleting.set(true);
-    this.http
-      .delete(`${this.getBaseUrl()}/course/delete/${item.STUDY_YEAR}/${item.STUDY_SEMESTER}/${item.COURSE_NO}`)
+    this.courseService
+      .deleteCourse(item.STUDY_YEAR, item.STUDY_SEMESTER, item.COURSE_NO)
       .subscribe({
         next: () => {
           this.isDeleting.set(false);
@@ -716,17 +688,13 @@ export class TabCourseSearchComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.isDeleting.set(true);
-    this.http
-      .post<{ success: boolean; message: string; deletedCount?: number }>(
-        `${this.getBaseUrl()}/course/delete-bulk`,
-        {
-          year,
-          semester: sem,
-          courseNos: selectedNos,
-        }
-      )
-      .subscribe({
+    this.courseService.deleteCoursesBulk({
+      items: selectedNos.map((no) => ({
+        studyYear: year,
+        studySemester: sem,
+        courseNo: no,
+      })),
+    } as any).subscribe({
         next: (res) => {
           this.isDeleting.set(false);
           this.toastService.success(`ลบวิชา ${selectedNos.length} รายการ สำเร็จ`);
