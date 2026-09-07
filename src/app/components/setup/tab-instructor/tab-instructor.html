@@ -136,8 +136,8 @@
                   <span class="rank-badge">{{ item.RANK_NAME_THAI_S }}</span>
                   }
                   <strong class="name-th">{{ item.INSTRUCTOR_NAME_THAI || '-' }}</strong>
-                  @if (item.IS_SCHEDULED) {
-                  <span class="instructor-scheduled-badge" title="มีตารางสอนในปี/ภาคนี้จำนวน {{ item.SCHEDULE_COUNT }} คาบ">
+                  @if (item.IS_SCHEDULED || ((item.SCHEDULE_COUNT ?? 0) > 0)) {
+                  <span class="instructor-scheduled-badge course-scheduled-badge" title="มีตารางสอนในปี/ภาคนี้จำนวน {{ item.SCHEDULE_COUNT }} คาบ">
                     <span class="material-symbols-rounded">event_seat</span>
                     <span>จัดในตารางแล้ว ({{ item.SCHEDULE_COUNT }} คาบ)</span>
                   </span>

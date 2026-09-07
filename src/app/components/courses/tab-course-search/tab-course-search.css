@@ -149,7 +149,7 @@
   padding: 0.55rem 0.95rem;
   border-radius: 8px;
   border: 1px solid var(--color-border);
-  background: #ffffff;
+  background: var(--apple-surface-sub, #ffffff);
   color: var(--apple-text-primary);
   font-size: 0.85rem;
   font-weight: 500;
@@ -158,7 +158,7 @@
 }
 
 .btn-secondary:hover {
-  background: #f5f5f7;
+  background: var(--color-border, #f5f5f7);
 }
 
 .btn-add-primary {
@@ -214,7 +214,7 @@
 
 .data-table td {
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid #f0f0f2;
+  border-bottom: 1px solid var(--color-border);
   font-size: 0.9rem;
   color: var(--apple-text-primary);
   vertical-align: middle;
@@ -427,19 +427,19 @@
 .modal-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #1d1d1f !important;
+  color: var(--apple-text-primary);
   margin: 0;
 }
 
 .modal-subtitle {
   font-size: 0.78rem;
-  color: #6e6e73;
+  color: var(--apple-text-secondary);
 }
 
 .btn-close-modal {
-  background: #f5f5f7;
+  background: var(--apple-surface-sub);
   border: none;
-  color: #6e6e73;
+  color: var(--apple-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -451,8 +451,8 @@
 }
 
 .btn-close-modal:hover {
-  background: #e5e5ea;
-  color: #1d1d1f;
+  background: var(--color-border);
+  color: var(--apple-text-primary);
 }
 
 .modal-body {
@@ -485,7 +485,7 @@
 
 .font-bold {
   font-weight: 700;
-  color: #1d1d1f;
+  color: var(--apple-text-primary);
   font-size: 0.9rem;
 }
 
@@ -494,15 +494,15 @@
   flex-direction: column;
   gap: 0.45rem;
   padding: 0.75rem 0.95rem;
-  background: #f8f9fa;
-  border: 1px solid #e5e5ea;
+  background: var(--apple-surface-sub, #f8f9fa);
+  border: 1px solid var(--color-border, #e5e5ea);
   border-radius: 12px;
 }
 
 .step-badge {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #48484a;
+  color: var(--apple-blue, #48484a);
 }
 
 .step-header-row {
@@ -526,8 +526,8 @@
   gap: 0.25rem;
   padding: 0.2rem 0.55rem;
   border-radius: 6px;
-  background: #ffffff;
-  border: 1px solid #d2d2d7;
+  background: var(--apple-surface, #ffffff);
+  border: 1px solid var(--color-border, #d2d2d7);
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--apple-blue);
@@ -536,7 +536,7 @@
 }
 
 .btn-select-all-group:hover {
-  background: #e8f2fc;
+  background: var(--apple-blue-soft, #e8f2fc);
   border-color: var(--apple-blue);
 }
 
@@ -556,8 +556,8 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.3rem 0.6rem;
-  background: #ffffff;
-  border: 1px solid #d2d2d7;
+  background: var(--apple-surface, #ffffff);
+  border: 1px solid var(--color-border, #d2d2d7);
   border-radius: 8px;
   transition: all 0.15s ease;
 }
@@ -587,7 +587,7 @@
   background: transparent;
   font-size: 0.78rem;
   font-family: var(--font-thai);
-  color: #1d1d1f;
+  color: var(--apple-text-primary, #1d1d1f);
   min-width: 0;
 }
 
@@ -678,9 +678,9 @@
 .ugb-course-scroll-box {
   max-height: 190px;
   overflow-y: auto;
-  border: 1px solid #e5e5ea;
+  border: 1px solid var(--color-border, #e5e5ea);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--apple-surface, #ffffff);
   display: flex;
   flex-direction: column;
 }
@@ -690,7 +690,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.55rem 0.85rem;
-  border-bottom: 1px solid #f0f0f2;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--apple-surface, #ffffff);
   cursor: pointer;
   transition: background 0.12s ease;
 }
@@ -700,11 +701,11 @@
 }
 
 .ugb-course-item:hover {
-  background: #f5f5f7;
+  background: var(--apple-surface-sub, #f5f5f7);
 }
 
 .ugb-course-item.selected {
-  background: #e8f2fc;
+  background: var(--apple-blue-soft, #e8f2fc);
 }
 
 .ugb-col-checkbox {
@@ -721,13 +722,13 @@
 }
 
 .ugb-col-code strong {
-  color: #1d1d1f;
+  color: var(--apple-blue, #1d1d1f);
   font-size: 0.9rem;
 }
 
 .ugb-credit-badge {
   font-size: 0.7rem;
-  color: #0369a1;
+  color: var(--apple-blue, #0369a1);
 }
 
 .ugb-col-names {
@@ -740,7 +741,7 @@
 .ugb-thai {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1d1d1f;
+  color: var(--apple-text-primary, #1d1d1f);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -748,7 +749,7 @@
 
 .ugb-eng {
   font-size: 0.75rem;
-  color: #6e6e73;
+  color: var(--apple-text-secondary, #6e6e73);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -898,8 +899,8 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1.1rem 1.5rem;
-  background: #fafafc !important;
-  border-top: 1px solid #e5e5ea;
+  background: var(--apple-surface, #fafafc) !important;
+  border-top: 1px solid var(--color-border, #e5e5ea);
 }
 
 .btn-primary {
@@ -927,3 +928,188 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ==========================================================================
+   DARK MODE ADJUSTMENTS — TAB COURSE SEARCH
+   ========================================================================== */
+:host-context([data-theme="dark"]) .data-table th,
+[data-theme="dark"] .data-table th {
+  background: var(--apple-surface-sub, #1c2433);
+  border-bottom-color: var(--color-border, #242e3f);
+  color: var(--apple-text-secondary, #94a3b8);
+}
+
+:host-context([data-theme="dark"]) .data-table td,
+[data-theme="dark"] .data-table td {
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .data-table tbody tr:hover,
+[data-theme="dark"] .data-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+:host-context([data-theme="dark"]) .course-code-badge,
+[data-theme="dark"] .course-code-badge {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .credit-pill,
+[data-theme="dark"] .credit-pill {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.25) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .course-scheduled-badge,
+[data-theme="dark"] .course-scheduled-badge {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: #4ade80 !important;
+}
+
+:host-context([data-theme="dark"]) .course-modal-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .modal-header,
+:host-context([data-theme="dark"]) .modal-body,
+:host-context([data-theme="dark"]) .modal-footer {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .modal-title {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .modal-subtitle {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+:host-context([data-theme="dark"]) .picker-step-box {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .step-badge {
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .font-bold {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .btn-select-all-group {
+  background: var(--apple-surface, #131924) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .btn-select-all-group:hover {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .mini-search-box {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .mini-search-box input {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .letter-pill-btn,
+:host-context([data-theme="dark"]) .prefix-pill-btn {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .letter-pill-btn:hover,
+:host-context([data-theme="dark"]) .prefix-pill-btn:hover {
+  border-color: var(--apple-blue);
+  color: var(--apple-blue);
+}
+
+:host-context([data-theme="dark"]) .letter-pill-btn.active,
+:host-context([data-theme="dark"]) .prefix-pill-btn.active {
+  background: var(--apple-blue) !important;
+  border-color: var(--apple-blue) !important;
+  color: #ffffff !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-course-scroll-box {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-course-item {
+  background: var(--apple-surface, #131924) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-course-item:hover {
+  background: var(--apple-surface-sub, #1c2433) !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-course-item.selected {
+  background: rgba(56, 189, 248, 0.15) !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-col-code strong {
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-credit-badge {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-thai {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .ugb-eng {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+:host-context([data-theme="dark"]) .btn-secondary {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .btn-secondary:hover {
+  background: #242e3f !important;
+}
+
+:host-context([data-theme="dark"]) .selected-courses-summary-card {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+:host-context([data-theme="dark"]) .summary-count-badge {
+  color: #34d399 !important;
+}
+
+:host-context([data-theme="dark"]) .course-chip {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .chip-code {
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .chip-name {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+

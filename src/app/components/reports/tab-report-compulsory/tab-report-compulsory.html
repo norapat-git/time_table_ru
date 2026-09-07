@@ -214,12 +214,12 @@
                 <th>ชื่อวิชา (ภาษาไทย)</th>
                 <th>Course Name (English)</th>
                 <th style="width: 80px; text-align: center;">หน่วยกิต</th>
-                <th class="no-print" style="width: 70px; text-align: center;">ดูข้อมูล</th>
+                <th class="no-print" style="width: 70px; text-align: center;">จัดการ</th>
               </tr>
             </thead>
             <tbody>
               @for (item of paginatedCourses(); track item.FACULTY_NO + '_' + item.GROUP_NO + '_' + (item.SUB_GROUP_NO || '00') + '_' + item.YEAR_LEVEL + '_' + item.SEMESTER + '_' + item.COURSE_NO; let i = $index) {
-                <tr>
+                <tr class="context-clickable-row" (contextmenu)="onRowContextMenu($event, item)">
                   <td class="col-center text-muted">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
                   
                   <!-- Faculty -->
@@ -271,15 +271,15 @@
                     <span class="credit-pill">{{ item.CREDIT != null ? item.CREDIT : '-' }}</span>
                   </td>
 
-                  <!-- Actions -->
+                  <!-- Actions (3-dots) -->
                   <td class="col-center no-print">
                     <button
                       type="button"
-                      class="btn-detail-icon"
-                      (click)="openDetailModal(item)"
-                      title="ดูรายละเอียดข้อมูลวิชาในหลักสูตร"
+                      class="btn-action btn-more"
+                      (click)="openRowMenuFromBtn($event, item)"
+                      title="การจัดการ (หรือคลิกขวาที่แถว)"
                     >
-                      <span class="material-symbols-rounded">visibility</span>
+                      <span class="material-symbols-rounded">more_vert</span>
                     </button>
                   </td>
                 </tr>
@@ -405,7 +405,7 @@
 
                     <div class="courses-mini-grid">
                       @for (c of grp.courses; track c.COURSE_NO + '_' + c.YEAR_LEVEL + '_' + c.SEMESTER) {
-                        <div class="course-item-chip" (click)="openDetailModal(c)">
+                        <div class="course-item-chip" (click)="openDetailModal(c)" (contextmenu)="onRowContextMenu($event, c)" title="คลิกเพื่อดูรายละเอียด • คลิกขวาเพื่อเปิดเมนูจัดการ">
                           <div class="chip-top">
                             <span class="course-code-badge">{{ c.COURSE_NO }}</span>
                             <div class="chip-plan-tags">
@@ -507,4 +507,15 @@
     </div>
   }
 
+  <!-- Reusable Custom Context Menu -->
+  <app-custom-context-menu
+    [isOpen]="isContextMenuOpen()"
+    [position]="contextMenuPos()"
+    [headerBadge]="selectedContextMenuCourse()?.COURSE_NO"
+    [headerTitle]="selectedContextMenuCourse()?.COURSE_NAME_THAI || selectedContextMenuCourse()?.COURSE_NAME_ENG_L"
+    [items]="contextMenuItems()"
+    (close)="isContextMenuOpen.set(false)"
+  />
+
 </div>
+

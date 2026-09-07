@@ -417,6 +417,43 @@
   border-radius: 9999px;
 }
 
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-action .material-symbols-rounded {
+  font-size: 1.2rem;
+}
+
+.btn-action.btn-more {
+  color: #64748b;
+}
+
+.btn-action.btn-more:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.context-clickable-row {
+  cursor: context-menu;
+  transition: background-color 0.15s ease;
+}
+
+.context-clickable-row:hover {
+  background-color: rgba(240, 249, 255, 0.7);
+}
+
 .btn-detail-icon {
   display: inline-flex;
   align-items: center;

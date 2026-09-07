@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SkeletonComponent } from '../../common/skeleton/skeleton';
 import { CustomSelectComponent, SelectOption } from '../../common/custom-select/custom-select';
+import { CustomContextMenuComponent, ContextMenuItem } from '../../common/custom-context-menu/custom-context-menu.component';
 import { ToastService } from '../../../services/toast.service';
 import { CurriculumService } from '../../../services/curriculum.service';
 import { FacultyItem, ProgramGroupItem, ProgramSubGroupItem } from '../../../models/curriculum.model';
@@ -42,7 +43,7 @@ export interface GroupedFacultySection {
 @Component({
   selector: 'app-tab-report-compulsory',
   standalone: true,
-  imports: [CommonModule, FormsModule, SkeletonComponent, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, SkeletonComponent, CustomSelectComponent, CustomContextMenuComponent],
   templateUrl: './tab-report-compulsory.html',
   styleUrl: './tab-report-compulsory.css',
 })
@@ -52,6 +53,66 @@ export class TabReportCompulsoryComponent implements OnInit {
 
   readonly isLoading = signal<boolean>(false);
   readonly searchQuery = signal<string>('');
+
+  // Context Menu State
+  readonly isContextMenuOpen = signal<boolean>(false);
+  readonly contextMenuPos = signal<{ x: number; y: number }>({ x: 0, y: 0 });
+  readonly selectedContextMenuCourse = signal<CurriculumReportRow | null>(null);
+
+  readonly contextMenuItems = computed<ContextMenuItem[]>(() => {
+    const c = this.selectedContextMenuCourse();
+    if (!c) return [];
+    return [
+      {
+        id: 'detail',
+        label: 'ดูรายละเอียดวิชา',
+        sublabel: `${c.COURSE_NO} • ชั้นปี ${c.YEAR_LEVEL} ภาค ${c.SEMESTER}`,
+        icon: 'visibility',
+        iconType: 'detail',
+        action: () => this.openDetailModal(c),
+      },
+      {
+        id: 'copy-code',
+        label: 'คัดลอกรหัสวิชา',
+        sublabel: c.COURSE_NO,
+        icon: 'content_copy',
+        iconType: 'primary',
+        action: () => {
+          navigator.clipboard.writeText(c.COURSE_NO);
+          this.toastService.info(`คัดลอกรหัสวิชา ${c.COURSE_NO} แล้ว`);
+        },
+      },
+      {
+        id: 'copy-name',
+        label: 'คัดลอกชื่อวิชา',
+        sublabel: c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '',
+        icon: 'copy_all',
+        iconType: 'default',
+        action: () => {
+          const name = c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '';
+          navigator.clipboard.writeText(name);
+          this.toastService.info('คัดลอกชื่อวิชาแล้ว');
+        },
+      },
+    ];
+  });
+
+  onRowContextMenu(event: MouseEvent, item: CurriculumReportRow): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedContextMenuCourse.set(item);
+    this.contextMenuPos.set({ x: event.clientX, y: event.clientY });
+    this.isContextMenuOpen.set(true);
+  }
+
+  openRowMenuFromBtn(event: MouseEvent, item: CurriculumReportRow): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedContextMenuCourse.set(item);
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.contextMenuPos.set({ x: rect.left - 180, y: rect.bottom + 4 });
+    this.isContextMenuOpen.set(true);
+  }
 
   // Master Filter Signals
   readonly selectedFaculty = signal<string>('ALL');

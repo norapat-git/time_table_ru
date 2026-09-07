@@ -81,8 +81,10 @@ export class AuthService {
             this._remainingSeconds.set(getTokenRemainingSeconds(res.token));
 
             try {
-              localStorage.setItem(STORAGE_KEY_TOKEN, res.token);
-              localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(decodedUser));
+              sessionStorage.setItem(STORAGE_KEY_TOKEN, res.token);
+              sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(decodedUser));
+              localStorage.removeItem(STORAGE_KEY_TOKEN);
+              localStorage.removeItem(STORAGE_KEY_USER);
             } catch {}
 
             this.startTimer();
@@ -117,8 +119,10 @@ export class AuthService {
 
     if (persist) {
       try {
-        localStorage.setItem(STORAGE_KEY_TOKEN, token);
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+        sessionStorage.setItem(STORAGE_KEY_TOKEN, token);
+        sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+        localStorage.removeItem(STORAGE_KEY_TOKEN);
+        localStorage.removeItem(STORAGE_KEY_USER);
       } catch {}
     }
 
@@ -157,6 +161,8 @@ export class AuthService {
    */
   private clearSession(): void {
     try {
+      sessionStorage.removeItem(STORAGE_KEY_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEY_USER);
       localStorage.removeItem(STORAGE_KEY_TOKEN);
       localStorage.removeItem(STORAGE_KEY_USER);
     } catch {}
@@ -236,7 +242,17 @@ export class AuthService {
 
   private getStoredToken(): string | null {
     try {
-      return localStorage.getItem(STORAGE_KEY_TOKEN);
+      const sessionToken = sessionStorage.getItem(STORAGE_KEY_TOKEN);
+      if (sessionToken) return sessionToken;
+
+      // Backward compatibility: migrate any token left in localStorage into sessionStorage
+      const localToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+      if (localToken) {
+        sessionStorage.setItem(STORAGE_KEY_TOKEN, localToken);
+        localStorage.removeItem(STORAGE_KEY_TOKEN);
+        return localToken;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -244,7 +260,14 @@ export class AuthService {
 
   private getStoredUser(): DecodedUser | null {
     try {
-      const str = localStorage.getItem(STORAGE_KEY_USER);
+      let str = sessionStorage.getItem(STORAGE_KEY_USER);
+      if (!str) {
+        str = localStorage.getItem(STORAGE_KEY_USER);
+        if (str) {
+          sessionStorage.setItem(STORAGE_KEY_USER, str);
+          localStorage.removeItem(STORAGE_KEY_USER);
+        }
+      }
       return str ? JSON.parse(str) : null;
     } catch {
       return null;

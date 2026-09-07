@@ -36,15 +36,16 @@
           <span class="material-symbols-rounded input-icon">mail</span>
           <input
             id="login-email"
-            type="email"
+            type="text"
             class="form-control"
-            placeholder="เช่น name@ru.ac.th"
+            placeholder="ระบุชื่อบัญชี"
             [ngModel]="email()"
-            (ngModelChange)="email.set($event)"
+            (ngModelChange)="onEmailChange($event)"
             name="email"
             required
             autocomplete="username"
           />
+          <span class="email-suffix">&#64;ru.ac.th</span>
         </div>
       </div>
 

@@ -46,18 +46,26 @@
             <span>แนะนำการใช้งาน</span>
           </button>
 
-          <!-- Theme Toggle (Light / Dark Mode) -->
+          <!-- Theme Toggle (Auto / Light / Dark Mode) -->
           <button
             type="button"
             class="topbar-theme-toggle"
             (click)="themeService.toggleTheme()"
-            [title]="themeService.isDark() ? 'เปลี่ยนเป็นโหมดสว่าง (Light Mode)' : 'เปลี่ยนเป็นโหมดมืด (Dark Mode - Beta ยังไม่สมบูรณ์)'"
-            [attr.aria-label]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            (contextmenu)="themeService.resetToAuto(); $event.preventDefault()"
+            [title]="'โหมดธีม: ' + themeService.modeDescription() + ' • คลิกเพื่อสลับโหมด • คลิกขวาเพื่อตรวจจับตามระบบ (Auto)'"
+            [attr.aria-label]="themeService.modeDescription()"
           >
             <span class="material-symbols-rounded theme-icon" [class.is-dark]="themeService.isDark()">
               {{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}
             </span>
-            <span class="theme-beta-badge">Beta</span>
+            <span
+              class="theme-beta-badge"
+              [class.is-auto]="themeService.preference() === 'auto'"
+              [class.is-dark-mode]="themeService.preference() === 'dark'"
+              [class.is-light-mode]="themeService.preference() === 'light'"
+            >
+              {{ themeService.preference() === 'auto' ? 'Auto' : (themeService.isDark() ? 'Dark' : 'Light') }}
+            </span>
           </button>
 
           <!-- Active Semester Pill -->

@@ -10,8 +10,20 @@
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('app_theme');
-        var theme = saved === 'dark' ? 'dark' : 'light';
+        var pref = localStorage.getItem('app_theme_pref');
+        var isDark = false;
+        if (pref === 'dark') {
+          isDark = true;
+        } else if (pref === 'light') {
+          isDark = false;
+        } else {
+          // 'auto' or not set: detect Windows / OS or extension
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var extDark = document.documentElement.hasAttribute('data-darkreader-mode') || 
+                        document.documentElement.getAttribute('data-darkreader-scheme') === 'dark';
+          isDark = !!(systemDark || extDark);
+        }
+        var theme = isDark ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.style.colorScheme = theme;
       } catch (e) {}

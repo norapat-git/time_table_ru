@@ -27,15 +27,28 @@ export class LoginPageComponent {
     this.showPassword.set(!this.showPassword());
   }
 
+  onEmailChange(value: string): void {
+    const trimmed = value.trim();
+    if (trimmed.toLowerCase().endsWith('@ru.ac.th')) {
+      this.email.set(trimmed.slice(0, -9));
+    } else {
+      this.email.set(value);
+    }
+  }
+
   onSubmit(): void {
-    const emailVal = this.email().trim();
+    const rawEmail = this.email().trim();
     const passwordVal = this.password().trim();
 
-    if (!emailVal || !passwordVal) {
+    if (!rawEmail || !passwordVal) {
       this.errorMessage.set('กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน');
       this.toastService.warning('กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน');
       return;
     }
+
+    const emailVal = rawEmail.toLowerCase().endsWith('@ru.ac.th')
+      ? rawEmail
+      : `${rawEmail}@ru.ac.th`;
 
     this.isLoading.set(true);
     this.errorMessage.set('');

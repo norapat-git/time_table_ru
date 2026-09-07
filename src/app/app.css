@@ -100,21 +100,22 @@
   font-size: 1.05rem;
 }
 
-/* Theme Toggle Button (Apple Minimalist Pill) */
+/* Theme Toggle Button (Compact Circular Pill with Superscript Tag) */
 .topbar-theme-toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.55rem 0.25rem 0.5rem;
-  height: 32px;
-  border-radius: 9999px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   background: #f5f5f7;
   border: 1px solid #e5e5ea;
   color: var(--apple-text-primary);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: var(--font-thai);
+  padding: 0;
 }
 
 :host-context([data-theme="dark"]) .topbar-theme-toggle {
@@ -124,7 +125,7 @@
 }
 
 .topbar-theme-toggle:hover {
-  border-color: #f59e0b;
+  border-color: #38bdf8;
   color: var(--apple-blue);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -143,22 +144,57 @@
   color: #fbbf24;
 }
 
+/* Superscript-like floating tag on the top-right corner */
 .theme-beta-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.4rem;
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 0.08rem 0.35rem;
   border-radius: 9999px;
-  background: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fcd34d;
-  line-height: 1.2;
+  line-height: 1.1;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
 }
 
-:host-context([data-theme="dark"]) .theme-beta-badge {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fde68a;
-  border-color: rgba(245, 158, 11, 0.4);
+.theme-beta-badge.is-auto {
+  background: #0284c7;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+}
+
+.theme-beta-badge.is-dark-mode {
+  background: #334155;
+  color: #f8fafc;
+  border: 1.5px solid #ffffff;
+}
+
+.theme-beta-badge.is-light-mode {
+  background: #f59e0b;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+}
+
+:host-context([data-theme="dark"]) .theme-beta-badge.is-auto {
+  background: #38bdf8;
+  color: #0f172a;
+  border: 1.5px solid #131924;
+}
+
+:host-context([data-theme="dark"]) .theme-beta-badge.is-dark-mode {
+  background: #64748b;
+  color: #f8fafc;
+  border: 1.5px solid #131924;
+}
+
+:host-context([data-theme="dark"]) .theme-beta-badge.is-light-mode {
+  background: #fbbf24;
+  color: #0f172a;
+  border: 1.5px solid #131924;
 }
 
 .topbar-sem-badge {

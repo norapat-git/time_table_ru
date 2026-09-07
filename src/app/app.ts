@@ -304,50 +304,82 @@ export class App {
     } else if (tab === 'curriculum') {
       const steps: TourStep[] = [
         {
-          targetSelector: '.btn-add-primary',
+          targetSelector: '.action-right-btns .btn-primary, .btn-primary.btn-icon-only',
           title: 'เพิ่ม/จัดการวิชาในหลักสูตร',
-          description: 'คลิกเพื่อเปิดหน้าต่างกำหนดรายวิชาตามแผนการเรียน คณะ สาขาวิชา ชั้นปี และภาคการศึกษา',
+          description: 'คลิกปุ่มบวก (+) เพื่อเปิดหน้าต่างกำหนดรายวิชาตามแผนการเรียน โดยสามารถเลือกคณะ, สาขาวิชา, กลุ่มวิชาย่อย, ชั้นปี (1-4) และภาคเรียน พร้อมค้นหาและเพิ่มรายวิชาเข้าสู่หลักสูตร',
           icon: 'menu_book',
           position: 'bottom',
+          actionHint: 'คลิกปุ่มบวก (+) เพื่อเริ่มจัดการรายวิชาในหลักสูตร',
         },
         {
-          targetSelector: '.filter-toolbar',
-          title: 'แถบตัวกรองข้อมูลแบบเลือกคณะ/สาขา',
-          description: 'สามารถเลือกกรองตาม คณะ, กลุ่มสาขาวิชา, ชั้นปี (1-6) และภาคเรียน (1-2) ได้สะดวกรวดเร็ว',
+          targetSelector: '.curriculum-filters-container',
+          title: 'ตัวกรองคณะและกลุ่มสาขาวิชา',
+          description: 'เลือกคณะเพื่อแสดงเฉพาะกลุ่มวิชาในคณะนั้น และเลือกกลุ่มสาขาวิชาเพื่อเจาะจงข้อมูลหลักสูตรที่ต้องการตรวจสอบ',
           icon: 'filter_alt',
           position: 'bottom',
         },
         {
+          targetSelector: '.action-bar .search-box, .search-box',
+          title: 'ค้นหากลุ่มหลักสูตร',
+          description: 'พิมพ์ค้นหาชื่อกลุ่มวิชา, กลุ่มวิชาย่อย, คณะ หรือรหัสวิชา เพื่อค้นหาข้อมูลในตารางได้อย่างรวดเร็ว',
+          icon: 'search',
+          position: 'bottom',
+        },
+        {
           targetSelector: '.data-table, .table-responsive',
-          title: 'ตารางรายวิชาในหลักสูตร',
-          description: 'แสดงรายวิชาในหลักสูตร พร้อมข้อมูลหน่วยกิต คณะ และกลุ่มสาขา สามารถเลือกติ๊กลบหลายวิชาพร้อมกันได้',
-          icon: 'table_view',
+          title: 'ตารางกลุ่มหลักสูตรตามโครงสร้าง',
+          description: 'แสดงรายการกลุ่มวิชาและกลุ่มวิชาย่อยทั้งหมดที่สังกัดคณะ พร้อมป้ายระบุกลุ่มวิชาหลักและกลุ่มวิชาย่อยชัดเจน',
+          icon: 'account_tree',
           position: 'top',
+        },
+        {
+          targetSelector: '.col-actions .btn-action.btn-more, .btn-action.btn-more, .context-clickable-row',
+          title: 'การจัดการกลุ่มวิชา (ปุ่ม 3 จุด / คลิกขวา)',
+          description: 'คลิกปุ่ม 3 จุด หรือคลิกขวาที่แถวใดก็ได้ เพื่อเลือก: 1) ดูรายชื่อวิชาทั้งหมดในกลุ่มหลักสูตร (ไอคอนตา), 2) จัดการวิชาในกลุ่ม (เปิดหน้าต่างเพิ่ม/ลบวิชา), หรือ 3) ลบกลุ่มหลักสูตร',
+          icon: 'more_vert',
+          position: 'left',
+          actionHint: 'คลิกขวาบนแถวเพื่อเปิดเมนูจัดการด่วนได้',
         },
       ];
       this.tourService.startTour('curriculum', steps, force);
     } else if (tab === 'academic-year') {
       const steps: TourStep[] = [
         {
-          targetSelector: '.action-right-btns .btn-add-primary, .btn-add-primary',
+          targetSelector: '.action-right-btns .btn-primary, .btn-primary.btn-icon-only',
           title: 'เพิ่มปีและภาคการศึกษา',
-          description: 'เพิ่มปีการศึกษา (ตั้งแต่ปี 2550 ขึ้นไป) และเลือกภาคเรียน (ภาค 1 หรือ ภาค 2)',
+          description: 'คลิกปุ่มบวก (+) เพื่อเปิดหน้าต่างเพิ่มปีการศึกษาใหม่ (เช่น 2569) และเลือกภาคเรียน (ภาค 1 หรือ ภาค 2) พร้อมกำหนดให้เป็นปีภาคที่ใช้งานได้ทันที',
           icon: 'calendar_add_on',
           position: 'bottom',
+          actionHint: 'คลิกเพื่อเปิดหน้าต่างกรอกข้อมูลปีภาค',
         },
         {
           targetSelector: '.action-bar .search-box, .search-box',
-          title: 'ค้นหาปีภาค',
-          description: 'พิมพ์ค้นหาปีการศึกษาหรือภาคเรียน',
+          title: 'ค้นหาปีภาคการศึกษา',
+          description: 'พิมพ์ค้นหาปีการศึกษา เช่น "2569" หรือ "ภาค 1" เพื่อกรองข้อมูลในตารางได้อย่างรวดเร็ว',
           icon: 'search',
           position: 'bottom',
         },
         {
-          targetSelector: '.data-table, .table-responsive',
-          title: 'ตารางปีภาคและการตั้งค่าปัจจุบัน',
-          description: 'สามารถคลิกเปิด/ปิดสถานะ "ปีภาคปัจจุบัน" เพื่อให้ระบบใช้เป็นค่าเริ่มต้นในการจัดตารางสอน',
-          icon: 'toggle_on',
+          targetSelector: '.action-right-btns .btn-refresh, .btn-refresh',
+          title: 'รีเฟรชข้อมูล',
+          description: 'กดปุ่มนี้เพื่อดึงข้อมูลปีภาคการศึกษาล่าสุดจากฐานข้อมูลใหม่อีกครั้ง',
+          icon: 'refresh',
+          position: 'bottom',
+        },
+        {
+          targetSelector: '.col-status, .badge-active-sem, .btn-set-active',
+          title: 'กำหนดปีภาคที่ใช้งานปัจจุบัน (Active Semester)',
+          description: 'แถวที่มีป้ายสีเขียวคือ "ปีภาคที่ใช้งานปัจจุบัน" ของระบบ คุณสามารถคลิกปุ่ม "กำหนดเป็นปีภาคที่ใช้งาน" ในแถวอื่นเพื่อสลับปีภาคหลักที่ใช้จัดตารางสอนได้ทันที',
+          icon: 'check_circle',
           position: 'top',
+        },
+        {
+          targetSelector: '.col-actions .btn-action.btn-more, .btn-action.btn-more, .context-clickable-row',
+          title: 'ปุ่มจัดการและคลิกขวา (Context Menu)',
+          description: 'คลิกที่ปุ่ม 3 จุด หรือคลิกขวาที่แถวรายการใดก็ได้ เพื่อเปิดเมนูจัดการข้อมูล เช่น แก้ไขสถานะปีภาค หรือลบรายการ',
+          icon: 'more_vert',
+          position: 'left',
+          actionHint: 'คลิกขวาบนแถวในตารางเพื่อเปิดเมนูด่วนได้เช่นกัน',
         },
       ];
       this.tourService.startTour('academic-year', steps, force);

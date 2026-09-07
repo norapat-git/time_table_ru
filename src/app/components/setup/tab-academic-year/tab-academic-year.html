@@ -84,7 +84,8 @@
               }
             </td>
             <td class="col-actions" style="text-align: center;">
-              <button class="btn-action btn-more" (click)="openMenuFromBtn($event, item)" title="การจัดการ (หรือคลิกขวาที่แถว)">
+              <button class="btn-action btn-more" (click)="openMenuFromBtn($event, item)"
+                title="การจัดการ (หรือคลิกขวาที่แถว)">
                 <span class="material-symbols-rounded">more_vert</span>
               </button>
             </td>
@@ -106,60 +107,35 @@
       </div>
 
       <div class="pagination-controls">
-        <button
-          type="button"
-          class="btn-pagination-nav"
-          [disabled]="currentPage() === 1"
-          (click)="setPage(1)"
-          title="หน้าแรก"
-        >
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === 1" (click)="setPage(1)"
+          title="หน้าแรก">
           <span class="material-symbols-rounded">first_page</span>
         </button>
 
-        <button
-          type="button"
-          class="btn-pagination-nav"
-          [disabled]="currentPage() === 1"
-          (click)="setPage(currentPage() - 1)"
-          title="หน้าก่อนหน้า"
-        >
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === 1"
+          (click)="setPage(currentPage() - 1)" title="หน้าก่อนหน้า">
           <span class="material-symbols-rounded">chevron_left</span>
         </button>
 
         <div class="page-pills-list">
           @for (p of displayedPageNumbers(); track $index) {
-            @if (p === '...') {
-              <span class="page-ellipsis">…</span>
-            } @else {
-              <button
-                type="button"
-                class="page-pill-btn"
-                [class.active]="p === currentPage()"
-                (click)="setPage(+p)"
-              >
-                {{ p }}
-              </button>
-            }
+          @if (p === '...') {
+          <span class="page-ellipsis">…</span>
+          } @else {
+          <button type="button" class="page-pill-btn" [class.active]="p === currentPage()" (click)="setPage(+p)">
+            {{ p }}
+          </button>
+          }
           }
         </div>
 
-        <button
-          type="button"
-          class="btn-pagination-nav"
-          [disabled]="currentPage() === totalPages()"
-          (click)="setPage(currentPage() + 1)"
-          title="หน้าถัดไป"
-        >
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === totalPages()"
+          (click)="setPage(currentPage() + 1)" title="หน้าถัดไป">
           <span class="material-symbols-rounded">chevron_right</span>
         </button>
 
-        <button
-          type="button"
-          class="btn-pagination-nav"
-          [disabled]="currentPage() === totalPages()"
-          (click)="setPage(totalPages())"
-          title="หน้าสุดท้าย"
-        >
+        <button type="button" class="btn-pagination-nav" [disabled]="currentPage() === totalPages()"
+          (click)="setPage(totalPages())" title="หน้าสุดท้าย">
           <span class="material-symbols-rounded">last_page</span>
         </button>
       </div>
@@ -192,12 +168,12 @@
         }
 
         <div class="form-group">
-          <label class="form-label">ปีการศึกษา (STUDY_YEAR) *</label>
+          <label class="form-label">ปีการศึกษา *</label>
           <input type="text" maxlength="4" class="form-input" [(ngModel)]="modalYear" placeholder="เช่น 2569" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">ภาคการศึกษา (STUDY_SEMESTER) *</label>
+          <label class="form-label">ภาคการศึกษา *</label>
           <app-custom-select [options]="semesterOptions" [value]="modalSemester"
             (valueChange)="modalSemester = $event" />
         </div>
@@ -225,13 +201,9 @@
   }
 
   <!-- Reusable Custom Context Menu -->
-  <app-custom-context-menu
-    [isOpen]="isContextMenuOpen()"
-    [position]="contextMenuPos()"
+  <app-custom-context-menu [isOpen]="isContextMenuOpen()" [position]="contextMenuPos()"
     [headerBadge]="selectedContextMenuRecord() ? 'ปี ' + selectedContextMenuRecord()!.STUDY_YEAR : undefined"
     [headerTitle]="selectedContextMenuRecord() ? 'ภาคการศึกษาที่ ' + selectedContextMenuRecord()!.STUDY_SEMESTER : undefined"
-    [items]="contextMenuItems()"
-    (close)="isContextMenuOpen.set(false)"
-  />
+    [items]="contextMenuItems()" (close)="isContextMenuOpen.set(false)" />
 
 </div>

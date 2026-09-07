@@ -233,3 +233,87 @@
 .btn-tour-prev .material-symbols-rounded {
   font-size: 1rem;
 }
+
+/* ============================================================
+   ONBOARDING TOUR DARK MODE
+   ============================================================ */
+:host-context([data-theme="dark"]) .tour-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06) inset !important;
+}
+
+:host-context([data-theme="dark"]) .tour-card-header {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .tour-step-badge {
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .btn-close-tour {
+  color: #94a3b8 !important;
+}
+
+:host-context([data-theme="dark"]) .btn-close-tour:hover {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  color: #f8fafc !important;
+}
+
+:host-context([data-theme="dark"]) .tour-card-body {
+  background: var(--apple-surface, #131924) !important;
+}
+
+:host-context([data-theme="dark"]) .tour-step-title {
+  color: #f8fafc !important;
+}
+
+:host-context([data-theme="dark"]) .tour-step-desc {
+  color: #94a3b8 !important;
+}
+
+:host-context([data-theme="dark"]) .tour-action-hint {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.28) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .tour-card-footer {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-top-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .btn-tour-skip {
+  color: #94a3b8 !important;
+}
+
+:host-context([data-theme="dark"]) .btn-tour-skip:hover {
+  color: #f87171 !important;
+  background: rgba(220, 38, 38, 0.15) !important;
+}
+
+:host-context([data-theme="dark"]) .click-anywhere-hint {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .click-anywhere-hint.is-last {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  color: #4ade80 !important;
+}
+
+:host-context([data-theme="dark"]) .btn-tour-prev {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: #f8fafc !important;
+}
+
+:host-context([data-theme="dark"]) .btn-tour-prev:hover {
+  background: #242e3f !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+

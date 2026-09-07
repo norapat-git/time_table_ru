@@ -114,3 +114,24 @@
   border-color: #a2c5ea;
   box-shadow: none;
 }
+
+/* ==========================================================================
+   DARK MODE — CUSTOM CHECKBOX
+   ========================================================================== */
+:host-context([data-theme="dark"]) .apple-checkmark,
+[data-theme="dark"] .apple-checkmark {
+  background-color: var(--apple-surface, #131924);
+  border-color: var(--color-border-dark, #334155);
+}
+
+:host-context([data-theme="dark"]) .apple-checkbox-container:hover .apple-checkbox-input:not(:disabled) ~ .apple-checkmark,
+[data-theme="dark"] .apple-checkbox-container:hover .apple-checkbox-input:not(:disabled) ~ .apple-checkmark {
+  border-color: var(--apple-blue, #38bdf8);
+}
+
+:host-context([data-theme="dark"]) .apple-checkbox-input:checked ~ .apple-checkmark,
+[data-theme="dark"] .apple-checkbox-input:checked ~ .apple-checkmark {
+  background-color: var(--apple-blue, #38bdf8);
+  border-color: var(--apple-blue, #38bdf8);
+  box-shadow: 0 1px 4px rgba(56, 189, 248, 0.4);
+}
