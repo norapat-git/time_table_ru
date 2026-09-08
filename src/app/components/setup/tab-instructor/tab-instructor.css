@@ -1060,3 +1060,131 @@
   text-decoration: underline;
 }
 
+/* ==========================================================================
+   Dark Mode Overrides for Tab Instructor
+   ========================================================================== */
+
+/* 1. Instructor Code Pill */
+:host-context([data-theme="dark"]) .instructor-code-pill,
+[data-theme="dark"] .instructor-code-pill {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+}
+
+/* 2. Rank & Title Badges */
+:host-context([data-theme="dark"]) .rank-badge,
+[data-theme="dark"] .rank-badge,
+:host-context([data-theme="dark"]) .profile-rank-badge,
+[data-theme="dark"] .profile-rank-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+/* 3. Faculty Pills */
+:host-context([data-theme="dark"]) .faculty-pill,
+[data-theme="dark"] .faculty-pill,
+:host-context([data-theme="dark"]) .profile-tag-faculty,
+[data-theme="dark"] .profile-tag-faculty {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+/* 4. Type Pills & Profile Tag Pills */
+:host-context([data-theme="dark"]) .type-permanent,
+[data-theme="dark"] .type-permanent,
+:host-context([data-theme="dark"]) .profile-tag-pill.type-permanent,
+[data-theme="dark"] .profile-tag-pill.type-permanent {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .type-exec,
+[data-theme="dark"] .type-exec,
+:host-context([data-theme="dark"]) .profile-tag-pill.type-exec,
+[data-theme="dark"] .profile-tag-pill.type-exec {
+  background: rgba(217, 70, 239, 0.15) !important;
+  border: 1px solid rgba(217, 70, 239, 0.35) !important;
+  color: #f0abfc !important;
+}
+
+:host-context([data-theme="dark"]) .type-special,
+[data-theme="dark"] .type-special,
+:host-context([data-theme="dark"]) .profile-tag-pill.type-special,
+[data-theme="dark"] .profile-tag-pill.type-special {
+  background: rgba(234, 179, 8, 0.15) !important;
+  border: 1px solid rgba(234, 179, 8, 0.35) !important;
+  color: #fde047 !important;
+}
+
+:host-context([data-theme="dark"]) .type-default,
+[data-theme="dark"] .type-default,
+:host-context([data-theme="dark"]) .profile-tag-pill.type-default,
+[data-theme="dark"] .profile-tag-pill.type-default {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+/* 5. Instructor Detail Modal Elements */
+:host-context([data-theme="dark"]) .modal-sem-tag,
+[data-theme="dark"] .modal-sem-tag {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .profile-avatar,
+[data-theme="dark"] .profile-avatar {
+  background: #0f172a !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+:host-context([data-theme="dark"]) .profile-hero-card,
+[data-theme="dark"] .profile-hero-card {
+  background: linear-gradient(135deg, #161f2e 0%, #111622 100%) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .profile-name-th,
+[data-theme="dark"] .profile-name-th {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .profile-name-en,
+[data-theme="dark"] .profile-name-en {
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+:host-context([data-theme="dark"]) .detail-info-grid,
+[data-theme="dark"] .detail-info-grid {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+:host-context([data-theme="dark"]) .info-label,
+[data-theme="dark"] .info-label {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+:host-context([data-theme="dark"]) .info-val,
+[data-theme="dark"] .info-val {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .code-highlight,
+[data-theme="dark"] .code-highlight {
+  color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .load-more-section,
+[data-theme="dark"] .load-more-section {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+

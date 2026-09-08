@@ -1,0 +1,108 @@
+/* GLOBAL DESIGN TOKENS — Apple Minimalist Theme (White & Gray)
+   Aesthetics: Apple macOS / iOS Cupertino Clean Monochrome & Blue Accent */
+
+:root {
+  /* Apple Canvas & Surfaces */
+  --apple-canvas:      #f5f5f7;
+  --apple-surface:     #ffffff;
+  --apple-surface-sub: #fafafc;
+  --apple-sidebar-bg:  #f8f9fa;
+  --apple-sidebar-alt: #f1f2f4;
+
+  /* Apple Monochrome Palette */
+  --apple-text-primary:   #1d1d1f;
+  --apple-text-secondary: #6e6e73;
+  --apple-text-tertiary:  #86868b;
+  --apple-text-quaternary:#aeaeb2;
+
+  /* Apple Accent */
+  --apple-blue:       #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-blue-soft:  #e8f2fc;
+  --apple-dark:       #1d1d1f;
+  --apple-dark-hover: #333336;
+
+  /* Semantic Aliases */
+  --color-bg:             var(--apple-canvas);
+  --color-surface:        var(--apple-surface);
+  --color-border:         #e5e5ea;
+  --color-border-dark:    #d2d2d7;
+  --color-text-primary:   var(--apple-text-primary);
+  --color-text-secondary: var(--apple-text-secondary);
+  --color-text-muted:     var(--apple-text-tertiary);
+
+  /* Typography */
+  --font-sans:   'SF Pro Display', 'SF Pro Text', 'Inter', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-thai:   'Sarabun', 'SF Pro Text', 'Inter', -apple-system, sans-serif;
+
+  /* Spacing */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Border Radius */
+  --radius-sm:   0.375rem;  /* 6px */
+  --radius-md:   0.625rem;  /* 10px */
+  --radius-lg:   0.875rem;  /* 14px */
+  --radius-xl:   1.125rem;  /* 18px */
+  --radius-full: 9999px;
+
+  /* Apple Soft Diffuse Shadows */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg:     0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* Apple Spring Transitions */
+  --spring-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast:   150ms var(--spring-apple);
+  --transition-normal: 280ms var(--spring-apple);
+  --transition-slow:   400ms var(--spring-apple);
+}
+
+/* GLOBAL DESIGN TOKENS — Apple Cupertino Dark Theme
+   Deep Charcoal Surfaces, High-Contrast Text & Crisp Accents */
+[data-theme="dark"] {
+  /* Apple Dark Canvas & Surfaces */
+  --apple-canvas:      #0b0f17;
+  --apple-surface:     #131924;
+  --apple-surface-sub: #1c2433;
+  --apple-sidebar-bg:  #111620;
+  --apple-sidebar-alt: #19212e;
+
+  /* Apple Dark Monochrome Palette */
+  --apple-text-primary:   #f8fafc;
+  --apple-text-secondary: #94a3b8;
+  --apple-text-tertiary:  #64748b;
+  --apple-text-quaternary:#475569;
+
+  /* Apple Dark Accent */
+  --apple-blue:       #38bdf8;
+  --apple-blue-hover: #0ea5e9;
+  --apple-blue-soft:  rgba(56, 189, 248, 0.12);
+  --apple-dark:       #f8fafc;
+  --apple-dark-hover: #e2e8f0;
+
+  /* Semantic Aliases */
+  --color-bg:             var(--apple-canvas);
+  --color-surface:        var(--apple-surface);
+  --color-border:         #242e3f;
+  --color-border-dark:    #334155;
+  --color-text-primary:   var(--apple-text-primary);
+  --color-text-secondary: var(--apple-text-secondary);
+  --color-text-muted:     var(--apple-text-tertiary);
+
+  /* Dark Diffuse Shadows */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md:     0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg:     0 12px 32px rgba(0, 0, 0, 0.65);
+  --shadow-glass:  0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}

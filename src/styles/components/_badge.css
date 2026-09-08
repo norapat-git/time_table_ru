@@ -1,0 +1,33 @@
+/* Global Badges & Pills */
+/* Global Level & Semester Badges (Clean Number Only Badges) */
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.45rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  color: #0369a1;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sem-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.45rem;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 9999px;
+  color: #7e22ce;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+}

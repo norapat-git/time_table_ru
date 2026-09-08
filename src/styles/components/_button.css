@@ -1,0 +1,137 @@
+/* Global Buttons & Modal Footers */
+/* GLOBAL MODAL FOOTER & STANDARD BUTTONS (APPLE BLUE ACCENT) */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 1rem 1.5rem;
+  background: #fafafc;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  background: var(--apple-blue) !important;
+  color: #ffffff !important;
+  border: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.2);
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--apple-blue-hover) !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.25);
+  transform: none !important;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary.btn-icon-only,
+.btn-add-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--apple-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.2) !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease !important;
+}
+
+.btn-primary.btn-icon-only:hover:not(:disabled),
+.btn-add-icon:hover:not(:disabled) {
+  background: var(--apple-blue-hover) !important;
+  box-shadow: 0 1px 3px rgba(0, 113, 227, 0.25) !important;
+  transform: none !important;
+}
+
+.btn-primary.btn-icon-only .material-symbols-rounded,
+.btn-add-icon .material-symbols-rounded {
+  font-size: 1.35rem !important;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  color: var(--apple-text-primary);
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f5f5f7;
+  border-color: var(--color-border-dark);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Standard Refresh Icon Button (Apple Gray Icon Box) */
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #f5f5f7;
+  border: 1px solid var(--color-border);
+  color: var(--apple-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #e5e5ea;
+  color: var(--apple-text-primary);
+  border-color: var(--color-border-dark);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-refresh .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.spin-loading {
+  animation: spinLoading 0.9s linear infinite;
+}
+
+@keyframes spinLoading {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

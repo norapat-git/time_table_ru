@@ -76,8 +76,12 @@
 
           <!-- User Profile Display & Logout -->
           <div class="topbar-user-pill">
-            <div class="topbar-avatar">
-              <span class="material-symbols-rounded">person</span>
+            <div class="topbar-avatar" [class.has-img]="!!authService.currentUser()?.avatarUrl">
+              @if (authService.currentUser()?.avatarUrl; as avatar) {
+                <img [src]="avatar" alt="Avatar" class="topbar-avatar-img" (error)="onAvatarError($event)" />
+              } @else {
+                <span class="material-symbols-rounded">person</span>
+              }
             </div>
             <span class="topbar-name">{{ authService.currentUser()?.displayName || 'ผู้ใช้งานระบบ' }}</span>
             <button class="topbar-logout-btn" (click)="authService.logout()" title="ออกจากระบบ">

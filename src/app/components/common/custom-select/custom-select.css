@@ -354,8 +354,10 @@
 }
 
 :host-context([data-theme="dark"]) .select-search-input {
-  background: var(--apple-surface, #131924) !important;
-  border-color: var(--color-border-dark, #334155) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
   color: var(--apple-text-primary, #f8fafc) !important;
 }
 

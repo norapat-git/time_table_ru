@@ -1,0 +1,373 @@
+/* ==========================================================================
+   15. Compulsory Course Report (tab-report-compulsory) Dark Mode Styles
+   ========================================================================== */
+
+[data-theme="dark"] app-tab-report-compulsory .btn-header-secondary {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-header-secondary:hover:not(:disabled) {
+  background: #242e3f !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .content-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .filter-toolbar {
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .filter-label {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .search-box {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .search-box:focus-within {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .search-input {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .search-icon,
+[data-theme="dark"] app-tab-report-compulsory .btn-clear-search {
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-reset-filters {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-reset-filters:hover {
+  background: #242e3f !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+  border-color: var(--color-border, #334155) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-refresh {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-refresh:hover:not(:disabled) {
+  background: #242e3f !important;
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .view-toggle-group {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-view-toggle {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-view-toggle.active {
+  background: #242e3f !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .table-responsive {
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .report-table th {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .report-table td {
+  border-bottom-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .report-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .context-clickable-row {
+  cursor: context-menu;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .context-clickable-row:hover td {
+  background-color: rgba(56, 189, 248, 0.06) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .faculty-badge {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .group-title {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .subgroup-text {
+  color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .badge-year-1 {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .badge-year-2 {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #c084fc !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .badge-year-3 {
+  background: rgba(249, 115, 22, 0.15) !important;
+  color: #fb923c !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .badge-year-4 {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .badge-year-default {
+  background: rgba(148, 163, 184, 0.15) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .sem-pill {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .course-code-badge {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .course-name-th {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .course-name-en {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .credit-pill {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-action,
+[data-theme="dark"] app-tab-report-compulsory .btn-action.btn-more,
+[data-theme="dark"] app-tab-report-compulsory .btn-detail-icon {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-action.btn-more:hover,
+[data-theme="dark"] app-tab-report-compulsory .btn-detail-icon:hover {
+  background: #242e3f !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .pagination-bar {
+  border-top-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .info-text {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .info-strong {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-pagination-nav {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-pagination-nav:hover:not(:disabled) {
+  background: #242e3f !important;
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .page-chip {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .page-chip:hover:not(.active) {
+  background: #242e3f !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .page-chip.active {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+/* Mode B: Grouped View Dark Mode */
+[data-theme="dark"] app-tab-report-compulsory .faculty-section-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .faculty-section-header {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .fac-section-title {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .fac-short-tag {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .fac-stat-badge {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .program-group-block {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .group-block-title {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .group-count-pill {
+  background: #242e3f !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .course-item-chip {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .course-item-chip:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.15) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .chip-name-th {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .chip-name-en {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+/* Modal Dark Mode */
+[data-theme="dark"] app-tab-report-compulsory .modal-card {
+  background: var(--apple-surface, #131924) !important;
+  border-color: var(--color-border, #242e3f) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .modal-header {
+  border-bottom-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .modal-title {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .modal-subtitle {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-close-modal {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-close-modal:hover {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .detail-hero-box {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .hero-name-th {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .hero-name-en {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .info-card {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .info-label {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .info-value {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .modal-footer {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-top-color: var(--color-border, #242e3f) !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-modal-close {
+  background: #242e3f !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] app-tab-report-compulsory .btn-modal-close:hover {
+  background: #334155 !important;
+}
+
+[data-theme="dark"] .instructor-scheduled-badge,
+[data-theme="dark"] .course-scheduled-badge {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: #4ade80 !important;
+}

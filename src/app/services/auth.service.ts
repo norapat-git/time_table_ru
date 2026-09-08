@@ -69,13 +69,17 @@ export class AuthService {
   /**
    * Login with real Backend API (Microsoft 365 + RG_SCHEDULE_ACCOUNT)
    */
-  login(email: string, password: string): Observable<{ success: boolean; message: string; results?: any }> {
+  login(email: string, password: string): Observable<{ success: boolean; message: string; results?: any; avatarUrl?: string }> {
     const targetUrl = `${environment.apiUrl}/login`;
-    return this.http.post<{ success: boolean; message: string; token?: string; results?: any }>(targetUrl, { email, password }).pipe(
+    return this.http.post<{ success: boolean; message: string; token?: string; results?: any; avatarUrl?: string }>(targetUrl, { email, password }).pipe(
       tap((res) => {
         if (res && res.success && res.token) {
           const decodedUser = extractUserFromToken(res.token);
           if (decodedUser) {
+            const avatar = res.avatarUrl || (res.results as any)?.avatarUrl;
+            if (avatar && !decodedUser.avatarUrl) {
+              decodedUser.avatarUrl = avatar;
+            }
             this._token.set(res.token);
             this._user.set(decodedUser);
             this._remainingSeconds.set(getTokenRemainingSeconds(res.token));

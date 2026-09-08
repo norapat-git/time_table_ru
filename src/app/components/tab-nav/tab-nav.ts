@@ -137,4 +137,11 @@ export class TabNavComponent implements AfterViewInit {
     }
     this.authService.logout();
   }
+
+  onAvatarError(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target) {
+      target.style.display = 'none';
+    }
+  }
 }

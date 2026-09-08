@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-login-page',
@@ -14,6 +15,7 @@ import { ToastService } from '../../services/toast.service';
 export class LoginPageComponent {
   readonly authService = inject(AuthService);
   readonly toastService = inject(ToastService);
+  readonly themeService = inject(ThemeService);
 
   email = signal<string>('');
   password = signal<string>('');

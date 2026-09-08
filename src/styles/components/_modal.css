@@ -1,0 +1,115 @@
+/* Global Modal Base, Header Actions & Scroll Locks */
+/* Modal Header Actions & Help Tour Button */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-modal-tour {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.65rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  color: var(--apple-blue);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-thai);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-tour:hover {
+  background: var(--apple-blue);
+  color: #ffffff;
+  border-color: var(--apple-blue);
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-modal-tour .material-symbols-rounded {
+  font-size: 0.95rem;
+}
+
+/* FETCH LOCK & DOUBLE-CLICK PREVENTION (60FPS ACCELERATED) */
+.is-fetching-locked {
+  pointer-events: none !important;
+  user-select: none !important;
+  cursor: wait !important;
+}
+
+.is-fetching-locked * {
+  pointer-events: none !important;
+}
+
+
+
+/* Global clean modal scrollbars (no chunky bars) */
+.modal-body,
+.modal-card,
+.ugb-course-scroll-box,
+.instructor-list-scroll,
+.instructors-chip-scroll,
+.drawer-body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.modal-body::-webkit-scrollbar,
+.modal-card::-webkit-scrollbar,
+.ugb-course-scroll-box::-webkit-scrollbar,
+.instructor-list-scroll::-webkit-scrollbar,
+.instructors-chip-scroll::-webkit-scrollbar,
+.drawer-body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+
+
+/* GLOBAL MODAL SCROLL LOCK & SCROLL CHAINING PREVENTION */
+html:has(.modal-backdrop),
+html:has(.dialog-backdrop),
+html:has(.drawer-backdrop),
+html:has(.custom-modal-overlay),
+body:has(.modal-backdrop),
+body:has(.dialog-backdrop),
+body:has(.drawer-backdrop),
+body:has(.custom-modal-overlay) {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+html:has(.modal-backdrop) .dashboard-main-area,
+html:has(.modal-backdrop) .dashboard-view-content,
+body:has(.modal-backdrop) .dashboard-main-area,
+body:has(.modal-backdrop) .dashboard-view-content,
+html:has(.dialog-backdrop) .dashboard-main-area,
+html:has(.dialog-backdrop) .dashboard-view-content,
+body:has(.dialog-backdrop) .dashboard-main-area,
+body:has(.dialog-backdrop) .dashboard-view-content {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+/* Prevent scroll chaining on all backdrops */
+.modal-backdrop,
+.dialog-backdrop,
+.drawer-backdrop,
+.custom-modal-overlay {
+  overscroll-behavior: contain !important;
+}
+
+/* Modal cards, dialog cards, and scrollable bodies */
+.modal-card,
+.dialog-modal-card,
+.drawer-content,
+.modal-body,
+.modal-form-scrollable,
+.modal-recommend-body {
+  overscroll-behavior: contain !important;
+}

@@ -48,4 +48,5 @@ Thumbs.db
 .env.*.local
 src/environments/
 src/environment/
+claude.md
 

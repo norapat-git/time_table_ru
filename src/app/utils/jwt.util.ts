@@ -189,6 +189,7 @@ export function extractUserFromToken(token: string): DecodedUser | null {
     department: (payload.department || payload['FACULTY_NAME'] || 'สำนักบริการทางวิชาการและทดสอบประเมินผล') as string | undefined,
     facultyNo: (payload.facultyNo || payload['FACULTY_NO']) as string | undefined,
     majorNo: (payload.majorNo || payload['MAJOR_NO']) as string | undefined,
+    avatarUrl: (payload['avatarUrl'] || payload['AVATAR_URL'] || payload['photo'] || payload['picture'] || payload['avatar']) as string | undefined,
     rawPayload: payload,
   };
 }

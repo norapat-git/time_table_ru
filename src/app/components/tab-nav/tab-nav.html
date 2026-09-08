@@ -141,8 +141,12 @@
 
     <!-- User Profile & Logout -->
     <div class="user-profile-box">
-      <div class="user-avatar-circle">
-        <span class="material-symbols-rounded">person</span>
+      <div class="user-avatar-circle" [class.has-img]="!!authService.currentUser()?.avatarUrl">
+        @if (authService.currentUser()?.avatarUrl; as avatar) {
+          <img [src]="avatar" alt="Avatar" class="user-avatar-img" (error)="onAvatarError($event)" />
+        } @else {
+          <span class="material-symbols-rounded">person</span>
+        }
       </div>
 
       <div class="user-meta">

@@ -488,4 +488,11 @@ export class App {
       this.tourService.startTour('student-schedule', steps, force);
     }
   }
+
+  onAvatarError(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target) {
+      target.style.display = 'none';
+    }
+  }
 }
