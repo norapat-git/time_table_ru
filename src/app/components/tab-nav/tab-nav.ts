@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { TabLockService } from '../../services/tab-lock.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 export type TabGroupKey = 'setup' | 'courses' | 'timetable' | 'reports';
 
@@ -38,6 +39,7 @@ export class TabNavComponent implements AfterViewInit {
   readonly authService = inject(AuthService);
   readonly tabLockService = inject(TabLockService);
   readonly toastService = inject(ToastService);
+  readonly confirmDialogService = inject(ConfirmDialogService);
 
   readonly tabs = input.required<TabItem[]>();
   readonly activeTab = input.required<string>();
@@ -130,12 +132,25 @@ export class TabNavComponent implements AfterViewInit {
     this.isMobileOpen.set(!this.isMobileOpen());
   }
 
-  onLogout(): void {
+  async onLogout(): Promise<void> {
     if (this.tabLockService.isLocked()) {
       this.toastService.warning('กรุณาบันทึกหรือยกเลิกการปรับตารางก่อนออกจากระบบ');
       return;
     }
-    this.authService.logout();
+
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'ยืนยันการออกจากระบบ',
+      message: 'คุณต้องการออกจากระบบจัดการตารางสอนใช่หรือไม่?',
+      detail: 'เมื่อออกจากระบบแล้ว คุณจะต้องลงชื่อเข้าใช้งานใหม่อีกครั้ง',
+      confirmText: 'ออกจากระบบ',
+      cancelText: 'ยกเลิก',
+      variant: 'warning',
+      icon: 'logout',
+    });
+
+    if (confirmed) {
+      this.authService.logout();
+    }
   }
 
   onAvatarError(event: Event): void {

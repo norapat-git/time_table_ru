@@ -30,97 +30,6 @@
 }
 
 
-/* Timetable Board */
-[data-theme="dark"] .timetable-mock-board {
-  background: rgba(19, 25, 36, 0.88) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
-}
-
-[data-theme="dark"] .board-top-bar {
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-[data-theme="dark"] .board-title-chip {
-  color: #94a3b8 !important;
-}
-
-[data-theme="dark"] .board-status-badge {
-  background: rgba(34, 197, 94, 0.15) !important;
-  border-color: rgba(34, 197, 94, 0.3) !important;
-  color: #4ade80 !important;
-}
-
-[data-theme="dark"] .grid-time-head,
-[data-theme="dark"] .grid-col-head {
-  background: rgba(255, 255, 255, 0.04) !important;
-  color: #cbd5e1 !important;
-}
-
-[data-theme="dark"] .time-sub {
-  color: #64748b !important;
-}
-
-[data-theme="dark"] .cell-empty {
-  background: rgba(255, 255, 255, 0.02) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
-}
-
-[data-theme="dark"] .slot-free-text {
-  color: #475569 !important;
-}
-
-[data-theme="dark"] .mon-cell {
-  background: rgba(234, 179, 8, 0.15) !important;
-  color: #fde047 !important;
-}
-
-[data-theme="dark"] .tue-cell {
-  background: rgba(236, 72, 153, 0.15) !important;
-  color: #f472b6 !important;
-}
-
-[data-theme="dark"] .wed-cell {
-  background: rgba(34, 197, 94, 0.15) !important;
-  color: #4ade80 !important;
-}
-
-/* Course Cards */
-[data-theme="dark"] .card-tha {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(56, 189, 248, 0.15) 100%) !important;
-  border-color: rgba(56, 189, 248, 0.4) !important;
-  color: #38bdf8 !important;
-}
-
-[data-theme="dark"] .card-eng {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(167, 139, 250, 0.15) 100%) !important;
-  border-color: rgba(167, 139, 250, 0.4) !important;
-  color: #c4b5fd !important;
-}
-
-[data-theme="dark"] .card-law {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.25) 0%, rgba(251, 191, 36, 0.15) 100%) !important;
-  border-color: rgba(251, 191, 36, 0.4) !important;
-  color: #fde047 !important;
-}
-
-[data-theme="dark"] .card-mth {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(52, 211, 153, 0.15) 100%) !important;
-  border-color: rgba(52, 211, 153, 0.4) !important;
-  color: #4ade80 !important;
-}
-
-[data-theme="dark"] .card-pol {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.25) 0%, rgba(251, 113, 133, 0.15) 100%) !important;
-  border-color: rgba(251, 113, 133, 0.4) !important;
-  color: #fda4af !important;
-}
-
-[data-theme="dark"] .card-room {
-  background: rgba(0, 0, 0, 0.4) !important;
-}
-
-
 /* Right Auth Card */
 [data-theme="dark"] .modern-auth-card {
   background: rgba(19, 25, 36, 0.88) !important;
@@ -133,14 +42,6 @@
 [data-theme="dark"] .auth-brand-badge {
   background: var(--apple-surface-sub, #1c2433) !important;
   border-color: var(--color-border, #242e3f) !important;
-  color: var(--apple-text-secondary, #94a3b8) !important;
-}
-
-[data-theme="dark"] .auth-title {
-  color: var(--apple-text-primary, #f8fafc) !important;
-}
-
-[data-theme="dark"] .auth-subtitle {
   color: var(--apple-text-secondary, #94a3b8) !important;
 }
 

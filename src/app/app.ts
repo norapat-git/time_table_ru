@@ -30,6 +30,7 @@ import { OnboardingTourService, TourStep } from './services/onboarding-tour.serv
 import { TabLockService } from './services/tab-lock.service';
 import { ToastService } from './services/toast.service';
 import { ThemeService } from './services/theme.service';
+import { ConfirmDialogService } from './services/confirm-dialog.service';
 
 @Component({
   selector: 'app-root',
@@ -61,6 +62,7 @@ export class App {
   readonly tabLockService = inject(TabLockService);
   readonly toastService = inject(ToastService);
   readonly themeService = inject(ThemeService);
+  readonly confirmDialogService = inject(ConfirmDialogService);
 
   readonly activeTab = signal<string>('academic-year');
 
@@ -493,6 +495,27 @@ export class App {
     const target = event.target as HTMLElement;
     if (target) {
       target.style.display = 'none';
+    }
+  }
+
+  async onLogout(): Promise<void> {
+    if (this.tabLockService.isLocked()) {
+      this.toastService.warning('กรุณาบันทึกหรือยกเลิกการปรับตารางก่อนออกจากระบบ');
+      return;
+    }
+
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'ยืนยันการออกจากระบบ',
+      message: 'คุณต้องการออกจากระบบจัดการตารางสอนใช่หรือไม่?',
+      detail: 'เมื่อออกจากระบบแล้ว คุณจะต้องลงชื่อเข้าใช้งานใหม่อีกครั้ง',
+      confirmText: 'ออกจากระบบ',
+      cancelText: 'ยกเลิก',
+      variant: 'warning',
+      icon: 'logout',
+    });
+
+    if (confirmed) {
+      this.authService.logout();
     }
   }
 }

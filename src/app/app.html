@@ -84,7 +84,7 @@
               }
             </div>
             <span class="topbar-name">{{ authService.currentUser()?.displayName || 'ผู้ใช้งานระบบ' }}</span>
-            <button class="topbar-logout-btn" (click)="authService.logout()" title="ออกจากระบบ">
+            <button class="topbar-logout-btn" (click)="onLogout()" title="ออกจากระบบ">
               <span class="material-symbols-rounded">logout</span>
             </button>
           </div>

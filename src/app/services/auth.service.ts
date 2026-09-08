@@ -117,6 +117,12 @@ export class AuthService {
       return false;
     }
 
+    // Preserve avatarUrl from existing stored session if present
+    const storedUser = this.getStoredUser();
+    if (storedUser?.avatarUrl && !user.avatarUrl) {
+      user.avatarUrl = storedUser.avatarUrl;
+    }
+
     this._token.set(token);
     this._user.set(user);
     this._remainingSeconds.set(getTokenRemainingSeconds(token));
