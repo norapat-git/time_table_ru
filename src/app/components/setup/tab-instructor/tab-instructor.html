@@ -84,17 +84,16 @@
             <th style="width: 48px; text-align: center;">
               <app-custom-checkbox [checked]="isAllSelected()" (checkedChange)="toggleSelectAll()" />
             </th>
-            <th style="width: 120px;">รหัสอาจารย์</th>
             <th>ชื่อ-สกุลอาจารย์ (ภาษาไทย / อังกฤษ)</th>
             <th style="width: 180px;">คณะ</th>
             <th style="width: 110px; text-align: center;">ประเภท</th>
-            <th style="width: 170px; text-align: center;">จัดการ</th>
+            <th style="width: 90px; text-align: center;">จัดการ</th>
           </tr>
         </thead>
         <tbody>
           @if (filteredInstructors().length === 0) {
           <tr>
-            <td colspan="6" class="empty-cell">
+            <td colspan="5" class="empty-cell">
               <div class="empty-state">
                 <span class="material-symbols-rounded empty-icon">person_off</span>
                 <p class="empty-text">ไม่พบข้อมูลอาจารย์ผู้สอน</p>
@@ -112,20 +111,17 @@
           }
 
           @for (item of paginatedInstructors(); track item.INSTRUCTOR_CODE) {
-          <tr [class.row-selected]="isRowSelected(item.INSTRUCTOR_CODE)" class="context-clickable-row" (contextmenu)="onRowContextMenu($event, item)">
+          <tr [class.row-selected]="isRowSelected(item.INSTRUCTOR_CODE)" class="context-clickable-row"
+              (click)="openDetailModal(item)" (contextmenu)="onRowContextMenu($event, item)"
+              title="คลิกเพื่อดูรายละเอียดอาจารย์ (หรือคลิกขวาเพื่อจัดการ)">
             <!-- Checkbox -->
-            <td style="text-align: center;">
+            <td style="text-align: center;" (click)="$event.stopPropagation()">
               <app-custom-checkbox
                 [checked]="isRowSelected(item.INSTRUCTOR_CODE)"
                 [disabled]="!!item.IS_SCHEDULED"
                 [title]="item.IS_SCHEDULED ? 'อาจารย์ถูกจัดในตารางสอนแล้ว ไม่สามารถเลือกลบได้' : ''"
                 (checkedChange)="toggleSelectRow(item.INSTRUCTOR_CODE)"
               />
-            </td>
-
-            <!-- Instructor Code -->
-            <td>
-              <span class="instructor-code-pill">{{ item.INSTRUCTOR_CODE }}</span>
             </td>
 
             <!-- Instructor Names & Rank -->
@@ -168,7 +164,7 @@
             </td>
 
             <!-- Actions -->
-            <td style="text-align: center; white-space: nowrap;">
+            <td style="text-align: center; white-space: nowrap;" (click)="$event.stopPropagation()">
               <button class="btn-action btn-more" (click)="openMenuFromBtn($event, item)" title="การจัดการ (หรือคลิกขวาที่แถว)">
                 <span class="material-symbols-rounded">more_vert</span>
               </button>
@@ -349,11 +345,13 @@
                 [class.is-already-added]="alreadyAdded"
                 (click)="!alreadyAdded && toggleMasterSelect(m.INSTRUCTOR_CODE)">
                 <div class="item-card-left">
-                  <app-custom-checkbox
-                    [checked]="isMasterSelected(m.INSTRUCTOR_CODE)"
-                    [disabled]="alreadyAdded"
-                    (checkedChange)="!alreadyAdded && toggleMasterSelect(m.INSTRUCTOR_CODE)"
-                  />
+                  <div (click)="$event.stopPropagation()">
+                    <app-custom-checkbox
+                      [checked]="isMasterSelected(m.INSTRUCTOR_CODE)"
+                      [disabled]="alreadyAdded"
+                      (checkedChange)="!alreadyAdded && toggleMasterSelect(m.INSTRUCTOR_CODE)"
+                    />
+                  </div>
                   <span class="card-code-pill">{{ m.INSTRUCTOR_CODE }}</span>
                   <div class="card-info">
                     <div class="card-name-row">
@@ -452,6 +450,10 @@
             <p class="profile-name-en">{{ d.INSTRUCTOR_NAME_ENG }}</p>
             }
             <div class="profile-tags-row">
+              <span class="profile-tag-pill is-code" title="รหัสอาจารย์">
+                <span class="material-symbols-rounded">badge</span>
+                รหัส {{ d.INSTRUCTOR_CODE }}
+              </span>
               <span class="profile-tag-pill" [ngClass]="getInstructorTypeClass(d.INSTRUCTOR_TYPE)">
                 {{ getInstructorTypeLabel(d.INSTRUCTOR_TYPE) }}
               </span>

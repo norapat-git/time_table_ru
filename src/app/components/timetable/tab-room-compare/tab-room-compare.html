@@ -180,10 +180,12 @@
 
                     <div class="card-main-info">
                       <div class="card-top-row">
-                        <span class="course-code-badge">{{ item.COURSE_NO }}</span>
-                        @if (item.CREDIT) {
-                          <span class="course-credit-badge">{{ item.CREDIT }} นก.</span>
-                        }
+                        <span class="course-code-badge">
+                          {{ item.COURSE_NO }}
+                          @if (item.CREDIT) {
+                            <span class="course-credit-tag">({{ item.CREDIT }})</span>
+                          }
+                        </span>
                         @if (item.isMoved) {
                           <span class="status-badge-draft">
                             <span class="material-symbols-rounded draft-icon">edit_note</span>
@@ -209,10 +211,10 @@
                       </div>
 
                       @if (item.INSTRUCTORS && item.INSTRUCTORS.length > 0) {
-                        <div class="instructors-info">
+                        <div class="instructors-info" [title]="getFullInstructorsTooltip(item.INSTRUCTORS)">
                           <span class="material-symbols-rounded inst-icon">person</span>
                           <span class="inst-name">
-                            {{ item.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }}{{ item.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || item.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            {{ getShortInstructorName(item.INSTRUCTORS[0]) }}
                             @if (item.INSTRUCTORS.length > 1) {
                               <span class="more-inst-badge">+{{ item.INSTRUCTORS.length - 1 }}</span>
                             }
@@ -319,10 +321,12 @@
 
                     <div class="card-main-info">
                       <div class="card-top-row">
-                        <span class="course-code-badge">{{ item.COURSE_NO }}</span>
-                        @if (item.CREDIT) {
-                          <span class="course-credit-badge">{{ item.CREDIT }} นก.</span>
-                        }
+                        <span class="course-code-badge">
+                          {{ item.COURSE_NO }}
+                          @if (item.CREDIT) {
+                            <span class="course-credit-tag">({{ item.CREDIT }})</span>
+                          }
+                        </span>
                         @if (item.isMoved) {
                           <span class="status-badge-draft">
                             <span class="material-symbols-rounded draft-icon">edit_note</span>
@@ -348,10 +352,10 @@
                       </div>
 
                       @if (item.INSTRUCTORS && item.INSTRUCTORS.length > 0) {
-                        <div class="instructors-info">
+                        <div class="instructors-info" [title]="getFullInstructorsTooltip(item.INSTRUCTORS)">
                           <span class="material-symbols-rounded inst-icon">person</span>
                           <span class="inst-name">
-                            {{ item.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }}{{ item.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || item.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            {{ getShortInstructorName(item.INSTRUCTORS[0]) }}
                             @if (item.INSTRUCTORS.length > 1) {
                               <span class="more-inst-badge">+{{ item.INSTRUCTORS.length - 1 }}</span>
                             }

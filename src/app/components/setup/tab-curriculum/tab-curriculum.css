@@ -704,6 +704,81 @@
   color: #1d1d1f;
 }
 
+.form-label-with-hint {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.label-hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--apple-text-tertiary, #8e8e93);
+}
+
+.custom-input-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  height: 40px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-input-box:focus-within {
+  border-color: var(--apple-blue, #0071e3);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+}
+
+.custom-input-box .input-icon {
+  font-size: 1.15rem;
+  color: var(--apple-text-tertiary, #8e8e93);
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.modal-text-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-thai);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--apple-text-primary, #1d1d1f);
+}
+
+.modal-text-input::placeholder {
+  color: var(--apple-text-tertiary, #94a3b8);
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+
+.btn-clear-input {
+  background: none;
+  border: none;
+  color: var(--apple-text-tertiary, #8e8e93);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-clear-input:hover {
+  color: var(--apple-text-primary, #1d1d1f);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.btn-clear-input .material-symbols-rounded {
+  font-size: 1rem;
+}
+
 .form-input {
   padding: 0.6rem 0.85rem;
   border-radius: 8px;
@@ -837,6 +912,32 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.enroll-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.enroll-badge-cell {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.5rem;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .credit-tag {
@@ -1432,5 +1533,47 @@
   background: var(--apple-surface-sub, #1c2433);
   border-color: var(--color-border, #242e3f);
   color: var(--apple-text-primary, #f8fafc);
+}
+
+:host-context([data-theme="dark"]) .custom-input-box,
+[data-theme="dark"] .custom-input-box {
+  background: var(--apple-surface, #131924);
+  border-color: var(--color-border, #242e3f);
+}
+
+:host-context([data-theme="dark"]) .custom-input-box:focus-within,
+[data-theme="dark"] .custom-input-box:focus-within {
+  border-color: var(--apple-blue, #38bdf8);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+:host-context([data-theme="dark"]) .modal-text-input,
+[data-theme="dark"] .modal-text-input {
+  color: var(--apple-text-primary, #f8fafc);
+}
+
+:host-context([data-theme="dark"]) .modal-text-input::placeholder,
+[data-theme="dark"] .modal-text-input::placeholder {
+  color: var(--apple-text-tertiary, #64748b);
+}
+
+:host-context([data-theme="dark"]) .btn-clear-input:hover,
+[data-theme="dark"] .btn-clear-input:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:host-context([data-theme="dark"]) .enroll-badge,
+[data-theme="dark"] .enroll-badge {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+:host-context([data-theme="dark"]) .enroll-badge-cell,
+[data-theme="dark"] .enroll-badge-cell {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
 }
 

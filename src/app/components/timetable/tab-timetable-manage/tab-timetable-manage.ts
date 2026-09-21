@@ -74,7 +74,12 @@ export interface InstructorSlotAvailability {
   colorClass: string;
   period: string;
   timeLabel?: string;
+  timeStart?: string;
+  timeEnd?: string;
   isRu30Available?: boolean;
+  isBusyInRu30?: boolean;
+  ru30BusyCount?: number;
+  ru30BusyList?: any[];
   isBusyInClass?: boolean;
   isAvailable: boolean;
   busyCount: number;
@@ -219,14 +224,94 @@ export class TabTimetableManageComponent implements OnInit {
   readonly formInstructorCodes = signal<string[]>([]);
   readonly formError = signal<string>('');
 
+  computeDurationLabel(startTimeStr: string, endTimeStr: string): string {
+    if (!startTimeStr || !endTimeStr) return '';
+    const parseMin = (s: string) => {
+      const parts = s.split(':').map((x) => parseInt(x.trim(), 10));
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+      return parts[0] * 60 + parts[1];
+    };
+
+    const startM = parseMin(startTimeStr);
+    const endM = parseMin(endTimeStr);
+    if (startM == null || endM == null || endM <= startM) return '';
+
+    const diff = endM - startM;
+    const hours = Math.floor(diff / 60);
+    const minutes = diff % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours} ชม. ${minutes} นาที`;
+    } else if (hours > 0) {
+      return `${hours} ชม.`;
+    } else {
+      return `${minutes} นาที`;
+    }
+  }
+
   readonly formPeriodDurationText = computed<string>(() => {
     const times = this.formTimeCodes();
     if (times.length === 0) return 'ยังไม่ได้เลือกคาบ';
     const sorted = [...times].sort((a, b) => a - b);
     const count = sorted.length;
-    const hours = count * 2;
-    if (count === 1) return `1 คาบ (${hours} ชม.)`;
-    return `${count} คาบ (${hours} ชม.) • คาบที่ ${sorted.join(', ')}`;
+    const opts = this.timeOptions();
+
+    // Group consecutive codes into clusters (e.g. [1, 4] -> [[1], [4]])
+    const groups: number[][] = [];
+    for (const code of sorted) {
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup[lastGroup.length - 1] === code - 1) {
+        lastGroup.push(code);
+      } else {
+        groups.push([code]);
+      }
+    }
+
+    const parseMin = (s: string) => {
+      const parts = s.split(':').map((x) => parseInt(x.trim(), 10));
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+      return parts[0] * 60 + parts[1];
+    };
+
+    const groupRanges: string[] = [];
+    let totalMinutes = 0;
+
+    for (const group of groups) {
+      const firstOpt = opts.find((t) => Number(t.code) === group[0]);
+      const lastOpt = opts.find((t) => Number(t.code) === group[group.length - 1]);
+      const start = (firstOpt?.period || '').split('-')[0]?.trim() || '';
+      const end = (lastOpt?.period || '').split('-')[1]?.trim() || (lastOpt?.period || '').trim();
+
+      if (start && end) {
+        groupRanges.push(`${start} - ${end}`);
+        const startM = parseMin(start);
+        const endM = parseMin(end);
+        if (startM != null && endM != null && endM > startM) {
+          totalMinutes += endM - startM;
+        }
+      } else if (firstOpt?.period) {
+        groupRanges.push(firstOpt.period.trim());
+      }
+    }
+
+    const timeRange = groupRanges.length > 0 ? ` (${groupRanges.join(', ')})` : '';
+
+    let durationStr = '';
+    if (totalMinutes > 0) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (hours > 0 && minutes > 0) {
+        durationStr = `${hours} ชม. ${minutes} นาที`;
+      } else if (hours > 0) {
+        durationStr = `${hours} ชม.`;
+      } else {
+        durationStr = `${minutes} นาที`;
+      }
+    }
+    const durText = durationStr ? ` (${durationStr})` : '';
+
+    if (count === 1) return `คาบที่ ${sorted[0]}${timeRange} • 1 คาบ${durText}`;
+    return `คาบที่ ${sorted.join(', ')}${timeRange} • รวม ${count} คาบ${durText}`;
   });
 
   // Feature 1: Instructor Conflict Alert
@@ -246,7 +331,7 @@ export class TabTimetableManageComponent implements OnInit {
   readonly cloneSemesterOptions: SelectOption[] = [
     { value: '1', label: 'ภาค 1' },
     { value: '2', label: 'ภาค 2' },
-    { value: 'S', label: 'ภาคฤดูร้อน (Summer)' },
+    { value: '3', label: 'ภาคฤดูร้อน (Summer)' },
   ];
 
   // Inline Search State (Matching tab-paired-courses)
@@ -322,7 +407,7 @@ export class TabTimetableManageComponent implements OnInit {
 
     for (const time of times) {
       const matchedSlot = slots.find((s) => s.dayCode === day && s.timeCode === time);
-      if (!matchedSlot || !matchedSlot.isRu30Available) {
+      if (!matchedSlot || matchedSlot.isBusyInRu30 || !matchedSlot.isRu30Available) {
         return false;
       }
       const genuineBusy = (matchedSlot.busyList || []).filter(
@@ -348,14 +433,14 @@ export class TabTimetableManageComponent implements OnInit {
 
     for (const time of times) {
       const matchedSlot = slots.find((s) => s.dayCode === day && s.timeCode === time);
-      if (!matchedSlot || !matchedSlot.isRu30Available) {
-        return `คาบที่ ${time} ไม่อยู่ในวันและเวลาที่อาจารย์สามารถมาสอนได้ตามตาราง มร.30`;
+      if (!matchedSlot || matchedSlot.isBusyInRu30 || !matchedSlot.isRu30Available) {
+        return `อาจารย์ติดสอนในระบบส่วนกลาง (มร.30) ในคาบที่ ${time}`;
       }
       const genuineBusy = (matchedSlot.busyList || []).filter(
         (b) => (b.courseNo || '').trim().toUpperCase() !== currentCourse
       );
       if (genuineBusy.length > 0) {
-        return `อาจารย์ติดสอนวิชาอื่นในคาบที่ ${time} (${genuineBusy.length} ท่าน)`;
+        return `อาจารย์ติดสอนวิชาอื่นในระบบคณะในคาบที่ ${time} (${genuineBusy.length} ท่าน)`;
       }
     }
     return '';
@@ -747,7 +832,9 @@ export class TabTimetableManageComponent implements OnInit {
   }
 
   loadTimeSlots(): void {
-    this.timetableService.getTimeSlots().subscribe({
+    const isSummer = this.activeSemester() === '3' || this.activeSemester().toUpperCase() === 'S';
+    const flag = isSummer ? '2' : '1';
+    this.timetableService.getTimeSlots(flag).subscribe({
       next: (res) => {
         if (res && res.success && res.results && res.results.length > 0) {
           const list = res.results.filter((t) => t.code >= 1 && t.code <= 7);
@@ -836,16 +923,48 @@ export class TabTimetableManageComponent implements OnInit {
   toggleFormTimeCode(code: number): void {
     const current = [...this.formTimeCodes()];
     const idx = current.indexOf(code);
+
     if (idx >= 0) {
       if (current.length > 1) {
-        current.splice(idx, 1);
+        const min = Math.min(...current);
+        const max = Math.max(...current);
+        // ถ้ายกเลิกที่ขอบ (หัวหรือท้าย) ยังคงต่อเนื่องกันได้
+        if (code === min || code === max) {
+          current.splice(idx, 1);
+        } else {
+          // หากคลิกตรงกลาง จะทำให้คาบไม่ติดกัน ให้ปรับเลือกเฉพาะคาบที่คลิก
+          this.toastService.warning(`คาบที่เลือกมากกว่า 1 คาบจะต้องติดกันเท่านั้น ระบบปรับเลือกเป็นคาบที่ ${code}`);
+          this.formTimeCodes.set([code]);
+          this.formTimeCode.set(code);
+          this.checkInstructorConflicts();
+          this.fetchSlotAvailableInstructors();
+          return;
+        }
       } else {
         this.toastService.warning('ต้องเลือกเวลาเรียนอย่างน้อย 1 คาบ');
         return;
       }
     } else {
-      current.push(code);
+      if (current.length === 0) {
+        current.push(code);
+      } else {
+        const min = Math.min(...current);
+        const max = Math.max(...current);
+        // ขยายช่วงได้เฉพาะคาบที่ติดกับหัวหรือท้ายเท่านั้น (Adjacent)
+        if (code === max + 1 || code === min - 1) {
+          current.push(code);
+        } else {
+          // หากไม่ใช่คาบที่ติดกัน ให้แจ้งเตือนและสลับมาเลือกเฉพาะคาบที่คลิก
+          this.toastService.warning(`คาบที่เลือกมากกว่า 1 คาบจะต้องติดกันเท่านั้น ระบบปรับเลือกเป็นคาบที่ ${code}`);
+          this.formTimeCodes.set([code]);
+          this.formTimeCode.set(code);
+          this.checkInstructorConflicts();
+          this.fetchSlotAvailableInstructors();
+          return;
+        }
+      }
     }
+
     current.sort((a, b) => a - b);
     this.formTimeCodes.set(current);
     this.formTimeCode.set(current[0]);
@@ -946,7 +1065,7 @@ export class TabTimetableManageComponent implements OnInit {
       timeCode: item.TIME_CODE,
       roomCode: item.ROOM_CODE,
       instrGroup: item.INSTR_GROUP,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.deleteScheduleClass(payload).subscribe({
@@ -996,7 +1115,7 @@ export class TabTimetableManageComponent implements OnInit {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
       items: itemsToDelete,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.deleteBulkScheduleClasses(payload).subscribe({
@@ -1263,7 +1382,7 @@ export class TabTimetableManageComponent implements OnInit {
       targetYear: tYear,
       targetSemester: tSem,
       mode: this.cloneMode(),
-      userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.cloneSemester(payload).subscribe({
@@ -1845,6 +1964,14 @@ export class TabTimetableManageComponent implements OnInit {
       this.formError.set('กรุณาเลือกเวลาเรียนอย่างน้อย 1 คาบ');
       return;
     }
+
+    const sortedTimes = [...times].sort((a, b) => a - b);
+    const isConsecutive = sortedTimes.every((val, idx) => idx === 0 || val === sortedTimes[idx - 1] + 1);
+    if (!isConsecutive) {
+      this.formError.set('คาบเวลาที่เลือกมากกว่า 1 คาบจะต้องเป็นคาบที่ติดกันเท่านั้น');
+      this.toastService.warning('คาบเวลาที่เลือกมากกว่า 1 คาบจะต้องเป็นคาบที่ติดกันเท่านั้น');
+      return;
+    }
     if (!this.formRoomCode() || !this.formRoomCode().trim()) {
       this.formError.set('กรุณาเลือกหรือระบุห้องเรียน');
       this.toastService.error(this.formError());
@@ -1871,7 +1998,7 @@ export class TabTimetableManageComponent implements OnInit {
       timeCodes: times,
       roomCode: this.formRoomCode(),
       instructorCodes: this.formInstructorCodes(),
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     const save$ = isEdit

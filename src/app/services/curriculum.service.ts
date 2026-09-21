@@ -31,6 +31,7 @@ export class CurriculumService {
     subGroupNo?: string;
     yearLevel?: string;
     semester?: string;
+    yearEnroll?: string;
     search?: string;
   }): Observable<{ success: boolean; results: CurriculumCourseRow[] }> {
     let params = new HttpParams();
@@ -39,6 +40,7 @@ export class CurriculumService {
     if (filters?.subGroupNo) params = params.set('subGroupNo', filters.subGroupNo);
     if (filters?.yearLevel) params = params.set('yearLevel', filters.yearLevel);
     if (filters?.semester) params = params.set('semester', filters.semester);
+    if (filters?.yearEnroll) params = params.set('yearEnroll', filters.yearEnroll);
     if (filters?.search) params = params.set('search', filters.search.trim());
 
     return this.http.get<{ success: boolean; results: CurriculumCourseRow[] }>(`${this.baseUrl}/list`, { params });

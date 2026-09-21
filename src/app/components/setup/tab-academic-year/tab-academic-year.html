@@ -169,7 +169,7 @@
 
         <div class="form-group">
           <label class="form-label">ปีการศึกษา *</label>
-          <input type="text" maxlength="4" class="form-input" [(ngModel)]="modalYear" placeholder="เช่น 2569" />
+          <input type="text" maxlength="4" class="form-input" [(ngModel)]="modalYear" placeholder="ระบุปีการศึกษา (พ.ศ.) เช่น 2568, 2569" autofocus />
         </div>
 
         <div class="form-group">
@@ -180,7 +180,9 @@
 
         <div class="form-checkbox-row" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;"
           (click)="modalIsActive = !modalIsActive">
-          <app-custom-checkbox [checked]="modalIsActive" (checkedChange)="modalIsActive = $event" />
+          <div (click)="$event.stopPropagation()" style="display: inline-flex; align-items: center;">
+            <app-custom-checkbox [checked]="modalIsActive" (checkedChange)="modalIsActive = $event" />
+          </div>
           <span style="font-size: 0.9rem; font-weight: 500; color: var(--apple-text-primary); user-select: none;">
             กำหนดให้เป็นปีภาคการศึกษาที่ใช้งาน
           </span>

@@ -221,28 +221,6 @@
   color: #1e293b;
 }
 
-.btn-refresh {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-refresh:hover:not(:disabled) {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.spin-loading {
-  animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
   100% { transform: rotate(360deg); }

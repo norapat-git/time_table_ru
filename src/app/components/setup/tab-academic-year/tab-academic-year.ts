@@ -55,18 +55,30 @@ export class TabAcademicYearComponent implements OnInit {
         dividerAfter: true,
         action: () => this.setActive(item),
       });
-    }
 
-    // Delete Option
-    items.push({
-      id: 'delete',
-      label: 'ลบข้อมูลปีภาค',
-      sublabel: `ปี ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER}`,
-      icon: 'delete',
-      iconType: 'delete',
-      variant: 'danger',
-      action: () => this.deleteRecord(item),
-    });
+      // Delete Option (Only available for inactive semesters)
+      items.push({
+        id: 'delete',
+        label: 'ลบข้อมูลปีภาค',
+        sublabel: `ปี ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER}`,
+        icon: 'delete',
+        iconType: 'delete',
+        variant: 'danger',
+        action: () => this.deleteRecord(item),
+      });
+    } else {
+      // It is currently active - cannot be deleted
+      items.push({
+        id: 'active-locked',
+        label: 'ปีภาคปัจจุบัน (ห้ามลบ)',
+        sublabel: 'เป็นปีภาคที่กำลังเปิดใช้งานในระบบ',
+        icon: 'lock',
+        iconType: 'default',
+        action: () => {
+          this.toastService.warning('ไม่สามารถลบปีการศึกษาและภาคเรียนที่ตั้งเป็นปัจจุบันได้ กรุณาเปลี่ยนปีภาคปัจจุบันเป็นอันอื่นก่อน');
+        },
+      });
+    }
 
     return items;
   });
@@ -95,15 +107,16 @@ export class TabAcademicYearComponent implements OnInit {
   readonly editingOldSem = signal<string | null>(null);
 
   // Form Fields
-  modalYear: string = '2569';
+  modalYear: string = '';
   modalSemester: string = '1';
   modalIsActive: boolean = false;
   formError: string = '';
 
-  // Semester Options for CustomSelectComponent (Only Semester 1 and 2)
+  // Semester Options for CustomSelectComponent (Semester 1, 2, and Summer 3)
   readonly semesterOptions: SelectOption[] = [
     { value: '1', label: 'ภาค 1', icon: 'looks_one' },
     { value: '2', label: 'ภาค 2', icon: 'looks_two' },
+    { value: '3', label: 'ภาคฤดูร้อน (Summer)', icon: 'wb_sunny' },
   ];
 
   // Filtered Records
@@ -193,7 +206,7 @@ export class TabAcademicYearComponent implements OnInit {
     this.isEditing.set(false);
     this.editingOldYear.set(null);
     this.editingOldSem.set(null);
-    this.modalYear = '2569';
+    this.modalYear = '';
     this.modalSemester = '1';
     this.modalIsActive = false;
     this.formError = '';
@@ -229,8 +242,8 @@ export class TabAcademicYearComponent implements OnInit {
       return;
     }
 
-    if (!['1', '2'].includes(sem)) {
-      this.formError = 'ภาคการศึกษาต้องเป็นภาค 1 หรือภาค 2 เท่านั้น';
+    if (!['1', '2', '3'].includes(sem)) {
+      this.formError = 'ภาคการศึกษาต้องเป็นภาค 1, 2 หรือ 3 (ฤดูร้อน)';
       return;
     }
 
@@ -254,7 +267,7 @@ export class TabAcademicYearComponent implements OnInit {
     this.formError = '';
     this.isSaving.set(true);
 
-    const currentUserEmail = this.authService.currentUser()?.email || 'ADMIN';
+    const currentUserEmail = this.authService.getCurrentUsername();
 
     if (isEdit && oldYear && oldSem) {
       // Update
@@ -338,6 +351,11 @@ export class TabAcademicYearComponent implements OnInit {
 
   // Delete
   async deleteRecord(item: YearSemItem): Promise<void> {
+    if (item.STUDY_ACTIVE === '1') {
+      this.toastService.warning('ไม่สามารถลบปีการศึกษาและภาคเรียนที่ตั้งเป็นปัจจุบันได้ กรุณาเปลี่ยนปีภาคปัจจุบันเป็นอันอื่นก่อน');
+      return;
+    }
+
     const confirmed = await this.confirmDialogService.confirm({
       title: 'ยืนยันการลบปีการศึกษา',
       message: `คุณต้องการลบ "ปีการศึกษา ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER}" ใช่หรือไม่?`,

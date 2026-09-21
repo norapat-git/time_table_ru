@@ -9,6 +9,8 @@ import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { CourseService } from '../../../services/course.service';
 import { YearSemService } from '../../../services/yearsem.service';
 
+import { AuthService } from '../../../services/auth.service';
+
 export interface ScheduleCourseItem {
   STUDY_YEAR: string;
   STUDY_SEMESTER: string;
@@ -19,6 +21,8 @@ export interface ScheduleCourseItem {
   CREDIT?: number | null;
   SCHEDULE_COUNT?: number;
   IS_SCHEDULED?: boolean;
+  INSERT_DATE?: string | null;
+  USER_INSERT?: string | null;
 }
 
 export interface UgbCourseItem {
@@ -50,6 +54,7 @@ export class TabCourseSearchComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly tourService = inject(OnboardingTourService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
+  private readonly authService = inject(AuthService);
 
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
@@ -584,11 +589,14 @@ export class TabCourseSearchComponent implements OnInit {
     this.formError = '';
     this.isSaving.set(true);
 
+    const currentUserEmail = this.authService.getCurrentUsername();
+
     const payload = {
       studyYear: year,
       studySemester: sem,
       courseNos,
       courseRemark: null,
+      userInsert: currentUserEmail,
     };
 
     this.courseService.addCourse(payload).subscribe({
@@ -638,8 +646,11 @@ export class TabCourseSearchComponent implements OnInit {
 
     if (!confirmed) return;
 
+    const currentUserEmail = this.authService.getCurrentUsername();
+    this.isDeleting.set(true);
+
     this.courseService
-      .deleteCourse(item.STUDY_YEAR, item.STUDY_SEMESTER, item.COURSE_NO)
+      .deleteCourse(item.STUDY_YEAR, item.STUDY_SEMESTER, item.COURSE_NO, currentUserEmail)
       .subscribe({
         next: () => {
           this.isDeleting.set(false);
@@ -674,8 +685,17 @@ export class TabCourseSearchComponent implements OnInit {
       return;
     }
 
-    const year = this.selectedYear();
-    const sem = this.selectedSemester();
+    let targetYear = (this.selectedYear() || '').trim();
+    let targetSem = (this.selectedSemester() || '').trim();
+
+    // Fallback: หากค่าปีหรือภาคใน signal ว่าง ให้ดึงจากข้อมูลวิชาที่เลือกในตาราง
+    if (!targetYear || !targetSem) {
+      const sample = this.courses().find((c) => selectedNos.includes(c.COURSE_NO));
+      if (sample) {
+        targetYear = targetYear || (sample.STUDY_YEAR || '').trim();
+        targetSem = targetSem || (sample.STUDY_SEMESTER || '').trim();
+      }
+    }
 
     const confirmed = await this.confirmDialogService.confirm({
       title: 'ยืนยันการลบแบบกลุ่ม',
@@ -688,16 +708,33 @@ export class TabCourseSearchComponent implements OnInit {
 
     if (!confirmed) return;
 
-    this.courseService.deleteCoursesBulk({
-      items: selectedNos.map((no) => ({
-        studyYear: year,
-        studySemester: sem,
-        courseNo: no,
-      })),
-    } as any).subscribe({
+    const currentUserEmail = this.authService.getCurrentUsername();
+    this.isDeleting.set(true);
+
+    this.courseService
+      .deleteCoursesBulk({
+        year: targetYear,
+        semester: targetSem,
+        studyYear: targetYear,
+        studySemester: targetSem,
+        courseNos: selectedNos,
+        userInsert: currentUserEmail,
+        userDelete: currentUserEmail,
+        items: selectedNos.map((no) => {
+          const c = this.courses().find((item) => item.COURSE_NO === no);
+          return {
+            studyYear: c?.STUDY_YEAR || targetYear,
+            studySemester: c?.STUDY_SEMESTER || targetSem,
+            year: c?.STUDY_YEAR || targetYear,
+            semester: c?.STUDY_SEMESTER || targetSem,
+            courseNo: no,
+          };
+        }),
+      })
+      .subscribe({
         next: (res) => {
           this.isDeleting.set(false);
-          this.toastService.success(`ลบวิชา ${selectedNos.length} รายการ สำเร็จ`);
+          this.toastService.success(res?.message || `ลบวิชา ${selectedNos.length} รายการ สำเร็จ`);
           this.selectedTableCourseNos.set([]);
           this.loadCourseList();
         },

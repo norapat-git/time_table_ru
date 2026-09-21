@@ -88,6 +88,16 @@ export interface TimetableBusyInstructorDetail {
   courseName?: string;
 }
 
+export interface TimetableRu30BusyDetail {
+  instructorCode: string;
+  instructorName: string;
+  courseNo: string;
+  courseName?: string;
+  period?: string;
+  timeStart?: string;
+  timeEnd?: string;
+}
+
 export interface TimetableSlotAvailability {
   dayCode: number;
   timeCode: number;
@@ -96,7 +106,12 @@ export interface TimetableSlotAvailability {
   colorClass: string;
   period: string;
   timeLabel?: string;
+  timeStart?: string;
+  timeEnd?: string;
   isRu30Available?: boolean;
+  isBusyInRu30?: boolean;
+  ru30BusyCount?: number;
+  ru30BusyList?: TimetableRu30BusyDetail[];
   isBusyInClass?: boolean;
   isAvailable: boolean;
   busyCount: number;

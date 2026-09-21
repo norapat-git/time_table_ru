@@ -750,7 +750,7 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
       moves: moves,
-      userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.updateScheduleSlots(payload as any).subscribe({
@@ -776,6 +776,55 @@ export class TabRoomCompareComponent implements OnInit, OnDestroy {
     if (!pairedList || pairedList.length === 0) return '';
     return pairedList
       .map((p) => `${p.courseNo} (${p.courseNameThai || ''})`.trim())
+      .join(', ');
+  }
+
+  getShortInstructorName(inst?: { INSTRUCTOR_CODE?: string; INSTRUCTOR_NAME_THAI?: string; RANK_NAME_THAI_S?: string }): string {
+    if (!inst) return '';
+    const rawName = (inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE || '').trim();
+    if (!rawName) return '';
+
+    const parts = rawName.split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '';
+
+    const titleTokens = new Set([
+      'ดร.', 'ดร', 'ศ.', 'รศ.', 'ผศ.', 'อ.', 'ศ.ดร.', 'รศ.ดร.', 'ผศ.ดร.', 'อ.ดร.',
+      'นาย', 'นาง', 'นางสาว', 'น.ส.', 'dr.', 'dr', 'prof.', 'assoc. prof.', 'asst. prof.'
+    ]);
+
+    const titleParts: string[] = [];
+    let nameIndex = 0;
+
+    while (nameIndex < parts.length && titleTokens.has(parts[nameIndex].toLowerCase())) {
+      titleParts.push(parts[nameIndex]);
+      nameIndex++;
+    }
+
+    let firstName = nameIndex < parts.length ? parts[nameIndex] : '';
+    if (!firstName && titleParts.length > 0) {
+      firstName = titleParts.pop() || '';
+    }
+
+    const rank = (inst.RANK_NAME_THAI_S || '').trim();
+    const combinedTitle = titleParts.join(' ');
+
+    let result = '';
+    if (combinedTitle) {
+      result = `${combinedTitle} ${firstName}`.trim();
+    } else {
+      result = firstName;
+    }
+
+    if (rank && !result.startsWith(rank)) {
+      result = `${rank} ${result}`.trim();
+    }
+    return result || rawName;
+  }
+
+  getFullInstructorsTooltip(instructors?: any[]): string {
+    if (!instructors || instructors.length === 0) return '';
+    return instructors
+      .map((i) => `${i.RANK_NAME_THAI_S || ''} ${i.INSTRUCTOR_NAME_THAI || i.INSTRUCTOR_CODE}`.trim())
       .join(', ');
   }
 

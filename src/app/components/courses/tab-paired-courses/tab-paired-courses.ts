@@ -229,10 +229,11 @@ export class TabPairedCoursesComponent implements OnInit {
     { value: '4', label: 'ชั้นปี 4', icon: 'looks_4' },
   ];
 
-  // Options for Semester (ภาค 1, ภาค 2)
+  // Options for Semester (ภาค 1, ภาค 2, ภาค 3/Summer)
   readonly semesterOptions: SelectOption[] = [
     { value: '1', label: 'ภาค 1', icon: 'looks_one' },
     { value: '2', label: 'ภาค 2', icon: 'looks_two' },
+    { value: '3', label: 'ภาคฤดูร้อน (Summer)', icon: 'wb_sunny' },
   ];
 
   // Inline Dropdown Course Search State (inside Modal Cards)
@@ -431,12 +432,14 @@ export class TabPairedCoursesComponent implements OnInit {
   }
 
   // Inline Dropdown Course Search Handlers (Direct Input Typing)
+  private inlineSearchDebounceTimer: any = null;
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (this.activeDropdownIndex() !== null) {
       const target = event.target as HTMLElement;
       if (target && !target.closest('.inline-picker-group')) {
-        this.activeDropdownIndex.set(null);
+        this.closeInlineDropdown();
       }
     }
   }
@@ -444,56 +447,59 @@ export class TabPairedCoursesComponent implements OnInit {
   @HostListener('keydown.escape')
   onEscape(): void {
     if (this.activeDropdownIndex() !== null) {
-      this.activeDropdownIndex.set(null);
+      this.closeInlineDropdown();
     }
   }
 
   openInlineDropdown(index: number): void {
     this.activeDropdownIndex.set(index);
     this.inlineSearchQuery.set('');
-    this.loadInitialInlineCourses();
+    this.inlineCourseResults.set([]);
+    this.isInlineLoading.set(false);
   }
 
   closeInlineDropdown(): void {
     this.activeDropdownIndex.set(null);
-  }
-
-  loadInitialInlineCourses(): void {
-    this.isInlineLoading.set(true);
-    this.courseService
-      .searchUgbCourses({ prefix: 'A' })
-      .subscribe({
-        next: (res) => {
-          this.isInlineLoading.set(false);
-          if (res && res.success && Array.isArray(res.results)) {
-            this.inlineCourseResults.set(res.results.slice(0, 40));
-          }
-        },
-        error: () => {
-          this.isInlineLoading.set(false);
-        },
-      });
+    this.inlineSearchQuery.set('');
+    this.inlineCourseResults.set([]);
+    this.isInlineLoading.set(false);
+    if (this.inlineSearchDebounceTimer) {
+      clearTimeout(this.inlineSearchDebounceTimer);
+      this.inlineSearchDebounceTimer = null;
+    }
   }
 
   onInlineSearchChange(index: number, q: string): void {
     this.inlineSearchQuery.set(q);
-    if (q.trim().length >= 1) {
+
+    if (this.inlineSearchDebounceTimer) {
+      clearTimeout(this.inlineSearchDebounceTimer);
+    }
+
+    const trimmed = (q || '').trim();
+    if (trimmed.length >= 2) {
       this.isInlineLoading.set(true);
-      this.courseService
-        .searchUgbCourses({ search: q.trim() })
-        .subscribe({
-          next: (res) => {
-            this.isInlineLoading.set(false);
-            if (res && res.success && Array.isArray(res.results)) {
-              this.inlineCourseResults.set(res.results.slice(0, 50));
-            }
-          },
-          error: () => {
-            this.isInlineLoading.set(false);
-          },
-        });
+      this.inlineSearchDebounceTimer = setTimeout(() => {
+        this.courseService
+          .searchUgbCourses({ search: trimmed })
+          .subscribe({
+            next: (res) => {
+              this.isInlineLoading.set(false);
+              if (res && res.success && Array.isArray(res.results)) {
+                this.inlineCourseResults.set(res.results.slice(0, 50));
+              } else {
+                this.inlineCourseResults.set([]);
+              }
+            },
+            error: () => {
+              this.isInlineLoading.set(false);
+              this.inlineCourseResults.set([]);
+            },
+          });
+      }, 250);
     } else {
-      this.loadInitialInlineCourses();
+      this.isInlineLoading.set(false);
+      this.inlineCourseResults.set([]);
     }
   }
 
@@ -508,8 +514,7 @@ export class TabPairedCoursesComponent implements OnInit {
   clearItemCourse(index: number): void {
     this.modalFormItems[index].courseNo = '';
     this.modalFormItems[index].courseNameDisplay = '';
-    this.inlineSearchQuery.set('');
-    this.loadInitialInlineCourses();
+    this.closeInlineDropdown();
   }
 
   // Master Checkbox Toggle
@@ -631,7 +636,7 @@ export class TabPairedCoursesComponent implements OnInit {
       {
         targetSelector: '.inline-search-input-box',
         title: '1. พิมพ์ค้นหารายวิชาโดยตรง',
-        description: 'สามารถคลิกและพิมพ์รหัสวิชา (เช่น ACC1101) หรือชื่อวิชาลงในช่องนี้เพื่อค้นหาและเลือกจากรายการได้ทันที',
+        description: 'สามารถคลิกและพิมพ์รหัสวิชา (พิมพ์ตั้งแต่ 2 ตัวขึ้นไป เช่น ACC, 1101) หรือชื่อวิชาเพื่อค้นหาและเลือกจากรายการได้ทันที',
         icon: 'search',
         position: 'bottom' as const,
       },
@@ -826,6 +831,7 @@ export class TabPairedCoursesComponent implements OnInit {
 
   closeModal(): void {
     this.closeDrawer();
+    this.closeInlineDropdown();
     this.isModalOpen.set(false);
   }
 }

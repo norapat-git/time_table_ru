@@ -484,6 +484,67 @@
   color: #fca5a5 !important;
 }
 
+/* RU.30 Dark Mode Global Overrides */
+[data-theme="dark"] .avail-slot-card.is-busy-ru30 {
+  background: rgba(245, 158, 11, 0.04) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+[data-theme="dark"] .slot-busy-tag.is-ru30 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.14) 100%) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.38) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .slot-busy-tag.is-ru30 .material-symbols-rounded {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .slot-busy-details-box.is-ru30 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.06) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  border-left: 3.5px solid #fbbf24 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 {
+  color: #fde68a !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .busy-inst-icon-wrap {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .busy-icon {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .busy-inst-name {
+  color: #fef3c7 !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .busy-inst-desc {
+  color: #fde68a !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .ru30-course-badge {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fef08a !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+[data-theme="dark"] .busy-inst-item.is-ru30 .ru30-period-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fde68a !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
 [data-theme="dark"] .btn-apply-slot {
   background: #10b981 !important;
   color: #ffffff !important;

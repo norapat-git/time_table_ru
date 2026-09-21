@@ -422,7 +422,7 @@ export class TabInstructorComponent implements OnInit {
       studyYear: item.STUDY_YEAR,
       studySemester: item.STUDY_SEMESTER,
       instructorCode: item.INSTRUCTOR_CODE,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.instructorService.deleteScheduleInstructor(payload).subscribe({
@@ -475,7 +475,7 @@ export class TabInstructorComponent implements OnInit {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
       instructorCodes: selected,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.instructorService.deleteBulkScheduleInstructors(payload as any).subscribe({
@@ -557,7 +557,7 @@ export class TabInstructorComponent implements OnInit {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
       instructorCodes: codes,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.instructorService.addScheduleInstructors(payload).subscribe({

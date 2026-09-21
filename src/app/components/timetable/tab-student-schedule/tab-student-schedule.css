@@ -461,24 +461,37 @@
   min-width: 40px !important;
   border-radius: 10px !important;
   background: #ffffff !important;
-  border: 1.5px solid #cbd5e1 !important;
+  border: 1px solid rgba(203, 213, 225, 0.85) !important;
   color: #475569 !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
   padding: 0 !important;
 }
 
 .filter-actions-group .btn-refresh:hover:not(:disabled) {
-  background: #f8fafc !important;
-  border-color: #94a3b8 !important;
-  color: #0f172a !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+  background: #f0f9ff !important;
+  border-color: #38bdf8 !important;
+  color: #0284c7 !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.16) !important;
+}
+
+.filter-actions-group .btn-refresh:hover:not(:disabled) .material-symbols-rounded:not(.spin-loading) {
+  transform: rotate(50deg) !important;
+}
+
+.filter-actions-group .btn-refresh:active:not(:disabled) {
+  transform: translateY(0) scale(0.93) !important;
 }
 
 .filter-actions-group .btn-refresh .material-symbols-rounded {
   font-size: 1.25rem !important;
-  color: #475569 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform-origin: 50% 50% !important;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease !important;
 }
 
 .filter-actions-group .btn-primary.btn-icon-only {
@@ -905,19 +918,19 @@
 .course-slot-card {
   background: linear-gradient(145deg, #f0f7ff 0%, #e1effe 100%);
   border: 1px solid #bae6fd;
-  border-radius: 9px;
-  padding: 0.45rem 0.5rem;
+  border-radius: 10px;
+  padding: 0.48rem 0.55rem;
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  box-shadow: 0 2px 6px -1px rgba(0, 113, 227, 0.10), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px -1px rgba(0, 113, 227, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   position: relative;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  min-height: 82px;
+  min-height: 74px;
   height: 100%;
   flex: 1;
 }
@@ -926,8 +939,24 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.3rem;
+  gap: 0.35rem;
   width: 100%;
+  flex: 1;
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.card-top-left {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
   flex: 1;
 }
 
@@ -1118,12 +1147,23 @@
 }
 
 .course-code-pill {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #0369a1;
   letter-spacing: -0.015em;
   white-space: nowrap;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.course-credit-tag {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #0284c7;
+  opacity: 0.88;
+  letter-spacing: 0;
 }
 
 .course-credit-pill {
@@ -1212,20 +1252,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
   border: none;
   background: transparent;
   color: #64748b;
   cursor: pointer;
   padding: 0;
-  opacity: 0;
+  opacity: 0.65;
   transition: all 0.15s ease;
 }
 
 .card-quick-menu-btn .material-symbols-rounded {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .course-slot-card:hover .card-quick-menu-btn {
@@ -1235,34 +1275,35 @@
 .card-quick-menu-btn:hover {
   background: rgba(2, 132, 199, 0.15);
   color: #0284c7;
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .instructors-pill-box {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.68rem;
+  gap: 0.35rem;
+  font-size: 0.72rem;
   color: #334155;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   padding: 0.22rem 0.45rem;
   border-radius: 6px;
-  border: 1px solid #e0f2fe;
+  border: 1px solid rgba(186, 230, 253, 0.85);
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  transition: background 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.18s ease;
 }
 
 .course-slot-card:hover .instructors-pill-box {
   background: #ffffff;
-  border-color: #bae6fd;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 5px rgba(2, 132, 199, 0.08);
 }
 
 .inst-avatar-mini {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #e0f2fe;
   color: #0284c7;
@@ -1273,16 +1314,17 @@
 }
 
 .inst-avatar-mini .inst-icon {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
 }
 
 .inst-names-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #334155;
+  letter-spacing: -0.01em;
 }
 
 .more-inst-badge {
@@ -1290,9 +1332,9 @@
   background: #dbeafe;
   color: #1d4ed8;
   border-radius: 4px;
-  padding: 0.5px 4px;
-  font-size: 0.60rem;
-  margin-left: 0.15rem;
+  padding: 1px 5px;
+  font-size: 0.62rem;
+  margin-left: 0.2rem;
   flex-shrink: 0;
 }
 
@@ -3679,6 +3721,114 @@
   font-size: 0.9rem;
 }
 
+/* RU.30 Busy Card & Details - Light Mode */
+.avail-slot-card.is-busy-ru30 {
+  background: #fffdf9;
+  border-color: #fef08a;
+}
+
+.slot-busy-tag.is-ru30 {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  box-shadow: 0 1px 2px rgba(217, 119, 6, 0.08);
+}
+
+.slot-busy-tag.is-ru30 .material-symbols-rounded {
+  color: #d97706;
+}
+
+.slot-busy-details-box.is-ru30 {
+  border-top: none;
+  background: linear-gradient(135deg, #fffdf7 0%, #fef8eb 100%);
+  border: 1px solid #fde68a;
+  border-left: 3.5px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  margin-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.05);
+}
+
+.busy-inst-item.is-ru30 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  color: #92400e;
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.busy-inst-item.is-ru30:hover {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.busy-inst-item.is-ru30 .busy-inst-icon-wrap {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.busy-inst-item.is-ru30 .busy-icon {
+  font-size: 0.95rem;
+  color: #d97706;
+}
+
+.busy-inst-item.is-ru30 .busy-inst-text-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.busy-inst-item.is-ru30 .busy-inst-name {
+  font-weight: 700;
+  color: #78350f;
+  font-size: 0.76rem;
+}
+
+.busy-inst-item.is-ru30 .busy-inst-desc {
+  color: #92400e;
+  font-size: 0.74rem;
+}
+
+.busy-inst-item.is-ru30 .ru30-course-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  background: #fef08a;
+  color: #854d0e;
+  border: 1px solid #fde047;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.busy-inst-item.is-ru30 .ru30-period-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08rem 0.4rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
 /* Day Badges */
 .day-tag-badge {
   display: inline-block;
@@ -4040,19 +4190,25 @@
 
 
 :host-context([data-theme="dark"]) .course-slot-card {
-  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%) !important;
-  border-color: #334155 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  background: linear-gradient(145deg, #0d1b2a 0%, #08111d 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.28) !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5) !important;
 }
 
 :host-context([data-theme="dark"]) .course-slot-card:hover {
-  background: linear-gradient(145deg, #273549 0%, #172033 100%) !important;
-  border-color: #38bdf8 !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6) !important;
+  background: linear-gradient(145deg, #132438 0%, #0a1727 100%) !important;
+  border-color: rgba(56, 189, 248, 0.65) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 12px rgba(56, 189, 248, 0.18) !important;
+  transform: translateY(-2px);
 }
 
 :host-context([data-theme="dark"]) .course-code-pill {
   color: #38bdf8 !important;
+}
+
+:host-context([data-theme="dark"]) .course-credit-tag {
+  color: #7dd3fc !important;
+  opacity: 0.92 !important;
 }
 
 :host-context([data-theme="dark"]) .course-credit-pill {
@@ -4068,13 +4224,19 @@
 }
 
 :host-context([data-theme="dark"]) .instructors-pill-box {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border-color: #334155 !important;
-  color: #cbd5e1 !important;
+  background: rgba(13, 27, 42, 0.85) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+}
+
+:host-context([data-theme="dark"]) .course-slot-card:hover .instructors-pill-box {
+  background: rgba(17, 34, 54, 0.98) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
 }
 
 :host-context([data-theme="dark"]) .inst-names-text {
-  color: #f1f5f9 !important;
+  color: #f8fafc !important;
 }
 
 :host-context([data-theme="dark"]) .inst-avatar-mini {
@@ -4084,22 +4246,17 @@
 
 :host-context([data-theme="dark"]) .more-inst-badge {
   background: rgba(56, 189, 248, 0.25) !important;
-  color: #38bdf8 !important;
+  color: #7dd3fc !important;
 }
-
-:host-context([data-theme="dark"]) .course-slot-card:hover .instructors-pill-box {
-  background: rgba(15, 23, 42, 0.9) !important;
-  border-color: rgba(56, 189, 248, 0.4) !important;
-}
-
 
 :host-context([data-theme="dark"]) .card-quick-menu-btn {
   color: #94a3b8 !important;
+  opacity: 0.75 !important;
 }
 
 :host-context([data-theme="dark"]) .card-quick-menu-btn:hover {
-  background: #334155 !important;
-  color: #f8fafc !important;
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #ffffff !important;
 }
 
 :host-context([data-theme="dark"]) .day-mon { background: rgba(234, 179, 8, 0.2) !important; color: #facc15 !important; border-color: rgba(234, 179, 8, 0.4) !important; }
@@ -4430,6 +4587,67 @@
 
 :host-context([data-theme="dark"]) .avail-empty-prompt p {
   color: var(--apple-text-tertiary, #64748b) !important;
+}
+
+/* RU.30 Dark Mode Overrides */
+:host-context([data-theme="dark"]) .avail-slot-card.is-busy-ru30 {
+  background: rgba(245, 158, 11, 0.04) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+:host-context([data-theme="dark"]) .slot-busy-tag.is-ru30 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.14) 100%) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.38) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+:host-context([data-theme="dark"]) .slot-busy-tag.is-ru30 .material-symbols-rounded {
+  color: #fbbf24 !important;
+}
+
+:host-context([data-theme="dark"]) .slot-busy-details-box.is-ru30 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.06) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  border-left: 3.5px solid #fbbf24 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 {
+  color: #fde68a !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .busy-inst-icon-wrap {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .busy-icon {
+  color: #fbbf24 !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .busy-inst-name {
+  color: #fef3c7 !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .busy-inst-desc {
+  color: #fde68a !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .ru30-course-badge {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fef08a !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+:host-context([data-theme="dark"]) .busy-inst-item.is-ru30 .ru30-period-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fde68a !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
 }
 
 /* CLASS DETAIL MODAL DARK MODE OVERRIDES */

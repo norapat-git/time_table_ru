@@ -306,7 +306,7 @@
                       <input
                         type="text"
                         class="inline-search-input"
-                        placeholder="พิมพ์รหัสวิชา (เช่น ACC1101) หรือชื่อวิชา..."
+                        placeholder="พิมพ์รหัสวิชา (เช่น ACC, 1101) หรือชื่อวิชา (อย่างน้อย 2 ตัวอักษร)..."
                         [value]="activeDropdownIndex() === i ? inlineSearchQuery() : item.courseNameDisplay"
                         (input)="onInlineSearchChange(i, $any($event.target).value)"
                         (focus)="openInlineDropdown(i)"
@@ -333,7 +333,7 @@
                     @if (activeDropdownIndex() === i) {
                       <div class="inline-dropdown-menu" (click)="$event.stopPropagation()">
                         <div class="dropdown-header-hint">
-                          <span>เลือกวิชาจากรายการ หรือพิมพ์ค้นหาด้านบน</span>
+                          <span>ค้นหากระบวนวิชา (พิมพ์อย่างน้อย 2 ตัวอักษร)</span>
                           <button type="button" class="btn-close-inline-menu" (click)="closeInlineDropdown()">
                             <span class="material-symbols-rounded">close</span>
                           </button>
@@ -344,10 +344,18 @@
                             <span class="material-symbols-rounded spin-loading">sync</span>
                             <span>กำลังค้นหารายวิชา...</span>
                           </div>
+                        } @else if (inlineSearchQuery().trim().length < 2) {
+                          <div class="inline-prompt">
+                            <span class="material-symbols-rounded prompt-icon">keyboard</span>
+                            <div class="prompt-texts">
+                              <strong>พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</strong>
+                              <span>ค้นหาได้ทั้งรหัสวิชา (เช่น ACC, 1101) หรือชื่อวิชา</span>
+                            </div>
+                          </div>
                         } @else if (inlineCourseResults().length === 0) {
                           <div class="inline-empty">
                             <span class="material-symbols-rounded">search_off</span>
-                            <span>ไม่พบรายวิชาที่ตรงกับคำค้นหา</span>
+                            <span>ไม่พบรายวิชาที่ตรงกับคำค้นหา "{{ inlineSearchQuery().trim() }}"</span>
                           </div>
                         } @else {
                           <div class="inline-results-scroll">
@@ -372,6 +380,9 @@
                                 }
                               </div>
                             }
+                          </div>
+                          <div class="inline-footer-count">
+                            พบ {{ inlineCourseResults().length }} รายวิชา
                           </div>
                         }
                       </div>

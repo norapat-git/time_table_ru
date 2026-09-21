@@ -17,6 +17,8 @@ export interface ScheduleCourseItem {
   COURSE_NAME_THAI?: string | null;
   COURSE_NAME_ENG_L?: string | null;
   CREDIT?: number | null;
+  INSERT_DATE?: string | null;
+  USER_INSERT?: string | null;
 }
 
 export interface YearSemOption {

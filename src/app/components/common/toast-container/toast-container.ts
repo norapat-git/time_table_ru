@@ -29,7 +29,7 @@ export class ToastContainerComponent implements OnInit {
       case 'info':
         return 'info';
       case 'loading':
-        return 'sync';
+        return 'progress_activity';
       default:
         return 'notifications';
     }

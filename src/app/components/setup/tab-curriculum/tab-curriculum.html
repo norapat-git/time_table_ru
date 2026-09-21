@@ -264,6 +264,25 @@
             <app-custom-select [options]="modalSemesterOptions" [value]="modalSemester"
               (valueChange)="modalSemester = $event; hasQueriedExisting.set(false)" icon="event_available" />
           </div>
+
+          <!-- ปีที่สมัคร (YEAR_ENROLL) -->
+          <div class="form-group">
+            <div class="form-label-with-hint">
+              <label class="form-label">ปีที่สมัคร *</label>
+              <span class="label-hint">เช่น 65, 66</span>
+            </div>
+            <div class="custom-input-box">
+              <span class="material-symbols-rounded input-icon">event_note</span>
+              <input type="text" class="modal-text-input" [(ngModel)]="modalYearEnroll"
+                (ngModelChange)="hasQueriedExisting.set(false)"
+                placeholder="เช่น 65, 66" maxlength="2" />
+              @if (modalYearEnroll) {
+              <button type="button" class="btn-clear-input" (click)="modalYearEnroll = ''; hasQueriedExisting.set(false)" title="ล้างค่า">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+              }
+            </div>
+          </div>
         </div>
 
         <!-- Action Buttons Bar (Matching Image 2: "แสดงวิชา" and "เพิ่มวิชา") -->
@@ -302,17 +321,20 @@
           } @else if (existingCurriculumCourses().length === 0) {
           <div class="empty-inline-box">
             <span class="material-symbols-rounded">info</span>
-            <span>ยังไม่มีรายวิชาในหลักสูตรตามชั้นปีและภาคเรียนที่เลือกนี้</span>
+            <span>ยังไม่มีรายวิชาในหลักสูตรตามเงื่อนไขที่เลือกนี้</span>
           </div>
           } @else {
           <div class="existing-courses-grid">
-            @for (c of existingCurriculumCourses(); track c.COURSE_NO) {
+            @for (c of existingCurriculumCourses(); track getRowKey(c)) {
             <div class="existing-course-card">
               <div class="card-left">
                 <strong class="course-code">{{ c.COURSE_NO }}</strong>
                 <span class="course-name">{{ c.COURSE_NAME_THAI || c.COURSE_NAME_ENG_L || '-' }}</span>
               </div>
               <div class="card-right">
+                @if (c.YEAR_ENROLL) {
+                <span class="enroll-badge" title="ปีที่สมัคร">ปี {{ c.YEAR_ENROLL }}</span>
+                }
                 @if (c.CREDIT != null) {
                 <span class="credit-tag">{{ c.CREDIT }} นก.</span>
                 }
@@ -410,8 +432,10 @@
                 @for (c of filteredUgbCourses(); track c.COURSE_NO) {
                 <div class="course-select-item" [class.is-selected]="isCourseSelectedInModal(c.COURSE_NO)"
                   (click)="toggleCourseInModal(c)">
-                  <app-custom-checkbox [checked]="isCourseSelectedInModal(c.COURSE_NO)"
-                    (checkedChange)="toggleCourseInModal(c)" />
+                  <div (click)="$event.stopPropagation()">
+                    <app-custom-checkbox [checked]="isCourseSelectedInModal(c.COURSE_NO)"
+                      (checkedChange)="toggleCourseInModal(c)" />
+                  </div>
                   <div class="course-text-col">
                     <strong class="c-code">{{ c.COURSE_NO }}</strong>
                     <span class="c-th">{{ c.COURSE_NAME_THAI || '-' }}</span>
@@ -539,6 +563,7 @@
               <th style="width: 50px; text-align: center;">ลำดับ</th>
               <th style="width: 75px; text-align: center;">ชั้นปี</th>
               <th style="width: 70px; text-align: center;">ภาค</th>
+              <th style="width: 80px; text-align: center;">ปีสมัคร</th>
               <th style="width: 110px;">รหัสวิชา</th>
               <th>ชื่อวิชา (ภาษาไทย)</th>
               <th>Course Name (English)</th>
@@ -549,14 +574,14 @@
           <tbody>
             @if (modalDetailCourses().length === 0) {
               <tr>
-                <td colspan="8" class="text-center empty-cell">
+                <td colspan="9" class="text-center empty-cell">
                   <span class="material-symbols-rounded empty-icon">search_off</span>
                   <p>ไม่พบรายวิชาในกลุ่มนี้ตามคำค้นหา</p>
                 </td>
               </tr>
             }
 
-            @for (c of modalDetailCourses(); track c.COURSE_NO + '_' + c.YEAR_LEVEL + '_' + c.SEMESTER; let i = $index) {
+            @for (c of modalDetailCourses(); track c.COURSE_NO + '_' + c.YEAR_LEVEL + '_' + c.SEMESTER + '_' + (c.YEAR_ENROLL || ''); let i = $index) {
               <tr class="context-clickable-row" (contextmenu)="onCourseContextMenu($event, c)">
                 <td style="text-align: center;" class="col-index">{{ i + 1 }}</td>
                 <td style="text-align: center;">
@@ -564,6 +589,13 @@
                 </td>
                 <td style="text-align: center;">
                   <span class="sem-pill">{{ c.SEMESTER }}</span>
+                </td>
+                <td style="text-align: center;">
+                  @if (c.YEAR_ENROLL) {
+                    <span class="enroll-badge-cell">ปี {{ c.YEAR_ENROLL }}</span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
                 </td>
                 <td>
                   <strong class="course-code-badge">{{ c.COURSE_NO }}</strong>

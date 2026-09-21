@@ -46,6 +46,17 @@ export class AuthService {
     return this._user()?.role ?? 'ADMIN';
   });
 
+  readonly currentUsername = computed<string>(() => {
+    const u = this._user();
+    if (!u) return 'ADMIN';
+    const raw = u.username || u.email || 'ADMIN';
+    return raw.split('@')[0].trim() || 'ADMIN';
+  });
+
+  getCurrentUsername(): string {
+    return this.currentUsername();
+  }
+
   readonly remainingTimeFormatted = computed(() => {
     return formatRemainingTime(this._remainingSeconds());
   });

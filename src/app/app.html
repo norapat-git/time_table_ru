@@ -1,15 +1,19 @@
 <!-- Global Apple Floating Toasts -->
 <app-toast-container />
 
-<!-- Global Product Tour & Onboarding Walkthrough -->
-<app-onboarding-tour />
+<!-- Global Product Tour & Onboarding Walkthrough (Lazy loaded on tour start) -->
+@defer (when tourService.isActive()) {
+  <app-onboarding-tour />
+}
 
 <!-- Global Apple Frosted Confirm Dialog -->
 <app-confirm-dialog />
 
 @if (!authService.isAuthenticated()) {
   <!-- Dedicated Full-Screen Login Page -->
-  <app-login-page />
+  @defer (when !authService.isAuthenticated()) {
+    <app-login-page />
+  }
 } @else {
   <!-- Dashboard Layout with Left Sidebar -->
   <div class="dashboard-shell">
@@ -78,7 +82,7 @@
           <div class="topbar-user-pill">
             <div class="topbar-avatar" [class.has-img]="!!authService.currentUser()?.avatarUrl">
               @if (authService.currentUser()?.avatarUrl; as avatar) {
-                <img [src]="avatar" alt="Avatar" class="topbar-avatar-img" (error)="onAvatarError($event)" />
+                <img [src]="avatar" alt="Avatar" class="topbar-avatar-img" loading="lazy" decoding="async" (error)="onAvatarError($event)" />
               } @else {
                 <span class="material-symbols-rounded">person</span>
               }
@@ -91,48 +95,119 @@
         </div>
       </header>
 
-      <!-- Main Business Content Area -->
+      <!-- Main Business Content Area with Lazy-Loaded Tabs -->
       <main class="dashboard-view-content" role="main">
         @switch (activeTab()) {
           <!-- 1. ข้อมูลตั้งต้น -->
           @case ('academic-year') {
-            <app-tab-academic-year />
+            @defer (on immediate) {
+              <app-tab-academic-year />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="56px" [lines]="4" />
+              </div>
+            }
           }
           @case ('curriculum') {
-            <app-tab-curriculum />
+            @defer (on immediate) {
+              <app-tab-curriculum />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="44px" />
+                <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+              </div>
+            }
           }
           @case ('instructor') {
-            <app-tab-instructor />
+            @defer (on immediate) {
+              <app-tab-instructor />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="48px" borderRadius="8px" [lines]="6" />
+              </div>
+            }
           }
 
           <!-- 2. จัดการรายวิชา -->
           @case ('course-search') {
-            <app-tab-course-search />
+            @defer (on immediate) {
+              <app-tab-course-search />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="44px" />
+                <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+              </div>
+            }
           }
           @case ('paired-courses') {
-            <app-tab-paired-courses />
+            @defer (on immediate) {
+              <app-tab-paired-courses />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="44px" />
+                <app-skeleton variant="rect" width="100%" height="60px" [lines]="4" />
+              </div>
+            }
           }
 
           <!-- 3. ตารางสอน -->
           @case ('timetable-manage') {
-            <app-tab-student-schedule />
+            @defer (on immediate) {
+              <app-tab-student-schedule />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="52px" borderRadius="10px" [lines]="7" />
+              </div>
+            }
           }
           @case ('student-schedule') {
-            <app-tab-student-schedule />
+            @defer (on immediate) {
+              <app-tab-student-schedule />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="52px" borderRadius="10px" [lines]="7" />
+              </div>
+            }
           }
 
           <!-- 4. รายงาน -->
           @case ('report-compulsory') {
-            <app-tab-report-compulsory />
+            @defer (on immediate) {
+              <app-tab-report-compulsory />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="48px" />
+                <app-skeleton variant="rect" width="100%" height="56px" borderRadius="10px" [lines]="6" />
+              </div>
+            }
           }
           @case ('report-faculty-year') {
-            <app-tab-report-faculty-year />
+            @defer (on immediate) {
+              <app-tab-report-faculty-year />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="52px" [lines]="3" />
+              </div>
+            }
           }
           @case ('report-mr30') {
-            <app-tab-report-mr30 />
+            @defer (on immediate) {
+              <app-tab-report-mr30 />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="48px" borderRadius="10px" [lines]="6" />
+              </div>
+            }
           }
           @case ('report-offered-courses') {
-            <app-tab-report-offered-courses />
+            @defer (on immediate) {
+              <app-tab-report-offered-courses />
+            } @placeholder {
+              <div class="tab-lazy-skeleton">
+                <app-skeleton variant="rect" width="100%" height="44px" />
+                <app-skeleton variant="rect" width="100%" height="52px" [lines]="6" />
+              </div>
+            }
           }
         }
       </main>
@@ -141,3 +216,4 @@
 
   </div>
 }
+

@@ -989,6 +989,48 @@
   color: #86868b;
 }
 
+.inline-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.25rem 1rem;
+  background: var(--apple-surface-sub, #f8f9fa);
+}
+
+.prompt-icon {
+  font-size: 1.6rem;
+  color: var(--apple-blue, #0071e3);
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.prompt-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.prompt-texts strong {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--apple-text-primary, #1d1d1f);
+}
+
+.prompt-texts span {
+  font-size: 0.75rem;
+  color: var(--apple-text-secondary, #6e6e73);
+}
+
+.inline-footer-count {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--apple-text-secondary, #86868b);
+  background: var(--apple-surface-sub, #f8f9fa);
+  border-top: 1px solid var(--color-border, #e5e5ea);
+  text-align: right;
+}
+
 /* Button: + เพิ่มวิชาคู่ */
 .add-more-row {
   display: flex;
@@ -1534,6 +1576,24 @@
 :host-context([data-theme="dark"]) .dropdown-header-hint {
   background: var(--apple-surface-sub, #1c2433) !important;
   border-bottom-color: var(--color-border, #242e3f) !important;
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+:host-context([data-theme="dark"]) .inline-prompt {
+  background: var(--apple-surface-sub, #1c2433) !important;
+}
+
+:host-context([data-theme="dark"]) .prompt-texts strong {
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+:host-context([data-theme="dark"]) .prompt-texts span {
+  color: var(--apple-text-secondary, #94a3b8) !important;
+}
+
+:host-context([data-theme="dark"]) .inline-footer-count {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border-top-color: var(--color-border, #242e3f) !important;
   color: var(--apple-text-secondary, #94a3b8) !important;
 }
 

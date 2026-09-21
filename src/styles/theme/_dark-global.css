@@ -29,6 +29,48 @@
   color: var(--apple-text-primary) !important;
 }
 
+/* Secondary & Action Buttons across all tabs */
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-action,
+[data-theme="dark"] .btn-more,
+[data-theme="dark"] .btn-action-more {
+  background: var(--apple-surface-sub, #1c2433) !important;
+  border: 1px solid var(--color-border, #242e3f) !important;
+  color: var(--apple-text-primary, #f8fafc) !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover:not(:disabled),
+[data-theme="dark"] .btn-action:hover:not(:disabled),
+[data-theme="dark"] .btn-more:hover:not(:disabled),
+[data-theme="dark"] .btn-action-more:hover:not(:disabled) {
+  background: var(--apple-surface, #131924) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+/* Dedicated Modern Dark Refresh Button */
+[data-theme="dark"] .btn-refresh {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-refresh:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.14) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.22) !important;
+}
+
+[data-theme="dark"] .btn-refresh:has(.spin-loading),
+[data-theme="dark"] .btn-refresh.is-loading {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.28) !important;
+}
+
 /* Cards & Containers across ALL tabs */
 [data-theme="dark"] .content-card,
 [data-theme="dark"] .filter-card,
@@ -517,8 +559,7 @@ input:-webkit-autofill:active {
 
 /* Secondary Buttons */
 [data-theme="dark"] .btn-secondary,
-[data-theme="dark"] .btn-action,
-[data-theme="dark"] .btn-refresh {
+[data-theme="dark"] .btn-action {
   background: var(--apple-surface-sub) !important;
   border-color: var(--color-border) !important;
   color: var(--apple-text-primary) !important;
@@ -698,27 +739,32 @@ html[data-darkreader-scheme="dark"] table td {
   color: var(--apple-text-secondary, #94a3b8) !important;
 }
 
-/* ── Toast / Sonner ─────────────────────────── */
+/* ── Toast / Sonner (Top-Center Modern Glass) ─── */
 [data-theme="dark"] .sonner-toast {
-  background: var(--apple-surface, #131924) !important;
-  border-color: var(--color-border, #242e3f) !important;
+  background: rgba(18, 24, 38, 0.88) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
   color: var(--apple-text-primary, #f8fafc) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55) !important;
+  box-shadow: 
+    0 22px 50px -10px rgba(0, 0, 0, 0.7),
+    0 8px 18px -4px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset !important;
 }
 [data-theme="dark"] .sonner-title {
-  color: var(--apple-text-primary, #f8fafc) !important;
+  color: #f8fafc !important;
 }
 [data-theme="dark"] .sonner-description {
-  color: var(--apple-text-secondary, #94a3b8) !important;
+  color: #94a3b8 !important;
 }
 [data-theme="dark"] .sonner-cancel-btn {
-  background: var(--apple-surface-sub, #1c2433) !important;
-  border-color: var(--color-border, #242e3f) !important;
-  color: var(--apple-text-primary, #f8fafc) !important;
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #cbd5e1 !important;
 }
 [data-theme="dark"] .sonner-close-btn:hover {
-  background: var(--apple-surface-sub, #1c2433) !important;
-  color: var(--apple-text-primary, #f8fafc) !important;
+  background: rgba(51, 65, 85, 0.95) !important;
+  color: #f8fafc !important;
 }
 
 /* ── Onboarding Tour Card ───────────────────── */

@@ -220,7 +220,7 @@
                     [class.is-multi-period]="cell.colspan > 1"
                     [draggable]="isEditMode()" (dragstart)="onDragStart($event, c, cell)" (dragend)="onDragEnd($event)"
                     (click)="openClassDetail(c, $event)"
-                    (contextmenu)="onCardContextMenu($event, c)"
+                    (contextmenu)="onCardContextMenu($event, c, cell.timeCodes)"
                     [title]="c.hasInstructorConflict ? ('คำเตือน: ' + c.instructorConflictReason) : (isEditMode() ? 'คลิกค้างแล้วลากกล่องนี้เพื่อย้ายคาบเรียน' : 'คลิกดูรายละเอียด • คลิกขวาเพื่อแก้ไข/ลบวิชา ' + c.COURSE_NO + ' (' + cell.periodRangeLabel + ')')">
                     
                     <!-- Card Content Inner -->
@@ -233,7 +233,12 @@
                             <span class="material-symbols-rounded drag-handle-icon">drag_indicator</span>
                           </div>
                           }
-                          <span class="course-code-pill">{{ c.COURSE_NO }}</span>
+                          <span class="course-code-pill">
+                            {{ c.COURSE_NO }}
+                            @if (c.CREDIT != null) {
+                            <span class="course-credit-tag">({{ c.CREDIT }})</span>
+                            }
+                          </span>
                           @if (cell.colspan > 1) {
                           <span class="multi-period-indicator-pill" title="วิชาสอนต่อเนื่องหลายคาบ">
                             <span class="material-symbols-rounded">timelapse</span>
@@ -242,11 +247,8 @@
                           }
                         </div>
                         <div class="card-top-actions">
-                          @if (c.CREDIT != null) {
-                          <span class="course-credit-pill">{{ c.CREDIT }} นก.</span>
-                          }
                           @if (!isEditMode()) {
-                          <button type="button" class="card-quick-menu-btn" (click)="onCardContextMenu($event, c)" title="จัดการวิชา (แก้ไข / ลบ)">
+                          <button type="button" class="card-quick-menu-btn" (click)="onCardContextMenu($event, c, cell.timeCodes)" title="จัดการวิชา (แก้ไข / ลบ)">
                             <span class="material-symbols-rounded">more_horiz</span>
                           </button>
                           }
@@ -289,13 +291,12 @@
                       <!-- Instructor Row & Period Range info for wide cards -->
                       <div class="card-footer-info-row">
                         @if (c.INSTRUCTORS && c.INSTRUCTORS.length > 0) {
-                        <div class="instructors-pill-box">
+                        <div class="instructors-pill-box" [title]="getFullInstructorsTooltip(c.INSTRUCTORS)">
                           <div class="inst-avatar-mini">
                             <span class="material-symbols-rounded inst-icon">person</span>
                           </div>
                           <span class="inst-names-text">
-                            {{ c.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }} {{ c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI ||
-                            c.INSTRUCTORS[0].INSTRUCTOR_CODE }}
+                            {{ getShortInstructorName(c.INSTRUCTORS[0]) }}
                             @if (c.INSTRUCTORS.length > 1) {
                             <span class="more-inst-badge">+{{ c.INSTRUCTORS.length - 1 }}</span>
                             }
@@ -752,14 +753,14 @@
                 </div>
                 <div class="period-quick-presets">
                   <span class="preset-label">ทางลัด:</span>
-                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 1)" title="เลือก 1 คาบ (2 ชม.)">
-                    1 คาบ (2 ชม.)
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 1)" title="เลือก 1 คาบ">
+                    1 คาบ
                   </button>
-                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 2)" title="เลือก 2 คาบติดกัน (4 ชม.)">
-                    2 คาบ (4 ชม.)
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 2)" title="เลือก 2 คาบติดกัน">
+                    2 คาบติดกัน
                   </button>
-                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 3)" title="เลือก 3 คาบติดกัน (6 ชม.)">
-                    3 คาบ (6 ชม.)
+                  <button type="button" class="btn-preset-chip" (click)="selectConsecutivePeriods(editTimeCodes()[0] || 1, 3)" title="เลือก 3 คาบติดกัน">
+                    3 คาบติดกัน
                   </button>
                 </div>
               </div>
@@ -1018,6 +1019,7 @@
               @for (slot of displayedAvailabilitySlots(); track (slot.dayCode + '_' + slot.timeCode)) {
               @let isCurrentSelected = (editDayCode() === slot.dayCode && isTimeCodeSelected(slot.timeCode));
               <div class="avail-slot-card" [class.is-free]="slot.isAvailable" [class.is-busy]="!slot.isAvailable"
+                [class.is-busy-ru30]="slot.isBusyInRu30"
                 [class.is-selected-slot]="isCurrentSelected"
                 (click)="slot.isAvailable ? applyAvailableSlot(slot) : null">
 
@@ -1037,9 +1039,14 @@
 
                   <div class="slot-card-right">
                     @if (slot.isBusyInClass) {
-                    <div class="slot-busy-tag" [title]="'ติดสอน ' + slot.busyCount + ' ท่าน'">
+                    <div class="slot-busy-tag" [title]="'ติดสอนในระบบ ' + slot.busyCount + ' ท่าน'">
                       <span class="material-symbols-rounded">block</span>
                       <span>ติดสอน ({{ slot.busyCount }})</span>
+                    </div>
+                    } @else if (slot.isBusyInRu30) {
+                    <div class="slot-busy-tag is-ru30" [title]="'ติดสอน มร.30 ' + (slot.ru30BusyCount || 1) + ' ท่าน'">
+                      <span class="material-symbols-rounded">school</span>
+                      <span>ติดสอน มร.30 ({{ slot.ru30BusyCount || (slot.ru30BusyList?.length || 1) }})</span>
                     </div>
                     } @else if (slot.isAvailable) {
                     @if (isCurrentSelected) {
@@ -1059,14 +1066,29 @@
                       <span class="material-symbols-rounded">touch_app</span>
                     </button>
                     }
-                    } @else {
-                    <div class="slot-busy-tag" style="background: #f1f5f9; color: #64748b; border-color: #cbd5e1;">
-                      <span class="material-symbols-rounded">schedule</span>
-                      <span>ไม่ตรง มร.30</span>
-                    </div>
                     }
                   </div>
                 </div>
+
+                @if (slot.isBusyInRu30 && slot.ru30BusyList && slot.ru30BusyList.length > 0) {
+                <div class="slot-busy-details-box is-ru30">
+                  @for (ru of slot.ru30BusyList; track ru.instructorCode + (ru.courseNo || '')) {
+                  <div class="busy-inst-item is-ru30">
+                    <div class="busy-inst-icon-wrap">
+                      <span class="material-symbols-rounded busy-icon">school</span>
+                    </div>
+                    <div class="busy-inst-text-wrap">
+                      <span class="busy-inst-name">{{ ru.instructorName }}</span>
+                      <span class="busy-inst-desc">ติดสอน มร.30 วิชา</span>
+                      <span class="ru30-course-badge">{{ ru.courseNo }}</span>
+                      @if (ru.period) {
+                      <span class="ru30-period-badge">({{ ru.period }})</span>
+                      }
+                    </div>
+                  </div>
+                  }
+                </div>
+                }
 
                 @if (slot.isBusyInClass && slot.busyList.length > 0) {
                 <div class="slot-busy-details-box">

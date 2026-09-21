@@ -32,6 +32,7 @@ export class CourseService {
     semester?: string;
     prefix?: string;
     search?: string;
+    query?: string;
     code?: string;
     name?: string;
   }): Observable<{ success: boolean; results: any[] }> {
@@ -39,7 +40,11 @@ export class CourseService {
     if (filters?.year) params = params.set('year', filters.year);
     if (filters?.semester) params = params.set('semester', filters.semester);
     if (filters?.prefix) params = params.set('prefix', filters.prefix);
-    if (filters?.search) params = params.set('search', filters.search.trim());
+    const searchVal = (filters?.search ?? filters?.query ?? '').trim();
+    if (searchVal) {
+      params = params.set('search', searchVal);
+      params = params.set('query', searchVal);
+    }
     if (filters?.code) params = params.set('code', filters.code.trim());
     if (filters?.name) params = params.set('name', filters.name.trim());
     return this.http.get<{ success: boolean; results: any[] }>(`${this.baseUrl}/search-ugb`, { params });
@@ -53,11 +58,25 @@ export class CourseService {
     return this.http.put<{ success: boolean; message: string }>(`${this.baseUrl}/update`, payload);
   }
 
-  deleteCourse(year: string, semester: string, courseNo: string): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/delete/${year}/${semester}/${courseNo}`);
+  deleteCourse(year: string, semester: string, courseNo: string, userDelete?: string): Observable<{ success: boolean; message: string }> {
+    let params = new HttpParams();
+    if (userDelete) {
+      params = params.set('user', userDelete.trim());
+    }
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/delete/${year}/${semester}/${courseNo}`, { params });
   }
 
-  deleteCoursesBulk(payload: { items: any[]; userDelete?: string }): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/delete-bulk`, payload);
+  deleteCoursesBulk(payload: {
+    year?: string;
+    semester?: string;
+    studyYear?: string;
+    studySemester?: string;
+    courseNos?: string[];
+    courses?: string[];
+    items?: any[];
+    userDelete?: string;
+    userInsert?: string;
+  }): Observable<{ success: boolean; message: string; deletedCount?: number }> {
+    return this.http.post<{ success: boolean; message: string; deletedCount?: number }>(`${this.baseUrl}/delete-bulk`, payload);
   }
 }

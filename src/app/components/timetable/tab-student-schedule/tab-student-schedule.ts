@@ -113,7 +113,12 @@ export interface InstructorSlotAvailability {
   colorClass: string;
   period: string;
   timeLabel?: string;
+  timeStart?: string;
+  timeEnd?: string;
   isRu30Available?: boolean;
+  isBusyInRu30?: boolean;
+  ru30BusyCount?: number;
+  ru30BusyList?: any[];
   isBusyInClass?: boolean;
   isAvailable: boolean;
   busyCount: number;
@@ -212,6 +217,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   readonly isContextMenuOpen = signal<boolean>(false);
   readonly contextMenuPos = signal<{ x: number; y: number }>({ x: 0, y: 0 });
   readonly contextMenuItem = signal<ScheduleClassItem | null>(null);
+  readonly contextMenuTimeCodes = signal<number[]>([]);
 
   // Empty Slot Context Menu (Right click on empty slot to add class at that day/time)
   readonly isEmptySlotMenuOpen = signal<boolean>(false);
@@ -285,7 +291,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   readonly cloneSemesterOptions: SelectOption[] = [
     { value: '1', label: 'ภาค 1' },
     { value: '2', label: 'ภาค 2' },
-    { value: 'S', label: 'ภาคฤดูร้อน (Summer)' },
+    { value: '3', label: 'ภาคฤดูร้อน (Summer)' },
   ];
 
   // Instructor Availability Matrix State (Companion Panel in Edit Modal)
@@ -306,22 +312,95 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     return this.displayedAvailabilitySlots().filter((s) => !s.isAvailable).length;
   });
 
+  computeDurationLabel(startTimeStr: string, endTimeStr: string): string {
+    if (!startTimeStr || !endTimeStr) return '';
+    const parseMin = (s: string) => {
+      const parts = s.split(':').map((x) => parseInt(x.trim(), 10));
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+      return parts[0] * 60 + parts[1];
+    };
+
+    const startM = parseMin(startTimeStr);
+    const endM = parseMin(endTimeStr);
+    if (startM == null || endM == null || endM <= startM) return '';
+
+    const diff = endM - startM;
+    const hours = Math.floor(diff / 60);
+    const minutes = diff % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours} ชม. ${minutes} นาที`;
+    } else if (hours > 0) {
+      return `${hours} ชม.`;
+    } else {
+      return `${minutes} นาที`;
+    }
+  }
+
   readonly editPeriodDurationText = computed<string>(() => {
     const codes = [...this.editTimeCodes()].sort((a, b) => a - b);
     if (codes.length === 0) return 'ยังไม่ได้เลือกคาบ';
     const count = codes.length;
-    const hours = count * 2;
     const slots = this.timeSlots();
-    const firstSlot = slots.find((s) => s.code === codes[0]);
-    const lastSlot = slots.find((s) => s.code === codes[codes.length - 1]);
-    const start = (firstSlot?.period || '').split('-')[0].trim();
-    const end = (lastSlot?.period || '').split('-')[1]?.trim() || '';
-    const timeRange = start && end ? ` (${start} - ${end})` : '';
+
+    // Group consecutive codes into clusters (e.g. [1, 4] -> [[1], [4]], [1, 2, 4] -> [[1, 2], [4]])
+    const groups: number[][] = [];
+    for (const code of codes) {
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup[lastGroup.length - 1] === code - 1) {
+        lastGroup.push(code);
+      } else {
+        groups.push([code]);
+      }
+    }
+
+    const parseMin = (s: string) => {
+      const parts = s.split(':').map((x) => parseInt(x.trim(), 10));
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+      return parts[0] * 60 + parts[1];
+    };
+
+    const groupRanges: string[] = [];
+    let totalMinutes = 0;
+
+    for (const group of groups) {
+      const firstSlot = slots.find((s) => s.code === group[0]);
+      const lastSlot = slots.find((s) => s.code === group[group.length - 1]);
+      const start = (firstSlot?.period || '').split('-')[0]?.trim() || '';
+      const end = (lastSlot?.period || '').split('-')[1]?.trim() || (lastSlot?.period || '').trim();
+
+      if (start && end) {
+        groupRanges.push(`${start} - ${end}`);
+        const startM = parseMin(start);
+        const endM = parseMin(end);
+        if (startM != null && endM != null && endM > startM) {
+          totalMinutes += endM - startM;
+        }
+      } else if (firstSlot?.period) {
+        groupRanges.push(firstSlot.period.trim());
+      }
+    }
+
+    const timeRange = groupRanges.length > 0 ? ` (${groupRanges.join(', ')})` : '';
+
+    let durationStr = '';
+    if (totalMinutes > 0) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (hours > 0 && minutes > 0) {
+        durationStr = `${hours} ชม. ${minutes} นาที`;
+      } else if (hours > 0) {
+        durationStr = `${hours} ชม.`;
+      } else {
+        durationStr = `${minutes} นาที`;
+      }
+    }
+    const durationPart = durationStr ? ` (${durationStr})` : '';
 
     if (count === 1) {
-      return `คาบที่ ${codes[0]}${timeRange} • 1 คาบ (2 ชั่วโมง)`;
+      return `คาบที่ ${codes[0]}${timeRange} • 1 คาบ${durationPart}`;
     }
-    return `คาบที่ ${codes.join(', ')}${timeRange} • รวม ${count} คาบ (${hours} ชั่วโมง)`;
+    return `คาบที่ ${codes.join(', ')}${timeRange} • รวม ${count} คาบ${durationPart}`;
   });
 
 
@@ -333,11 +412,43 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   toggleEditTimeCode(timeCode: number): void {
     const current = [...this.editTimeCodes()];
     const idx = current.indexOf(timeCode);
+
     if (idx > -1) {
-      current.splice(idx, 1);
+      if (current.length > 1) {
+        const min = Math.min(...current);
+        const max = Math.max(...current);
+        // ถ้ายกเลิกที่ขอบ (หัวหรือท้าย) ยังคงเป็นคาบติดกันต่อเนื่องได้
+        if (timeCode === min || timeCode === max) {
+          current.splice(idx, 1);
+        } else {
+          // หากคลิกตรงกลาง จะทำให้คาบขาดตอน ให้ปรับเลือกเฉพาะคาบที่คลิก
+          this.toastService.warning(`คาบที่เลือกมากกว่า 1 คาบจะต้องติดกันเท่านั้น ระบบปรับเลือกเป็นคาบที่ ${timeCode}`);
+          this.editTimeCodes.set([timeCode]);
+          this.fetchSlotAvailableInstructors();
+          return;
+        }
+      } else {
+        current.splice(idx, 1);
+      }
     } else {
-      current.push(timeCode);
+      if (current.length === 0) {
+        current.push(timeCode);
+      } else {
+        const min = Math.min(...current);
+        const max = Math.max(...current);
+        // ขยายช่วงได้เฉพาะคาบที่ติดกับหัวหรือท้ายเท่านั้น (Adjacent)
+        if (timeCode === max + 1 || timeCode === min - 1) {
+          current.push(timeCode);
+        } else {
+          // หากไม่ใช่คาบที่ติดกัน ให้แจ้งเตือนและสลับมาเลือกเฉพาะคาบที่คลิก
+          this.toastService.warning(`คาบที่เลือกมากกว่า 1 คาบจะต้องติดกันเท่านั้น ระบบปรับเลือกเป็นคาบที่ ${timeCode}`);
+          this.editTimeCodes.set([timeCode]);
+          this.fetchSlotAvailableInstructors();
+          return;
+        }
+      }
     }
+
     current.sort((a, b) => a - b);
     this.editTimeCodes.set(current);
     this.fetchSlotAvailableInstructors();
@@ -374,7 +485,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     return times.every((t) => {
       const matchedSlot = slots.find((s) => s.dayCode === day && s.timeCode === t);
       if (!matchedSlot) return false;
-      if (!matchedSlot.isRu30Available) return false;
+      if (matchedSlot.isBusyInRu30 || !matchedSlot.isRu30Available) return false;
       const genuineBusy = (matchedSlot.busyList || []).filter(
         (b) => (b.courseNo || '').trim().toUpperCase() !== currentCourse
       );
@@ -393,19 +504,32 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
 
     const currentCourse = this.editCourseNo().trim().toUpperCase();
 
-    const unavailableSlots = times.filter((t) => {
+    const ru30BusySlots: number[] = [];
+    const classBusySlots: number[] = [];
+
+    times.forEach((t) => {
       const matchedSlot = slots.find((s) => s.dayCode === day && s.timeCode === t);
-      if (!matchedSlot || !matchedSlot.isRu30Available) return true;
-      const genuineBusy = (matchedSlot.busyList || []).filter(
-        (b) => (b.courseNo || '').trim().toUpperCase() !== currentCourse
-      );
-      return genuineBusy.length > 0;
+      if (!matchedSlot || matchedSlot.isBusyInRu30 || !matchedSlot.isRu30Available) {
+        ru30BusySlots.push(t);
+      } else {
+        const genuineBusy = (matchedSlot.busyList || []).filter(
+          (b) => (b.courseNo || '').trim().toUpperCase() !== currentCourse
+        );
+        if (genuineBusy.length > 0) {
+          classBusySlots.push(t);
+        }
+      }
     });
 
-    if (unavailableSlots.length === 0) return '';
+    const reasons: string[] = [];
+    if (ru30BusySlots.length > 0) {
+      reasons.push(`ติดสอนในระบบส่วนกลาง (มร.30) ในคาบที่ ${ru30BusySlots.join(', ')}`);
+    }
+    if (classBusySlots.length > 0) {
+      reasons.push(`ติดสอนวิชาอื่นในระบบคณะในคาบที่ ${classBusySlots.join(', ')}`);
+    }
 
-    const periodNames = unavailableSlots.map((t) => `คาบที่ ${t}`).join(', ');
-    return `มีอาจารย์ไม่สามารถสอนได้ใน ${periodNames} (ไม่อยู่ในเวลาว่างตาม มร.30 หรือติดสอนวิชาอื่น)`;
+    return reasons.join(' และ ');
   });
 
   // Detail Modal
@@ -627,9 +751,11 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
           const startTimeStr = (startSlot?.period || '').split('-')[0].trim();
           const endTimeStr = (endSlot?.period || '').split('-')[1]?.trim() || (endSlot?.period || '').trim();
           const mergedPeriodLabel = startTimeStr && endTimeStr ? `${startTimeStr} - ${endTimeStr}` : (startSlot?.period || '');
+          const durationStr = this.computeDurationLabel(startTimeStr, endTimeStr);
+          const durationSuffix = durationStr ? ` (${durationStr})` : '';
           const periodRangeLabel =
             spannedCodes.length > 1
-              ? `คาบ ${spannedCodes[0]} - ${spannedCodes[spannedCodes.length - 1]} (${spannedCodes.length * 2} ชม.)`
+              ? `คาบ ${spannedCodes[0]} - ${spannedCodes[spannedCodes.length - 1]}${durationSuffix}`
               : `คาบ ${spannedCodes[0]}`;
 
           cells.push({
@@ -1406,7 +1532,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       studyYear: this.activeYear(),
       studySemester: this.activeSemester(),
       moves: moves as any,
-      userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.updateScheduleSlots(payload).subscribe({
@@ -1570,12 +1696,14 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCardContextMenu(event: MouseEvent, item: ScheduleClassItem): void {
+  onCardContextMenu(event: MouseEvent, item: ScheduleClassItem, spannedTimeCodes?: number[]): void {
     event.preventDefault();
     event.stopPropagation();
 
     this.closeEmptySlotMenu();
     this.contextMenuItem.set(item);
+    const codes = spannedTimeCodes && spannedTimeCodes.length > 0 ? spannedTimeCodes : [Number(item.TIME_CODE)];
+    this.contextMenuTimeCodes.set(codes);
 
     const menuWidth = 240;
     const menuHeight = 220;
@@ -1653,8 +1781,9 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   }
 
   openEditModalFromMenu(item: ScheduleClassItem): void {
+    const timeCodes = this.contextMenuTimeCodes();
     this.closeContextMenu();
-    this.openEditModal(item);
+    this.openEditModal(item, timeCodes);
   }
 
   openDetailModalFromMenu(item: ScheduleClassItem): void {
@@ -1709,6 +1838,55 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     const inst = this.allInstructors().find((i) => i.INSTRUCTOR_CODE === code);
     if (!inst) return code;
     return `${inst.RANK_NAME_THAI_S || ''} ${inst.INSTRUCTOR_NAME_THAI || code}`.trim();
+  }
+
+  getShortInstructorName(inst?: { INSTRUCTOR_CODE?: string; INSTRUCTOR_NAME_THAI?: string; RANK_NAME_THAI_S?: string }): string {
+    if (!inst) return '';
+    const rawName = (inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE || '').trim();
+    if (!rawName) return '';
+
+    const parts = rawName.split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '';
+
+    const titleTokens = new Set([
+      'ดร.', 'ดร', 'ศ.', 'รศ.', 'ผศ.', 'อ.', 'ศ.ดร.', 'รศ.ดร.', 'ผศ.ดร.', 'อ.ดร.',
+      'นาย', 'นาง', 'นางสาว', 'น.ส.', 'dr.', 'dr', 'prof.', 'assoc. prof.', 'asst. prof.'
+    ]);
+
+    const titleParts: string[] = [];
+    let nameIndex = 0;
+
+    while (nameIndex < parts.length && titleTokens.has(parts[nameIndex].toLowerCase())) {
+      titleParts.push(parts[nameIndex]);
+      nameIndex++;
+    }
+
+    let firstName = nameIndex < parts.length ? parts[nameIndex] : '';
+    if (!firstName && titleParts.length > 0) {
+      firstName = titleParts.pop() || '';
+    }
+
+    const rank = (inst.RANK_NAME_THAI_S || '').trim();
+    const combinedTitle = titleParts.join(' ');
+
+    let result = '';
+    if (combinedTitle) {
+      result = `${combinedTitle} ${firstName}`.trim();
+    } else {
+      result = firstName;
+    }
+
+    if (rank && !result.startsWith(rank)) {
+      result = `${rank} ${result}`.trim();
+    }
+    return result || rawName;
+  }
+
+  getFullInstructorsTooltip(instructors?: any[]): string {
+    if (!instructors || instructors.length === 0) return '';
+    return instructors
+      .map((i) => `${i.RANK_NAME_THAI_S || ''} ${i.INSTRUCTOR_NAME_THAI || i.INSTRUCTOR_CODE}`.trim())
+      .join(', ');
   }
 
   // INLINE COURSE SEARCH METHODS (FOR ADD MODE)
@@ -1821,6 +1999,33 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.fetchSlotAvailableInstructors();
   }
 
+  getContiguousTimeCodes(item: ScheduleClassItem, spannedTimeCodes?: number[]): number[] {
+    if (spannedTimeCodes && spannedTimeCodes.length > 0) {
+      return [...spannedTimeCodes].sort((a, b) => a - b);
+    }
+    const itemTime = Number(item.TIME_CODE);
+    const allMatching = this.classList().filter(
+      (c) =>
+        c.COURSE_NO === item.COURSE_NO &&
+        Number(c.DAY_CODE) === Number(item.DAY_CODE) &&
+        (item.INSTR_GROUP == null || c.INSTR_GROUP === item.INSTR_GROUP) &&
+        (item.ROOM_CODE == null || c.ROOM_CODE === item.ROOM_CODE)
+    );
+    const matchingCodes = new Set(allMatching.map((c) => Number(c.TIME_CODE)));
+    const contiguousCodes: number[] = [itemTime];
+    let left = itemTime - 1;
+    while (matchingCodes.has(left)) {
+      contiguousCodes.unshift(left);
+      left--;
+    }
+    let right = itemTime + 1;
+    while (matchingCodes.has(right)) {
+      contiguousCodes.push(right);
+      right++;
+    }
+    return contiguousCodes;
+  }
+
   openEditModal(item: ScheduleClassItem, spannedTimeCodes?: number[]): void {
     this.closeContextMenu();
     this.isAddMode.set(false);
@@ -1831,18 +2036,8 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.editFormError.set('');
     this.editDayCode.set(item.DAY_CODE !== undefined && item.DAY_CODE !== null ? Number(item.DAY_CODE) : 1);
 
-    if (spannedTimeCodes && spannedTimeCodes.length > 0) {
-      this.editTimeCodes.set([...spannedTimeCodes].sort((a, b) => a - b));
-    } else {
-      const siblings = this.classList().filter(
-        (c) =>
-          c.COURSE_NO === item.COURSE_NO &&
-          Number(c.DAY_CODE) === Number(item.DAY_CODE) &&
-          (item.INSTR_GROUP == null || c.INSTR_GROUP === item.INSTR_GROUP)
-      );
-      const siblingCodes = Array.from(new Set(siblings.map((c) => Number(c.TIME_CODE)))).sort((a, b) => a - b);
-      this.editTimeCodes.set(siblingCodes.length > 0 ? siblingCodes : [Number(item.TIME_CODE) || 1]);
-    }
+    const targetTimeCodes = this.getContiguousTimeCodes(item, spannedTimeCodes);
+    this.editTimeCodes.set(targetTimeCodes.length > 0 ? targetTimeCodes : [Number(item.TIME_CODE) || 1]);
 
     this.editRoomCode.set((item.ROOM_CODE || this.selectedRoom() || '').trim());
 
@@ -1938,7 +2133,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       targetYear: tYear,
       targetSemester: tSem,
       mode: this.cloneMode(),
-      userInsert: this.authService.currentUser()?.email?.split('@')[0] || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.cloneSemester(payload).subscribe({
@@ -2180,6 +2375,14 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const sortedTimes = [...timeCodes].sort((a, b) => a - b);
+    const isConsecutive = sortedTimes.every((val, idx) => idx === 0 || val === sortedTimes[idx - 1] + 1);
+    if (!isConsecutive) {
+      this.editFormError.set('คาบเวลาที่เลือกมากกว่า 1 คาบจะต้องเป็นคาบที่ติดกันเท่านั้น');
+      this.toastService.warning('คาบเวลาที่เลือกมากกว่า 1 คาบจะต้องเป็นคาบที่ติดกันเท่านั้น');
+      return;
+    }
+
     if (!this.isSelectedSlotAvailableForInstructors()) {
       const reason = this.slotUnavailabilityReason();
       this.editFormError.set(`ไม่สามารถบันทึกได้: อาจารย์ไม่ว่างในคาบนี้ (${reason})`);
@@ -2201,7 +2404,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       timeCodes: timeCodes,
       roomCode: room,
       instructorCodes: this.editInstructorCodes(),
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     const save$ = isAdd
@@ -2255,15 +2458,8 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
 
     if (!confirmed) return;
 
-    // ค้นหาทุกคาบที่เรียนต่อเนื่องกันของวิชานี้ในวันและห้องเดียวกัน เพื่อลบออกทั้งหมดพร้อมกัน
-    const siblings = this.classList().filter(
-      (c) =>
-        c.COURSE_NO === item.COURSE_NO &&
-        Number(c.DAY_CODE) === Number(item.DAY_CODE) &&
-        (item.INSTR_GROUP == null || c.INSTR_GROUP === item.INSTR_GROUP)
-    );
-    const siblingCodes = Array.from(new Set(siblings.map((c) => Number(c.TIME_CODE)))).sort((a, b) => a - b);
-    const targetTimeCodes = siblingCodes.length > 0 ? siblingCodes : [Number(item.TIME_CODE)];
+    // ค้นหาเฉพาะคาบที่เรียนต่อเนื่องติดกันของบล็อกนี้เท่านั้น (Contiguous block only)
+    const targetTimeCodes = this.getContiguousTimeCodes(item, this.contextMenuTimeCodes());
 
     const payload = {
       studyYear: item.STUDY_YEAR || this.activeYear(),
@@ -2274,7 +2470,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       timeCodes: targetTimeCodes,
       roomCode: item.ROOM_CODE || this.selectedRoom(),
       instrGroup: item.INSTR_GROUP,
-      userInsert: this.authService.currentUser()?.email || 'ADMIN',
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.timetableService.deleteScheduleClass(payload).subscribe({

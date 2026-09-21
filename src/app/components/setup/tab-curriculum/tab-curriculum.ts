@@ -9,6 +9,7 @@ import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { CurriculumService } from '../../../services/curriculum.service';
 import { FacultyItem, ProgramGroupItem, ProgramSubGroupItem, CurriculumCourseRow } from '../../../models/curriculum.model';
 import { CourseService } from '../../../services/course.service';
+import { AuthService } from '../../../services/auth.service';
 
 export interface UgbCourseOption {
   COURSE_NO: string;
@@ -47,6 +48,7 @@ export class TabCurriculumComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly tourService = inject(OnboardingTourService);
   private readonly confirmDialogService = inject(ConfirmDialogService);
+  private readonly authService = inject(AuthService);
 
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
@@ -193,6 +195,7 @@ export class TabCurriculumComponent implements OnInit {
   modalSubGroupNo: string = '00';
   modalYearLevel: string = '1';
   modalSemester: string = '1';
+  modalYearEnroll: string = '';
 
   // Modal Cascading Data
   readonly modalGroupsList = signal<ProgramGroupItem[]>([]);
@@ -237,11 +240,13 @@ export class TabCurriculumComponent implements OnInit {
     { value: 'ALL', label: 'ทุกภาค' },
     { value: '1', label: 'ภาค 1' },
     { value: '2', label: 'ภาค 2' },
+    { value: '3', label: 'ภาคฤดูร้อน' },
   ];
 
   readonly modalSemesterOptions: SelectOption[] = [
     { value: '1', label: 'ภาค 1' },
     { value: '2', label: 'ภาค 2' },
+    { value: '3', label: 'ภาคฤดูร้อน' },
   ];
 
   // Faculty Select Options for Filter
@@ -515,10 +520,14 @@ export class TabCurriculumComponent implements OnInit {
       yearLevel: r.YEAR_LEVEL,
       semester: r.SEMESTER,
       courseNo: r.COURSE_NO,
+      yearEnroll: r.YEAR_ENROLL || null,
     }));
 
     this.curriculumService
-      .deleteCurriculumBulk({ items: itemsToDelete })
+      .deleteCurriculumBulk({
+        items: itemsToDelete,
+        userDelete: this.authService.getCurrentUsername(),
+      })
       .subscribe({
         next: () => {
           this.isDeleting.set(false);
@@ -598,7 +607,7 @@ export class TabCurriculumComponent implements OnInit {
 
   // Row Unique Key Identifier
   getRowKey(row: CurriculumCourseRow): string {
-    return `${row.FACULTY_NO}_${row.GROUP_NO}_${row.SUB_GROUP_NO || '00'}_${row.YEAR_LEVEL}_${row.SEMESTER}_${row.COURSE_NO}`;
+    return `${row.FACULTY_NO}_${row.GROUP_NO}_${row.SUB_GROUP_NO || '00'}_${row.YEAR_LEVEL}_${row.SEMESTER}_${row.COURSE_NO}_${row.YEAR_ENROLL || ''}`;
   }
 
   isRowSelected(row: CurriculumCourseRow): boolean {
@@ -652,6 +661,7 @@ export class TabCurriculumComponent implements OnInit {
     this.selectedCourses.set([]);
     this.pickerCodeQuery.set('');
     this.pickerNameQuery.set('');
+    this.modalYearEnroll = '';
 
     const faculties = this.facultiesList();
     if (faculties.length > 0 && !this.modalFacultyNo) {
@@ -771,6 +781,12 @@ export class TabCurriculumComponent implements OnInit {
       return;
     }
 
+    const enrollInput = this.modalYearEnroll?.trim() || '';
+    if (!enrollInput || !/^\d{2}$/.test(enrollInput)) {
+      this.formError = 'กรุณาระบุปีที่สมัครเป็นตัวเลข 2 หลัก (เช่น 65, 66) ก่อนกดแสดงวิชา';
+      return;
+    }
+
     this.formError = '';
     this.isExistingLoading.set(true);
     this.hasQueriedExisting.set(true);
@@ -782,6 +798,7 @@ export class TabCurriculumComponent implements OnInit {
         subGroupNo: this.modalSubGroupNo || '00',
         yearLevel: this.modalYearLevel,
         semester: this.modalSemester,
+        yearEnroll: enrollInput,
       })
       .subscribe({
         next: (res) => {
@@ -928,6 +945,12 @@ export class TabCurriculumComponent implements OnInit {
       return;
     }
 
+    const enrollInput = this.modalYearEnroll?.trim() || '';
+    if (!enrollInput || !/^\d{2}$/.test(enrollInput)) {
+      this.formError = 'กรุณาระบุปีที่สมัครเป็นตัวเลข 2 หลัก (เช่น 65, 66)';
+      return;
+    }
+
     const list = this.selectedCourses();
     if (list.length === 0) {
       this.formError = 'กรุณาเลือกวิชาที่ต้องการเพิ่มอย่างน้อย 1 วิชา';
@@ -943,36 +966,39 @@ export class TabCurriculumComponent implements OnInit {
       subGroupNo: this.modalSubGroupNo || '00',
       yearLevel: this.modalYearLevel,
       semester: this.modalSemester,
+      yearEnroll: enrollInput,
       courseNos: list.map((c) => c.COURSE_NO),
+      userInsert: this.authService.getCurrentUsername(),
     };
 
     this.curriculumService.addCurriculumCourses(payload).subscribe({
-        next: (res) => {
-          this.isSaving.set(false);
-          if (res && res.success) {
-            this.toastService.success(res.message);
-            this.selectedCourses.set([]);
-            this.loadExistingCoursesForModal();
-            this.loadCurriculumList();
-          } else {
-            this.formError = res.message;
-            this.toastService.error(res.message);
-          }
-        },
-        error: (err) => {
-          this.isSaving.set(false);
-          const msg = err?.error?.message || 'เกิดข้อผิดพลาดในการบันทึกวิชาในหลักสูตร';
-          this.formError = msg;
-          this.toastService.error(msg);
-        },
-      });
+      next: (res) => {
+        this.isSaving.set(false);
+        if (res && res.success) {
+          this.toastService.success(res.message);
+          this.selectedCourses.set([]);
+          this.loadExistingCoursesForModal();
+          this.loadCurriculumList();
+        } else {
+          this.formError = res.message;
+          this.toastService.error(res.message);
+        }
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        const msg = err?.error?.message || 'เกิดข้อผิดพลาดในการบันทึกวิชาในหลักสูตร';
+        this.formError = msg;
+        this.toastService.error(msg);
+      },
+    });
   }
 
   // Delete Individual Course -> Stored in RG_SCHEDULE_CURRICULUM_HIS
   async deleteCurriculumCourse(row: CurriculumCourseRow): Promise<void> {
     if (this.isDeleting()) return;
 
-    const courseTitle = `${row.COURSE_NO} (${row.COURSE_NAME_THAI || ''})`.trim();
+    const enrollLabel = row.YEAR_ENROLL ? ` (ปีสมัคร ${row.YEAR_ENROLL})` : '';
+    const courseTitle = `${row.COURSE_NO} (${row.COURSE_NAME_THAI || ''})${enrollLabel}`.trim();
     const confirmed = await this.confirmDialogService.confirm({
       title: 'ยืนยันการลบวิชาในหลักสูตร',
       message: `คุณต้องการลบวิชา "${courseTitle}" ออกจากหลักสูตรใช่หรือไม่?`,
@@ -992,6 +1018,8 @@ export class TabCurriculumComponent implements OnInit {
       yearLevel: row.YEAR_LEVEL,
       semester: row.SEMESTER,
       courseNo: row.COURSE_NO,
+      yearEnroll: row.YEAR_ENROLL || null,
+      userDelete: this.authService.getCurrentUsername(),
     };
 
     this.curriculumService.deleteCurriculumCourse(payload).subscribe({
@@ -1037,10 +1065,14 @@ export class TabCurriculumComponent implements OnInit {
         yearLevel: r.YEAR_LEVEL,
         semester: r.SEMESTER,
         courseNo: r.COURSE_NO,
+        yearEnroll: r.YEAR_ENROLL || null,
       }));
 
     this.curriculumService
-      .deleteCurriculumBulk({ items: itemsToDelete })
+      .deleteCurriculumBulk({
+        items: itemsToDelete,
+        userDelete: this.authService.getCurrentUsername(),
+      })
       .subscribe({
         next: (res) => {
           this.isDeleting.set(false);

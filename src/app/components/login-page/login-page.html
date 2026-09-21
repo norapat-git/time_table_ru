@@ -2,23 +2,16 @@
 
   <!-- Floating Theme Toggle at Top Right -->
   <div class="login-theme-toggle-wrap">
-    <button
-      type="button"
-      class="topbar-theme-toggle"
-      (click)="themeService.toggleTheme()"
+    <button type="button" class="topbar-theme-toggle" (click)="themeService.toggleTheme()"
       (contextmenu)="themeService.resetToAuto(); $event.preventDefault()"
       [title]="'โหมดธีม: ' + themeService.modeDescription() + ' • คลิกเพื่อสลับโหมด • คลิกขวาเพื่อตรวจจับตามระบบ (Auto)'"
-      [attr.aria-label]="themeService.modeDescription()"
-    >
+      [attr.aria-label]="themeService.modeDescription()">
       <span class="material-symbols-rounded theme-icon" [class.is-dark]="themeService.isDark()">
         {{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}
       </span>
-      <span
-        class="theme-beta-badge"
-        [class.is-auto]="themeService.preference() === 'auto'"
+      <span class="theme-beta-badge" [class.is-auto]="themeService.preference() === 'auto'"
         [class.is-dark-mode]="themeService.preference() === 'dark'"
-        [class.is-light-mode]="themeService.preference() === 'light'"
-      >
+        [class.is-light-mode]="themeService.preference() === 'light'">
         {{ themeService.preference() === 'auto' ? 'Auto' : (themeService.isDark() ? 'Dark' : 'Light') }}
       </span>
     </button>
@@ -43,23 +36,23 @@
           </div>
 
           <h1 class="showcase-headline">ระบบจัดตารางสอน</h1>
-          <div class="headline-gradient">Smart Timetable Scheduling</div>
+          <div class="headline-gradient">Regional Class Scheduling System</div>
 
           <div class="auth-brand-badge">
             <span class="material-symbols-rounded">verified_user</span>
-            <span>ระบบยืนยันตัวตน สวป. (Microsoft 365)</span>
+            <span>Microsoft 365</span>
           </div>
         </div>
 
         <!-- Error Alert Message -->
         @if (errorMessage()) {
-          <div class="modern-alert-error" role="alert">
-            <span class="material-symbols-rounded alert-icon">error</span>
-            <div class="alert-content">
-              <strong>ไม่สามารถเข้าสู่ระบบได้</strong>
-              <p>{{ errorMessage() }}</p>
-            </div>
+        <div class="modern-alert-error" role="alert">
+          <span class="material-symbols-rounded alert-icon">error</span>
+          <div class="alert-content">
+            <strong>ไม่สามารถเข้าสู่ระบบได้</strong>
+            <p>{{ errorMessage() }}</p>
           </div>
+        </div>
         }
 
         <!-- Login Form -->
@@ -72,17 +65,9 @@
             </label>
             <div class="auth-input-box">
               <span class="material-symbols-rounded input-leading-icon">account_circle</span>
-              <input
-                id="login-email"
-                type="text"
-                class="auth-text-input"
-                placeholder="ระบุชื่อบัญชี (เช่น dev07)"
-                [ngModel]="email()"
-                (ngModelChange)="onEmailChange($event)"
-                name="email"
-                required
-                autocomplete="username"
-              />
+              <input id="login-email" type="text" class="auth-text-input" placeholder="ระบุชื่อบัญชี (เช่น dev07)"
+                [ngModel]="email()" (ngModelChange)="onEmailChange($event)" name="email" required
+                autocomplete="username" />
               <span class="email-domain-pill">&#64;ru.ac.th</span>
             </div>
             <span class="field-hint">พิมพ์เฉพาะชื่อผู้ใช้ได้ ระบบจะเติม &#64;ru.ac.th ให้โดยอัตโนมัติ</span>
@@ -95,24 +80,11 @@
             </label>
             <div class="auth-input-box">
               <span class="material-symbols-rounded input-leading-icon">key</span>
-              <input
-                id="login-password"
-                [type]="showPassword() ? 'text' : 'password'"
-                class="auth-text-input"
-                placeholder="ระบุรหัสผ่านของคุณ"
-                [ngModel]="password()"
-                (ngModelChange)="password.set($event)"
-                name="password"
-                required
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="btn-password-visibility"
-                (click)="togglePasswordVisibility()"
-                [title]="showPassword() ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'"
-                tabindex="-1"
-              >
+              <input id="login-password" [type]="showPassword() ? 'text' : 'password'" class="auth-text-input"
+                placeholder="ระบุรหัสผ่านของคุณ" [ngModel]="password()" (ngModelChange)="password.set($event)"
+                name="password" required autocomplete="current-password" />
+              <button type="button" class="btn-password-visibility" (click)="togglePasswordVisibility()"
+                [title]="showPassword() ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'" tabindex="-1">
                 <span class="material-symbols-rounded">
                   {{ showPassword() ? 'visibility_off' : 'visibility' }}
                 </span>
@@ -120,18 +92,19 @@
             </div>
           </div>
 
-          <!-- Sign In Submit Button (Icon Only) -->
-          <button
-            type="submit"
-            class="btn-modern-login btn-arrow-only"
-            [disabled]="isLoading()"
-            title="เข้าสู่ระบบ"
-            aria-label="เข้าสู่ระบบ"
-          >
+          <!-- Sign In Submit Button -->
+          <button type="submit" class="btn-modern-login" [class.is-loading-state]="isLoading()" [disabled]="isLoading()"
+            title="เข้าสู่ระบบ" aria-label="เข้าสู่ระบบ">
             @if (isLoading()) {
-              <span class="material-symbols-rounded spin-icon">sync</span>
+              <span class="btn-login-content is-loading">
+                <span class="login-spinner-ring" aria-hidden="true"></span>
+                <span class="btn-login-text">กำลังเข้าสู่ระบบ...</span>
+              </span>
             } @else {
-              <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+              <span class="btn-login-content">
+                <span class="btn-login-text">เข้าสู่ระบบ</span>
+                <span class="material-symbols-rounded btn-login-arrow">arrow_forward</span>
+              </span>
             }
           </button>
 

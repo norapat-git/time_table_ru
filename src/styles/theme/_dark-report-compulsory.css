@@ -61,18 +61,6 @@
   border-color: var(--color-border, #334155) !important;
 }
 
-[data-theme="dark"] app-tab-report-compulsory .btn-refresh {
-  background: var(--apple-surface-sub, #1c2433) !important;
-  border-color: var(--color-border, #242e3f) !important;
-  color: var(--apple-text-secondary, #94a3b8) !important;
-}
-
-[data-theme="dark"] app-tab-report-compulsory .btn-refresh:hover:not(:disabled) {
-  background: #242e3f !important;
-  color: #38bdf8 !important;
-  border-color: #38bdf8 !important;
-}
-
 [data-theme="dark"] app-tab-report-compulsory .view-toggle-group {
   background: var(--apple-surface-sub, #1c2433) !important;
   border: 1px solid var(--color-border, #242e3f) !important;

@@ -22,6 +22,7 @@ import { TabReportMr30Component } from './components/reports/tab-report-mr30/tab
 import { TabReportOfferedCoursesComponent } from './components/reports/tab-report-offered-courses/tab-report-offered-courses';
 
 import { AuthService } from './services/auth.service';
+import { SkeletonComponent } from './components/common/skeleton/skeleton';
 import { ToastContainerComponent } from './components/common/toast-container/toast-container';
 import { OnboardingTourComponent } from './components/common/onboarding-tour/onboarding-tour';
 import { ConfirmDialogComponent } from './components/common/confirm-dialog/confirm-dialog';
@@ -32,6 +33,33 @@ import { ToastService } from './services/toast.service';
 import { ThemeService } from './services/theme.service';
 import { ConfirmDialogService } from './services/confirm-dialog.service';
 
+const STORAGE_KEY_ACTIVE_TAB = 'timetable_active_tab';
+
+function getInitialActiveTab(): string {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_ACTIVE_TAB);
+    const validTabs = [
+      'academic-year',
+      'curriculum',
+      'instructor',
+      'course-search',
+      'paired-courses',
+      'timetable-manage',
+      'student-schedule',
+      'report-compulsory',
+      'report-faculty-year',
+      'report-mr30',
+      'report-offered-courses',
+    ];
+    if (saved && validTabs.includes(saved)) {
+      return saved;
+    }
+  } catch {
+    // Ignore error if localStorage is not accessible
+  }
+  return 'academic-year';
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -39,6 +67,7 @@ import { ConfirmDialogService } from './services/confirm-dialog.service';
     CommonModule,
     TabNavComponent,
     LoginPageComponent,
+    SkeletonComponent,
     ToastContainerComponent,
     OnboardingTourComponent,
     ConfirmDialogComponent,
@@ -64,7 +93,7 @@ export class App {
   readonly themeService = inject(ThemeService);
   readonly confirmDialogService = inject(ConfirmDialogService);
 
-  readonly activeTab = signal<string>('academic-year');
+  readonly activeTab = signal<string>(getInitialActiveTab());
 
   /**
    * Browser Reload / Window Close Guard:
@@ -232,6 +261,11 @@ export class App {
     }
 
     this.activeTab.set(tabId);
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_TAB, tabId);
+    } catch {
+      // Ignore localStorage errors
+    }
   }
 
   // Trigger Tour for current active tab
@@ -515,6 +549,12 @@ export class App {
     });
 
     if (confirmed) {
+      try {
+        localStorage.removeItem(STORAGE_KEY_ACTIVE_TAB);
+      } catch {
+        // Ignore error
+      }
+      this.activeTab.set('academic-year');
       this.authService.logout();
     }
   }
