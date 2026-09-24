@@ -381,7 +381,7 @@
               @if (isInlineDropdownOpen()) {
               <div class="inline-dropdown-menu" (click)="$event.stopPropagation()">
                 <div class="dropdown-header-hint">
-                  <span>ผลการค้นหาจากฐานข้อมูล UGB_COURSE</span>
+                  <span>รายวิชาที่เปิดสอน (ปี {{ activeYear() }} ภาค {{ activeSemester() }})</span>
                   <button type="button" class="btn-close-inline-menu" (click)="closeInlineDropdown()">
                     <span class="material-symbols-rounded">close</span>
                   </button>
@@ -394,7 +394,14 @@
                 } @else if (inlineSearchResults().length === 0) {
                 <div class="inline-empty-msg">
                   <span class="material-symbols-rounded">search_off</span>
-                  <p>ไม่พบรายวิชาที่ค้นหา ลองระบุรหัสวิชา เช่น ACC1101 หรือเปิดแผงตัวอักษรด้านขวา</p>
+                  @if (inlineSearchQuery()) {
+                    <p>ไม่พบรายวิชาที่ค้นหา ลองระบุรหัสวิชา เช่น ACC1101</p>
+                  } @else {
+                    <p>ไม่พบรายวิชาที่เปิดสอนสำหรับปี {{ activeYear() }} ภาค {{ activeSemester() }}</p>
+                    <span style="font-size: 0.8rem; color: var(--text-tertiary); display: block; margin-top: 0.25rem;">
+                      (สามารถเพิ่มวิชาที่เปิดสอนได้ที่แท็บ "จัดการวิชาที่เปิดสอน")
+                    </span>
+                  }
                 </div>
                 } @else {
                 <div class="inline-results-scroll">
@@ -616,8 +623,13 @@
                 } @else if (filteredInstructorsList().length === 0) {
                 <div class="inst-empty-box">
                   <span class="material-symbols-rounded">person_search</span>
-                  <p>ไม่พบรายชื่ออาจารย์ที่ตรงกับ "<strong>{{ instructorSearch() }}</strong>"</p>
-                  <span class="empty-sub">ลองค้นหาด้วยรหัส หรือชื่ออาจารย์ท่านอื่น</span>
+                  @if (instructorSearch()) {
+                    <p>ไม่พบรายชื่ออาจารย์ที่ตรงกับ "<strong>{{ instructorSearch() }}</strong>"</p>
+                    <span class="empty-sub">ลองค้นหาด้วยรหัส หรือชื่ออาจารย์ท่านอื่น</span>
+                  } @else {
+                    <p>ยังไม่มีรายชื่ออาจารย์ในภาคการศึกษานี้</p>
+                    <span class="empty-sub">สามารถเพิ่มอาจารย์ประจำภาคการศึกษาได้ที่แท็บ "จัดการอาจารย์"</span>
+                  }
                 </div>
                 } @else {
                 <div class="instructor-items-grid">
@@ -736,6 +748,7 @@
               @let isCurrentSelected = (formDayCode() === slot.dayCode && isTimeCodeSelected(slot.timeCode));
               <div class="avail-slot-card" [class.is-free]="slot.isAvailable" [class.is-busy]="!slot.isAvailable"
                 [class.is-busy-ru30]="slot.isBusyInRu30"
+                [class.is-busy-class]="slot.isBusyInClass"
                 [class.is-selected-slot]="isCurrentSelected"
                 (click)="slot.isAvailable ? applyAvailableSlot(slot) : null">
 
@@ -806,11 +819,17 @@
                 }
 
                 @if (slot.isBusyInClass && slot.busyList.length > 0) {
-                <div class="slot-busy-details-box">
+                <div class="slot-busy-details-box is-class">
                   @for (b of slot.busyList; track b.instructorCode) {
-                  <div class="busy-inst-item">
-                    <span class="material-symbols-rounded busy-icon">person_off</span>
-                    <span><strong>{{ b.instructorName }}</strong> ติดสอน {{ b.courseNo }}</span>
+                  <div class="busy-inst-item is-class">
+                    <div class="busy-inst-icon-wrap">
+                      <span class="material-symbols-rounded busy-icon">person_off</span>
+                    </div>
+                    <div class="busy-inst-text-wrap">
+                      <span class="busy-inst-name">{{ b.instructorName }}</span>
+                      <span class="busy-inst-desc">ติดสอนในระบบ วิชา</span>
+                      <span class="class-course-badge">{{ b.courseNo }}</span>
+                    </div>
                   </div>
                   }
                 </div>
@@ -838,8 +857,8 @@
         <div class="drawer-title-box">
           <span class="material-symbols-rounded drawer-title-icon">manage_search</span>
           <div>
-            <h3 class="drawer-title">ค้นหารายวิชา (UGB_COURSE)</h3>
-            <p class="drawer-subtitle">เลือกวิชาสำหรับจัดตารางสอน</p>
+            <h3 class="drawer-title">รายวิชาที่เปิดสอน</h3>
+            <p class="drawer-subtitle">เลือกวิชาสำหรับจัดตารางสอน (ปี {{ activeYear() }} ภาค {{ activeSemester() }})</p>
           </div>
         </div>
         <button class="btn-close-drawer" (click)="closeDrawer()" title="ปิดแผงค้นหา">
@@ -930,7 +949,14 @@
             @if (filteredDrawerCourses().length === 0) {
             <div class="drawer-empty-msg">
               <span class="material-symbols-rounded">search_off</span>
-              <p>ไม่พบรายวิชาที่ตรงกับเงื่อนไข</p>
+              @if (drawerCodeQuery() || drawerNameQuery()) {
+                <p>ไม่พบรายวิชาที่ตรงกับเงื่อนไข</p>
+              } @else {
+                <p>ไม่พบรายวิชาที่เปิดสอนสำหรับปี {{ activeYear() }} ภาค {{ activeSemester() }}</p>
+                <span style="font-size: 0.8rem; color: var(--text-tertiary); display: block; margin-top: 0.25rem;">
+                  (สามารถเพิ่มวิชาที่เปิดสอนได้ที่แท็บ "จัดการวิชาที่เปิดสอน")
+                </span>
+              }
             </div>
             } @else {
             @for (c of filteredDrawerCourses(); track c.COURSE_NO) {
@@ -1198,7 +1224,7 @@
                 (change)="cloneMode.set('merge')" />
               <div class="mode-info">
                 <strong>ต่อเติมข้อมูล (Merge - แนะนำ)</strong>
-                <span>คัดลอกเฉพาะวิชาที่ปี {{ activeYear() }}/{{ activeSemester() }} ยังไม่มี โดยไม่ลบวิชาเดิม</span>
+                <span>คัดลอกตารางสอน รายวิชา และอาจารย์ผู้สอน โดยเพิ่มเฉพาะรายการที่ยังไม่มี (ไม่ลบข้อมูลเดิม)</span>
               </div>
             </label>
 
@@ -1207,7 +1233,7 @@
                 (change)="cloneMode.set('replace')" />
               <div class="mode-info">
                 <strong class="text-danger">แทนที่ทั้งหมด (Overwrite / Replace)</strong>
-                <span>ล้างตารางเดิมทั้งหมด (สำรองลง HIS) แล้วคัดลอกวิชาจากต้นทางใหม่</span>
+                <span>ล้างตารางสอน รายวิชา และอาจารย์เดิมทั้งหมด (สำรองลง HIS) แล้วคัดลอกจากต้นทางใหม่</span>
               </div>
             </label>
           </div>

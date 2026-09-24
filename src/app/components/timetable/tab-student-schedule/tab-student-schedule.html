@@ -20,6 +20,13 @@
     </div>
 
     <div class="header-actions">
+      <!-- Reference Timetable Button -->
+      <button type="button" class="btn-action-tool btn-action-ref-top" (click)="openReferenceModal()"
+        [disabled]="isLoading() || !selectedRoom()" title="เทียบตารางสอนปีอื่นและคัดลอกวิชาเข้าสู่ห้องนี้">
+        <span class="material-symbols-rounded">compare_arrows</span>
+        <span>เทียบ/คัดลอกตารางปีอื่น</span>
+      </button>
+
       <!-- Clone Semester Button -->
       <button type="button" class="btn-action-tool" (click)="openCloneModal()" title="คัดลอกตารางสอนจากปี/ภาคอื่น">
         <span class="material-symbols-rounded">content_copy</span>
@@ -104,6 +111,13 @@
       </div>
 
       <div class="grid-control-right">
+        <!-- Reference Timetable & Copy Single Class Button Directly Beside Grid -->
+        <button type="button" class="btn-action-reference" (click)="openReferenceModal()"
+          [disabled]="isLoading() || !selectedRoom()" title="เทียบตารางสอนปีอื่นและคัดลอกวิชาเข้าสู่ห้องนี้">
+          <span class="material-symbols-rounded">compare_arrows</span>
+          <span>เทียบ/คัดลอกตารางปีอื่น</span>
+        </button>
+
         <!-- Edit Mode Toggle Button Directly Above Grid -->
         <button type="button" class="btn-action-edit-mode" [class.is-active]="isEditMode()" (click)="toggleEditMode()"
           [disabled]="isLoading() || !selectedRoom()" title="เปิด/ปิดโหมดลากย้ายตารางสอน (Drag & Drop)">
@@ -343,54 +357,73 @@
 
   <!-- 4. CLASS DETAIL MODAL (APPLE FROSTED GLASS) -->
   @if (isDetailModalOpen() && selectedClassDetail(); as detail) {
-  <div class="modal-backdrop" (click)="closeDetailModal()">
+  <div class="modal-backdrop detail-modal-backdrop" (click)="closeDetailModal()">
     <div class="modal-card detail-modal-card" (click)="$event.stopPropagation()">
 
       <!-- Modal Header -->
-      <div class="modal-header">
+      <div class="modal-header detail-modal-header">
         <div class="modal-title-box">
-          <span class="material-symbols-rounded modal-title-icon">menu_book</span>
-          <div>
-            <h3 class="modal-title">{{ detail.COURSE_NO }} : {{ detail.COURSE_NAME_THAI || '—' }}</h3>
-            <span class="modal-subtitle">{{ detail.COURSE_NAME_ENG || 'Course Schedule Details' }}</span>
+          <div class="detail-icon-badge">
+            <span class="material-symbols-rounded">menu_book</span>
+          </div>
+          <div class="detail-header-text-group">
+            <div class="detail-code-row">
+              <span class="detail-code-tag">{{ detail.COURSE_NO }}</span>
+              @if (detail.CREDIT != null) {
+              <span class="detail-credit-pill">{{ detail.CREDIT }} หน่วยกิต</span>
+              }
+              <span class="detail-term-pill">ปี {{ detail.STUDY_YEAR }}/{{ detail.STUDY_SEMESTER }}</span>
+            </div>
+            <h3 class="modal-title" [title]="detail.COURSE_NAME_THAI || ''">
+              {{ detail.COURSE_NAME_THAI || 'ไม่มีชื่อวิชาภาษาไทย' }}
+            </h3>
+            @if (detail.COURSE_NAME_ENG) {
+            <span class="modal-subtitle" [title]="detail.COURSE_NAME_ENG">
+              {{ detail.COURSE_NAME_ENG }}
+            </span>
+            }
           </div>
         </div>
-        <button type="button" class="btn-close-modal" (click)="closeDetailModal()">
+        <button type="button" class="btn-close-modal" (click)="closeDetailModal()" title="ปิดหน้าต่าง">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body">
-        <div class="detail-grid">
-          <!-- Room -->
-          <div class="detail-item">
-            <span class="detail-label">ห้องเรียน</span>
-            <strong class="detail-val highlight-room">{{ detail.ROOM_CODE || selectedRoom() }}</strong>
+      <div class="modal-body detail-modal-body">
+        <!-- Info Cards Grid (3 cards) -->
+        <div class="detail-info-cards-grid">
+          <!-- Room Card -->
+          <div class="detail-info-card">
+            <div class="detail-card-icon-wrap room">
+              <span class="material-symbols-rounded">meeting_room</span>
+            </div>
+            <div class="detail-card-content">
+              <span class="detail-card-label">ห้องเรียน</span>
+              <strong class="detail-card-val text-room">{{ detail.ROOM_CODE || selectedRoom() || '—' }}</strong>
+            </div>
           </div>
 
-          <!-- Day -->
-          <div class="detail-item">
-            <span class="detail-label">วันเรียน</span>
-            <strong class="detail-val">{{ getDayLabel(detail.DAY_CODE) }}</strong>
+          <!-- Day Card -->
+          <div class="detail-info-card">
+            <div class="detail-card-icon-wrap day">
+              <span class="material-symbols-rounded">calendar_today</span>
+            </div>
+            <div class="detail-card-content">
+              <span class="detail-card-label">วันเรียน</span>
+              <strong class="detail-card-val">{{ getDayLabel(detail.DAY_CODE) }}</strong>
+            </div>
           </div>
 
-          <!-- Time -->
-          <div class="detail-item">
-            <span class="detail-label">คาบเรียน / เวลา</span>
-            <strong class="detail-val">คาบที่ {{ detail.TIME_CODE }} ({{ getTimePeriod(detail.TIME_CODE) }})</strong>
-          </div>
-
-          <!-- Credit -->
-          <div class="detail-item">
-            <span class="detail-label">หน่วยกิต</span>
-            <strong class="detail-val">{{ detail.CREDIT != null ? detail.CREDIT + ' หน่วยกิต' : '—' }}</strong>
-          </div>
-
-          <!-- Year / Semester -->
-          <div class="detail-item">
-            <span class="detail-label">ปีการศึกษา / ภาค</span>
-            <strong class="detail-val">{{ detail.STUDY_YEAR }} / {{ detail.STUDY_SEMESTER }}</strong>
+          <!-- Time Card -->
+          <div class="detail-info-card">
+            <div class="detail-card-icon-wrap time">
+              <span class="material-symbols-rounded">schedule</span>
+            </div>
+            <div class="detail-card-content">
+              <span class="detail-card-label">คาบเรียน / เวลา</span>
+              <strong class="detail-card-val">คาบที่ {{ detail.TIME_CODE }} ({{ getTimePeriod(detail.TIME_CODE) }})</strong>
+            </div>
           </div>
         </div>
 
@@ -402,19 +435,19 @@
             <span>วิชาคู่ที่เปิดสอนร่วมกัน ({{ detail.PAIRED_COURSES.length }} วิชา)</span>
           </h4>
           <div class="paired-courses-cards-list">
-            @for (p of detail.PAIRED_COURSES; track p.courseNo) {
+            @for (p of detail.PAIRED_COURSES; track (p.courseNo || p.COURSE_NO || $index)) {
             <div class="paired-course-profile-card">
               <div class="pair-code-badge-box">
                 <span class="material-symbols-rounded">school</span>
-                <strong>{{ p.courseNo }}</strong>
+                <strong>{{ p.courseNo || p.COURSE_NO }}</strong>
               </div>
               <div class="pair-card-meta">
-                <strong class="pair-thai-name">{{ p.courseNameThai || '-' }}</strong>
-                @if (p.courseNameEng) {
-                <span class="pair-eng-name">{{ p.courseNameEng }}</span>
+                <strong class="pair-thai-name">{{ p.courseNameThai || p.COURSE_NAME_THAI || '-' }}</strong>
+                @if (p.courseNameEng || p.COURSE_NAME_ENG) {
+                <span class="pair-eng-name">{{ p.courseNameEng || p.COURSE_NAME_ENG }}</span>
                 }
-                @if (p.credit != null) {
-                <span class="pair-credit-tag">{{ p.credit }} หน่วยกิต</span>
+                @if (p.credit != null || p.CREDIT != null) {
+                <span class="pair-credit-tag">{{ p.credit ?? p.CREDIT }} หน่วยกิต</span>
                 }
               </div>
             </div>
@@ -441,7 +474,7 @@
                 <strong class="inst-thai-name">
                   {{ inst.RANK_NAME_THAI_S || '' }} {{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}
                 </strong>
-                <span class="inst-code-sub">รหัส: {{ inst.INSTRUCTOR_CODE }}</span>
+                <span class="inst-code-sub">รหัสอาจารย์: {{ inst.INSTRUCTOR_CODE }}</span>
               </div>
             </div>
             }
@@ -456,8 +489,9 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer modal-footer-spaced">
+      <div class="modal-footer modal-footer-spaced detail-modal-footer">
         <div class="footer-left-actions">
+          @if (detail.STUDY_YEAR === activeYear() && detail.STUDY_SEMESTER === activeSemester()) {
           <button type="button" class="btn-danger-outline" (click)="deleteClassFromDetail(detail)">
             <span class="material-symbols-rounded">delete</span>
             <span>ลบตารางสอน</span>
@@ -466,8 +500,26 @@
             <span class="material-symbols-rounded">edit_calendar</span>
             <span>แก้ไขตารางสอน</span>
           </button>
+          } @else {
+          <div class="detail-ref-source-pill">
+            <span class="material-symbols-rounded">history</span>
+            <span>วิชาอ้างอิงจากปี {{ detail.STUDY_YEAR }} ภาค {{ detail.STUDY_SEMESTER }}</span>
+          </div>
+          }
         </div>
-        <button type="button" class="btn-primary" (click)="closeDetailModal()">ปิด</button>
+        <div class="footer-right-actions">
+          @if (detail.STUDY_YEAR !== activeYear() || detail.STUDY_SEMESTER !== activeSemester()) {
+          <button type="button" class="btn-detail-copy" (click)="copyClassFromDetail(detail)" [disabled]="isCopyingClassNo() === detail.COURSE_NO">
+            <span class="material-symbols-rounded" [class.spin-loading]="isCopyingClassNo() === detail.COURSE_NO">
+              {{ isCopyingClassNo() === detail.COURSE_NO ? 'sync' : 'add_circle' }}
+            </span>
+            <span>{{ isCopyingClassNo() === detail.COURSE_NO ? 'กำลังคัดลอก...' : 'คัดลอกวิชานี้' }}</span>
+          </button>
+          }
+          <button type="button" class="btn-detail-close" (click)="closeDetailModal()">
+            <span>ปิด</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -484,10 +536,15 @@
 
       <!-- Glass Header Badge (Cascade 1) -->
       <div class="glass-menu-header cascade-item" style="animation-delay: 0.02s;">
-        <span class="glass-course-code">{{ menuCourse.COURSE_NO }}</span>
-        <span class="glass-course-title" [title]="menuCourse.COURSE_NAME_THAI || menuCourse.COURSE_NAME_ENG || ''">
+        <div class="glass-header-top-row">
+          <span class="glass-course-code">{{ menuCourse.COURSE_NO }}</span>
+          @if (menuCourse.CREDIT) {
+          <span class="ref-menu-credit-tag">{{ menuCourse.CREDIT }} หน่วยกิต</span>
+          }
+        </div>
+        <div class="glass-course-title" [title]="menuCourse.COURSE_NAME_THAI || menuCourse.COURSE_NAME_ENG || ''">
           {{ menuCourse.COURSE_NAME_THAI || menuCourse.COURSE_NAME_ENG || 'ข้อมูลรายวิชา' }}
-        </span>
+        </div>
       </div>
 
       <div class="glass-menu-divider cascade-item" style="animation-delay: 0.05s;"></div>
@@ -569,9 +626,80 @@
   </div>
   }
 
+  <!-- 5.3 REFERENCE CLASS FROSTED GLASS CONTEXT MENU (คลิกขวาที่วิชาเทียบตารางสอน) -->
+  @if (isRefContextMenuOpen() && refContextMenuItem(); as refMenuCourse) {
+  <div class="card-context-menu-backdrop ref-context-menu-backdrop" (click)="closeRefContextMenu()" (contextmenu)="closeRefContextMenu(); $event.preventDefault()">
+    <div class="vertical-glass-menu"
+      [style.top.px]="refContextMenuPos().y"
+      [style.left.px]="refContextMenuPos().x"
+      (click)="$event.stopPropagation()">
+
+      <!-- Glass Header Badge (Cascade 1) -->
+      <div class="glass-menu-header ref-header-layout cascade-item" style="animation-delay: 0.02s;">
+        <div class="ref-menu-header-top-row">
+          <span class="glass-course-code">{{ refMenuCourse.COURSE_NO }}</span>
+          @if (refMenuCourse.CREDIT) {
+          <span class="ref-menu-credit-tag">{{ refMenuCourse.CREDIT }} หน่วยกิต</span>
+          }
+          <span class="ref-menu-slot-badge">
+            <span class="material-symbols-rounded">schedule</span>
+            <span>วัน{{ getDayConfig(refMenuCourse.DAY_CODE).shortLabel }} คาบ {{ refMenuCourse.TIME_CODE }}</span>
+          </span>
+        </div>
+        <div class="glass-course-title" [title]="refMenuCourse.COURSE_NAME_THAI || refMenuCourse.COURSE_NAME_ENG || ''">
+          {{ refMenuCourse.COURSE_NAME_THAI || refMenuCourse.COURSE_NAME_ENG || 'ไม่มีชื่อวิชา' }}
+        </div>
+      </div>
+
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.05s;"></div>
+
+      <!-- Action 1: ดูรายละเอียด (ดวงตา) (Cascade 2) -->
+      <button type="button" class="glass-menu-item item-detail cascade-item" style="animation-delay: 0.08s;"
+        (click)="openRefClassDetail(refMenuCourse)">
+        <div class="glass-item-icon-box icon-detail">
+          <span class="material-symbols-rounded">visibility</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title">ดูรายละเอียด</span>
+          <span class="glass-item-desc">ชื่อวิชา หน่วยกิต และอาจารย์ผู้สอนทั้งหมด</span>
+        </div>
+        <span class="material-symbols-rounded glass-item-arrow">chevron_right</span>
+      </button>
+
+      <!-- Action 2: คัดลอกวิชานี้ (Cascade 3) -->
+      @if (refMenuCourse.canCopy && !refMenuCourse.isAlreadyCopied) {
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.12s;"></div>
+      <button type="button" class="glass-menu-item item-copy cascade-item" style="animation-delay: 0.15s;"
+        (click)="copyClassFromRefMenu(refMenuCourse)">
+        <div class="glass-item-icon-box icon-copy">
+          <span class="material-symbols-rounded">add_circle</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title text-success">คัดลอกวิชานี้</span>
+          <span class="glass-item-desc">เข้าสู่ตารางสอนปี {{ activeYear() }}/{{ activeSemester() }}</span>
+        </div>
+        <span class="material-symbols-rounded glass-item-arrow">chevron_right</span>
+      </button>
+      } @else if (refMenuCourse.isAlreadyCopied) {
+      <div class="glass-menu-divider cascade-item" style="animation-delay: 0.12s;"></div>
+      <div class="glass-menu-item item-copied-notice cascade-item" style="animation-delay: 0.15s;">
+        <div class="glass-item-icon-box icon-copied">
+          <span class="material-symbols-rounded">task_alt</span>
+        </div>
+        <div class="glass-item-text">
+          <span class="glass-item-title text-primary">อยู่ในตารางแล้ว</span>
+          <span class="glass-item-desc">วิชานี้อยู่ในตารางสอนปัจจุบันแล้ว</span>
+        </div>
+      </div>
+      }
+
+    </div>
+  </div>
+  }
+
   <!-- 6. ADD / EDIT CLASS MODAL (SMART AVAILABILITY COMPANION) -->
   @if (isEditModalOpen() && (isAddMode() || editingItem())) {
-  <div class="modal-backdrop" (click)="closeEditModal()">
+  <div class="modal-backdrop edit-modal-backdrop" (click)="closeEditModal()">
     <div class="modal-companion-layout" (click)="$event.stopPropagation()">
 
       <!-- MAIN FORM MODAL CARD (LEFT) -->
@@ -659,7 +787,7 @@
               @if (isInlineDropdownOpen() && isAddMode()) {
               <div class="inline-dropdown-menu" (click)="$event.stopPropagation()">
                 <div class="dropdown-header-hint">
-                  <span>ผลการค้นหาจากฐานข้อมูล UGB_COURSE</span>
+                  <span>รายวิชาที่เปิดสอน (ปี {{ activeYear() }} ภาค {{ activeSemester() }})</span>
                   <button type="button" class="btn-close-inline-menu" (click)="closeInlineDropdown()">
                     <span class="material-symbols-rounded">close</span>
                   </button>
@@ -672,7 +800,14 @@
                 } @else if (inlineSearchResults().length === 0) {
                 <div class="inline-empty-msg">
                   <span class="material-symbols-rounded">search_off</span>
-                  <p>ไม่พบรายวิชาที่ค้นหา ลองระบุรหัสวิชา เช่น ACC1101</p>
+                  @if (inlineSearchQuery()) {
+                    <p>ไม่พบรายวิชาที่ค้นหา ลองระบุรหัสวิชา เช่น ACC1101</p>
+                  } @else {
+                    <p>ไม่พบรายวิชาที่เปิดสอนสำหรับปี {{ activeYear() }} ภาค {{ activeSemester() }}</p>
+                    <span style="font-size: 0.8rem; color: var(--text-tertiary); display: block; margin-top: 0.25rem;">
+                      (สามารถเพิ่มวิชาที่เปิดสอนได้ที่แท็บ "จัดการวิชาที่เปิดสอน")
+                    </span>
+                  }
                 </div>
                 } @else {
                 <div class="inline-results-scroll">
@@ -1020,6 +1155,7 @@
               @let isCurrentSelected = (editDayCode() === slot.dayCode && isTimeCodeSelected(slot.timeCode));
               <div class="avail-slot-card" [class.is-free]="slot.isAvailable" [class.is-busy]="!slot.isAvailable"
                 [class.is-busy-ru30]="slot.isBusyInRu30"
+                [class.is-busy-class]="slot.isBusyInClass"
                 [class.is-selected-slot]="isCurrentSelected"
                 (click)="slot.isAvailable ? applyAvailableSlot(slot) : null">
 
@@ -1091,11 +1227,17 @@
                 }
 
                 @if (slot.isBusyInClass && slot.busyList.length > 0) {
-                <div class="slot-busy-details-box">
+                <div class="slot-busy-details-box is-class">
                   @for (b of slot.busyList; track b.instructorCode) {
-                  <div class="busy-inst-item">
-                    <span class="material-symbols-rounded busy-icon">person_off</span>
-                    <span><strong>{{ b.instructorName }}</strong> ติดสอน {{ b.courseNo }}</span>
+                  <div class="busy-inst-item is-class">
+                    <div class="busy-inst-icon-wrap">
+                      <span class="material-symbols-rounded busy-icon">person_off</span>
+                    </div>
+                    <div class="busy-inst-text-wrap">
+                      <span class="busy-inst-name">{{ b.instructorName }}</span>
+                      <span class="busy-inst-desc">ติดสอนในระบบ วิชา</span>
+                      <span class="class-course-badge">{{ b.courseNo }}</span>
+                    </div>
                   </div>
                   }
                 </div>
@@ -1115,7 +1257,7 @@
 
   <!-- MODAL: คัดลอกตารางจากเทอมอื่น (CLONE TIMETABLE MODAL) -->
   @if (isCloneModalOpen()) {
-  <div class="modal-backdrop" (click)="closeCloneModal()">
+  <div class="modal-backdrop clone-modal-backdrop" (click)="closeCloneModal()">
     <div class="modal-card modal-clone-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title-box">
@@ -1183,6 +1325,748 @@
           <span>{{ isCloning() ? 'กำลังคัดลอกข้อมูล...' : 'เริ่มคัดลอกตารางสอน' }}</span>
         </button>
       </div>
+    </div>
+  </div>
+  }
+
+  <!-- ======================================================== -->
+  <!-- 5. REFERENCE TIMETABLE & COPY CLASS MODAL (เทียบตารางสอนปีอื่น) -->
+  <!-- ======================================================== -->
+  @if (isRefModalOpen()) {
+  <div class="modal-backdrop ref-modal-backdrop" (click)="closeReferenceModal()">
+    <div
+      class="modal-card modal-card-reference"
+      [class.has-schedule-data]="refClasses().length > 0 || isRefLoading()"
+      [class.is-empty-data]="!isRefLoading() && refClasses().length === 0"
+      [class.is-ref-loading]="isRefLoading()"
+      [class.is-split-mode]="isRefSplitView()"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+    >
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-header-titles">
+          <div class="modal-header-badge">
+            <span class="material-symbols-rounded">compare_arrows</span>
+            <span>เทียบตารางสอน &amp; คัดลอกรายวิชา</span>
+          </div>
+          <h2 class="modal-title">
+            ตารางสอนปีอื่น • ห้อง <span class="text-highlight">{{ selectedRoom() }}</span>
+          </h2>
+          <p class="modal-subtitle">
+            เลือกปี/ภาคการศึกษาต้นทาง เพื่อตรวจสอบและคัดลอกรายวิชาเข้าสู่ตารางสอนปี <strong>{{ activeYear() }}</strong> ภาค <strong>{{ activeSemester() }}</strong>
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeReferenceModal()" title="ปิดหน้าต่าง">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Filter Bar inside Modal -->
+      <div class="ref-modal-filter-bar">
+        <div class="ref-filter-select-group">
+          <label class="ref-filter-label">เลือกปีการศึกษา / ภาคต้นทางที่จะเทียบ:</label>
+          <div class="ref-select-wrapper">
+            <app-custom-select
+              [options]="refYearSemSelectOptions()"
+              [value]="refSelectedYearSem()"
+              (valueChange)="onRefYearSemChange($event)"
+              placeholder="เลือกปี/ภาคการศึกษาต้นทาง..."
+              icon="history"
+            />
+          </div>
+        </div>
+
+        <button type="button" class="btn-ref-refresh" (click)="loadReferenceSchedule()" [disabled]="isRefLoading()" title="รีเฟรชข้อมูลต้นทาง">
+          <span class="material-symbols-rounded" [class.spin-loading]="isRefLoading()">refresh</span>
+          <span>โหลดใหม่</span>
+        </button>
+
+        <!-- View Mode Switcher: Grid vs List -->
+        <div class="ref-view-mode-toggle">
+          <button
+            type="button"
+            class="ref-toggle-btn"
+            [class.is-active]="!isRefSplitView() && refViewMode() === 'grid'"
+            (click)="isRefSplitView.set(false); refViewMode.set('grid')"
+            title="แสดงแบบตารางสอนเดี่ยว (Matrix Grid)"
+          >
+            <span class="material-symbols-rounded">calendar_view_week</span>
+            <span>ตารางสอน</span>
+          </button>
+          <button
+            type="button"
+            class="ref-toggle-btn"
+            [class.is-active]="!isRefSplitView() && refViewMode() === 'list'"
+            (click)="isRefSplitView.set(false); refViewMode.set('list')"
+            title="แสดงแบบการ์ดรายการ (Card List)"
+          >
+            <span class="material-symbols-rounded">view_agenda</span>
+            <span>รายการ</span>
+          </button>
+        </div>
+
+        <!-- Split Mode Toggle Button -->
+        <button
+          type="button"
+          class="btn-ref-split-toggle"
+          [class.is-active]="isRefSplitView()"
+          (click)="toggleRefSplitView()"
+          [disabled]="isRefLoading() || refClasses().length === 0"
+          [title]="isRefSplitView() ? 'ปิดการแสดงผลแบบเปรียบเทียบ 2 ฝั่ง' : 'เปิดการเปรียบเทียบตารางสอนแบบแบ่ง 2 ฝั่ง (ตารางต้นทาง vs ตารางปัจจุบัน)'"
+        >
+          <span class="material-symbols-rounded">vertical_split</span>
+          <span>{{ isRefSplitView() ? 'ตารางเดี่ยว' : 'เปรียบเทียบ 2 ฝั่ง' }}</span>
+        </button>
+
+        <!-- Stats Counter Pill -->
+        @if (!isRefLoading() && refClasses().length > 0) {
+        <div class="ref-stats-pill-group">
+          <span class="ref-stat-pill total">
+            พบ <strong>{{ refStats().total }}</strong> วิชา
+          </span>
+          <span class="ref-stat-pill ready">
+            <span class="material-symbols-rounded stat-icon">check_circle</span>
+            พร้อมคัดลอก <strong>{{ refStats().canCopyCount }}</strong>
+          </span>
+          @if (refStats().conflictCount > 0) {
+          <span class="ref-stat-pill conflict">
+            <span class="material-symbols-rounded stat-icon">cancel</span>
+            ติดขัด <strong>{{ refStats().conflictCount }}</strong>
+          </span>
+          }
+          @if (refStats().alreadyCopiedCount > 0) {
+          <span class="ref-stat-pill already">
+            <span class="material-symbols-rounded stat-icon">task_alt</span>
+            จัดแล้ว <strong>{{ refStats().alreadyCopiedCount }}</strong>
+          </span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Modal Body (Timetable Grid / Cards List / Split Dual Compare) -->
+      <div class="modal-body ref-modal-body" [class.is-grid-mode]="refViewMode() === 'grid'" [class.is-split-mode]="isRefSplitView()">
+        @if (isRefLoading()) {
+        <!-- SKELETON TIMETABLE LOADING STATE (PREVENTS COLLAPSING / JUMPING) -->
+        <div class="ref-skeleton-matrix-container">
+          <div class="ref-skeleton-notice">
+            <span class="material-symbols-rounded spin-loading">sync</span>
+            <span>กำลังตรวจสอบข้อมูลตารางสอนและเงื่อนไข มร.30...</span>
+          </div>
+          <div class="ref-matrix-scroll-wrapper">
+            <table class="ref-matrix-table skeleton-table">
+              <thead>
+                <tr>
+                  <th class="ref-th-day">วัน</th>
+                  @for (time of timeSlots(); track time.code) {
+                  <th class="ref-th-time">
+                    <div class="ref-th-time-content">
+                      <span class="ref-time-code-label">คาบ {{ time.code }}</span>
+                      <span class="ref-time-period-label">{{ time.period }}</span>
+                    </div>
+                  </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (day of daysConfig; track day.code) {
+                <tr>
+                  <td class="ref-td-day">
+                    <div class="ref-day-pill-box" [ngClass]="day.colorClass">
+                      <span class="day-short">{{ day.shortLabel }}</span>
+                    </div>
+                  </td>
+                  @for (time of timeSlots(); track time.code) {
+                  <td class="ref-td-slot skeleton-slot">
+                    <div class="skeleton-card-inner">
+                      <app-skeleton variant="rect" width="60%" height="14px" borderRadius="6px" />
+                      <app-skeleton variant="rect" width="90%" height="12px" borderRadius="4px" />
+                      <app-skeleton variant="rect" width="75%" height="12px" borderRadius="4px" />
+                      <app-skeleton variant="rect" width="100%" height="24px" borderRadius="6px" />
+                    </div>
+                  </td>
+                  }
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        } @else if (refClasses().length === 0) {
+        <div class="ref-empty-state">
+          <span class="material-symbols-rounded empty-icon">event_busy</span>
+          <h3>ไม่พบข้อมูลตารางสอน</h3>
+          <p>
+            ไม่พบรายวิชาที่จัดสอนในห้อง <strong>{{ selectedRoom() }}</strong> ประจำปีการศึกษา {{ refSourceYear() }} ภาค {{ refSourceSemester() }}
+          </p>
+        </div>
+        } @else if (isRefSplitView()) {
+        <!-- 3. DUAL-TABLE SPLIT COMPARE VIEW -->
+        <div class="ref-split-grid-container">
+          
+          <!-- LEFT PANE: ตารางต้นทาง (Source Year/Semester) -->
+          <div class="ref-split-pane pane-source">
+            <div class="ref-pane-header">
+              <div class="pane-header-title-wrap">
+                <span class="pane-tag source">
+                  <span class="material-symbols-rounded">history</span>
+                  <span>ตารางต้นทาง</span>
+                </span>
+                <strong class="pane-title">ปี {{ refSourceYear() }} ภาค {{ refSourceSemester() }}</strong>
+                <span class="pane-room-pill">ห้อง {{ selectedRoom() }}</span>
+              </div>
+              <div class="pane-header-meta">
+                <span class="pane-count-badge">
+                  <span class="material-symbols-rounded">menu_book</span>
+                  <span>{{ refStats().total }} วิชา (พร้อมคัดลอก {{ refStats().canCopyCount }})</span>
+                </span>
+                <div class="ref-pane-zoom-controls">
+                  <button type="button" class="btn-zoom" (click)="setPaneZoom('left', -0.08)" title="ย่อตาราง (Scroll Wheel Down เพื่อย่อ)">
+                    <span class="material-symbols-rounded">remove</span>
+                  </button>
+                  <span class="zoom-level-text" (click)="resetPaneZoom('left')" title="คลิกเพื่อรีเซ็ตขนาด 100%">{{ Math.round(refLeftZoom() * 100) }}%</span>
+                  <button type="button" class="btn-zoom" (click)="setPaneZoom('left', 0.08)" title="ขยายตาราง (Scroll Wheel Up เพื่อขยาย)">
+                    <span class="material-symbols-rounded">add</span>
+                  </button>
+                  @if (refLeftZoom() !== 1) {
+                  <button type="button" class="btn-zoom btn-zoom-reset" (click)="resetPaneZoom('left')" title="รีเซ็ตขนาดเริ่มต้น (100%)">
+                    <span class="material-symbols-rounded">restart_alt</span>
+                  </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div #leftSplitScroll class="ref-matrix-scroll-wrapper split-matrix-scroll" (mousedown)="onDragScrollMouseDown($event, leftSplitScroll)" (wheel)="onTableWheelZoom($event, 'left')">
+              <table class="ref-matrix-table split-matrix-table" [style.zoom]="refLeftZoom()">
+                <thead>
+                  <tr>
+                    <th class="ref-th-day">วัน</th>
+                    @for (time of timeSlots(); track time.code) {
+                    <th class="ref-th-time">
+                      <div class="ref-th-time-content">
+                        <span class="ref-time-code-label">คาบ {{ time.code }}</span>
+                        <span class="ref-time-period-label">{{ time.period }}</span>
+                      </div>
+                    </th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (day of daysConfig; track day.code) {
+                  <tr>
+                    <td class="ref-td-day">
+                      <div class="ref-day-pill-box" [ngClass]="day.colorClass">
+                        <span class="day-short">{{ day.shortLabel }}</span>
+                      </div>
+                    </td>
+                    @for (cell of refMatrixGridRows()[day.code]; track cell.timeCode) {
+                    <td class="ref-td-slot" [class.has-classes]="cell.classes.length > 0">
+                      @if (cell.classes.length > 0) {
+                        @for (c of cell.classes; track c.COURSE_NO + '_' + c.DAY_CODE + '_' + c.TIME_CODE) {
+                        <div
+                          class="ref-grid-course-card"
+                          [class.is-ready]="c.statusColor === 'green'"
+                          [class.is-conflict]="c.statusColor === 'red'"
+                          [class.is-copied]="c.isAlreadyCopied"
+                          [class.can-click]="c.canCopy"
+                          (click)="c.canCopy ? copyClassToReference(c) : null"
+                          (contextmenu)="onRefClassContextMenu($event, c)"
+                          [title]="c.canCopy ? 'คลิกเพื่อคัดลอกวิชา ' + c.COURSE_NO + ' เข้าตารางสอนปัจจุบัน (คลิกขวาเพื่อดูรายละเอียด)' : ((c.conflicts?.join(' • ') || '') + ' (คลิกขวาเพื่อดูรายละเอียด)')"
+                        >
+                          <div class="ref-gcc-top">
+                            <div class="ref-gcc-code-wrap">
+                              <span class="ref-gcc-code">{{ c.COURSE_NO }}</span>
+                              @if (c.CREDIT) {
+                              <span class="ref-gcc-credit">({{ c.CREDIT }})</span>
+                              }
+                              @if (c.PAIRED_COURSES && c.PAIRED_COURSES.length > 0) {
+                              <span class="ref-paired-tag" [title]="'วิชาคู่ที่เปิดสอนร่วมกัน (' + c.PAIRED_COURSES.length + ' วิชา): ' + getPairedCoursesTooltip(c.PAIRED_COURSES)">
+                                <span class="material-symbols-rounded">link</span>
+                              </span>
+                              }
+                            </div>
+                            <span
+                              class="ref-gcc-status-badge"
+                              [class.badge-green]="c.statusColor === 'green'"
+                              [class.badge-red]="c.statusColor === 'red'"
+                              [class.badge-blue]="c.statusColor === 'blue'"
+                            >
+                              <span class="material-symbols-rounded status-icon">
+                                {{ c.statusColor === 'green' ? 'check_circle' : (c.statusColor === 'red' ? 'error' : 'task_alt') }}
+                              </span>
+                              <span>{{ c.statusColor === 'green' ? 'พร้อมคัดลอก' : (c.statusColor === 'red' ? 'ติดขัด' : 'จัดแล้ว') }}</span>
+                            </span>
+                          </div>
+
+                          @if (c.INSTRUCTORS && c.INSTRUCTORS.length > 0) {
+                          <div class="ref-gcc-instructors">
+                            <span class="ref-gcc-inst-item" [title]="(c.INSTRUCTORS[0].RANK_NAME_THAI_S || '') + ' ' + (c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE)">
+                              <span class="material-symbols-rounded">person</span>
+                              <span class="inst-name-text">{{ c.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }} {{ c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE }}</span>
+                              @if (c.INSTRUCTORS.length > 1) {
+                              <span class="inst-more-tag">+{{ c.INSTRUCTORS.length - 1 }}</span>
+                              }
+                            </span>
+                          </div>
+                          }
+
+                          @if (c.conflicts && c.conflicts.length > 0) {
+                          <div class="ref-gcc-conflicts">
+                            @for (conf of c.conflicts; track conf) {
+                            <div class="ref-gcc-conflict-row" [title]="conf">
+                              <span class="material-symbols-rounded conf-icon">cancel</span>
+                              <span>{{ conf }}</span>
+                            </div>
+                            }
+                          </div>
+                          }
+
+                          <div class="ref-gcc-action">
+                            @if (c.isAlreadyCopied) {
+                            <span class="ref-gcc-copied-tag">
+                              <span class="material-symbols-rounded">task_alt</span>
+                              <span>อยู่ในตารางแล้ว</span>
+                            </span>
+                            } @else {
+                            <button
+                              type="button"
+                              class="btn-gcc-copy"
+                              [class.btn-gcc-disabled]="!c.canCopy"
+                              [disabled]="!c.canCopy || isCopyingClassNo() === c.COURSE_NO"
+                              (click)="copyClassToReference(c); $event.stopPropagation()"
+                              [title]="c.canCopy ? 'คลิกเพื่อคัดลอกวิชานี้ใส่ตารางสอนปัจจุบัน' : 'ไม่สามารถคัดลอกได้เนื่องจากติดข้อขัดแย้ง'"
+                            >
+                              <span class="material-symbols-rounded" [class.spin-loading]="isCopyingClassNo() === c.COURSE_NO">
+                                {{ isCopyingClassNo() === c.COURSE_NO ? 'sync' : 'add_circle' }}
+                              </span>
+                              <span>{{ isCopyingClassNo() === c.COURSE_NO ? 'กำลังคัดลอก...' : 'คัดลอกวิชานี้' }}</span>
+                            </button>
+                            }
+                          </div>
+                        </div>
+                        }
+                      } @else {
+                        <div class="ref-empty-slot-content">
+                          <span>—</span>
+                        </div>
+                      }
+                    </td>
+                    }
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CENTER DIVIDER -->
+          <div class="ref-split-divider">
+            <div class="split-divider-line"></div>
+            <div class="split-divider-badge" title="คัดลอกจากต้นทางสู่ตารางปัจจุบัน">
+              <span class="material-symbols-rounded">arrow_forward</span>
+            </div>
+            <div class="split-divider-line"></div>
+          </div>
+
+          <!-- RIGHT PANE: ตารางปัจจุบัน (Target/Current Active Year/Semester) -->
+          <div class="ref-split-pane pane-current">
+            <div class="ref-pane-header">
+              <div class="pane-header-title-wrap">
+                <span class="pane-tag current">
+                  <span class="material-symbols-rounded">today</span>
+                  <span>ตารางสอนปัจจุบัน</span>
+                </span>
+                <strong class="pane-title">ปี {{ activeYear() }} ภาค {{ activeSemester() }}</strong>
+                <span class="pane-room-pill">ห้อง {{ selectedRoom() }}</span>
+              </div>
+              <div class="pane-header-meta">
+                <span class="pane-count-badge current">
+                  <span class="material-symbols-rounded">task_alt</span>
+                  <span>จัดแล้ว {{ classList().length }} วิชา</span>
+                </span>
+                <div class="ref-pane-zoom-controls">
+                  <button type="button" class="btn-zoom" (click)="setPaneZoom('right', -0.08)" title="ย่อตาราง (Scroll Wheel Down เพื่อย่อ)">
+                    <span class="material-symbols-rounded">remove</span>
+                  </button>
+                  <span class="zoom-level-text" (click)="resetPaneZoom('right')" title="คลิกเพื่อรีเซ็ตขนาด 100%">{{ Math.round(refRightZoom() * 100) }}%</span>
+                  <button type="button" class="btn-zoom" (click)="setPaneZoom('right', 0.08)" title="ขยายตาราง (Scroll Wheel Up เพื่อขยาย)">
+                    <span class="material-symbols-rounded">add</span>
+                  </button>
+                  @if (refRightZoom() !== 1) {
+                  <button type="button" class="btn-zoom btn-zoom-reset" (click)="resetPaneZoom('right')" title="รีเซ็ตขนาดเริ่มต้น (100%)">
+                    <span class="material-symbols-rounded">restart_alt</span>
+                  </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div #rightSplitScroll class="ref-matrix-scroll-wrapper split-matrix-scroll" (mousedown)="onDragScrollMouseDown($event, rightSplitScroll)" (wheel)="onTableWheelZoom($event, 'right')">
+              <table class="ref-matrix-table split-matrix-table" [style.zoom]="refRightZoom()">
+                <thead>
+                  <tr>
+                    <th class="ref-th-day">วัน</th>
+                    @for (time of timeSlots(); track time.code) {
+                    <th class="ref-th-time">
+                      <div class="ref-th-time-content">
+                        <span class="ref-time-code-label">คาบ {{ time.code }}</span>
+                        <span class="ref-time-period-label">{{ time.period }}</span>
+                      </div>
+                    </th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (day of daysConfig; track day.code) {
+                  <tr>
+                    <td class="ref-td-day">
+                      <div class="ref-day-pill-box" [ngClass]="day.colorClass">
+                        <span class="day-short">{{ day.shortLabel }}</span>
+                      </div>
+                    </td>
+                    @for (cell of matrixGridRows()[day.code]; track cell.timeCode) {
+                    <td
+                      class="ref-td-slot"
+                      [attr.colspan]="cell.colspan > 1 ? cell.colspan : null"
+                      [class.has-classes]="cell.classes && cell.classes.length > 0"
+                      (contextmenu)="onSlotContextMenu($event, day.code, cell.timeCode, cell.classes)"
+                    >
+                      @if (cell.classes && cell.classes.length > 0) {
+                        @for (c of cell.classes; track c.COURSE_NO + '_' + (c.INSTR_GROUP || '0')) {
+                        <div
+                          class="ref-grid-course-card is-copied current-target-card"
+                          (click)="openClassDetail(c, $event)"
+                          (contextmenu)="onCardContextMenu($event, c, cell.timeCodes)"
+                          [title]="'คลิกดูรายละเอียด • คลิกขวาเพื่อแก้ไข/ลบวิชา ' + c.COURSE_NO"
+                        >
+                          <div class="ref-gcc-top">
+                            <div class="ref-gcc-code-wrap">
+                              <span class="ref-gcc-code">{{ c.COURSE_NO }}</span>
+                              @if (c.CREDIT != null) {
+                              <span class="ref-gcc-credit">({{ c.CREDIT }})</span>
+                              }
+                              @if (c.PAIRED_COURSES && c.PAIRED_COURSES.length > 0) {
+                              <span class="ref-paired-tag" [title]="'วิชาคู่ที่เปิดสอนร่วมกัน (' + c.PAIRED_COURSES.length + ' วิชา): ' + getPairedCoursesTooltip(c.PAIRED_COURSES)">
+                                <span class="material-symbols-rounded">link</span>
+                              </span>
+                              }
+                            </div>
+                            <span class="ref-gcc-status-badge badge-blue">
+                              <span class="material-symbols-rounded status-icon">task_alt</span>
+                              <span>ในตาราง</span>
+                            </span>
+                          </div>
+
+                          @if (c.INSTRUCTORS && c.INSTRUCTORS.length > 0) {
+                          <div class="ref-gcc-instructors">
+                            <span class="ref-gcc-inst-item" [title]="(c.INSTRUCTORS[0].RANK_NAME_THAI_S || '') + ' ' + (c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE)">
+                              <span class="material-symbols-rounded">person</span>
+                              <span class="inst-name-text">{{ c.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }} {{ c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE }}</span>
+                              @if (c.INSTRUCTORS.length > 1) {
+                              <span class="inst-more-tag">+{{ c.INSTRUCTORS.length - 1 }}</span>
+                              }
+                            </span>
+                          </div>
+                          }
+
+                          <div class="ref-gcc-action">
+                            <span class="ref-gcc-copied-tag active-target">
+                              <span class="material-symbols-rounded">verified</span>
+                              <span>ตารางปัจจุบัน</span>
+                            </span>
+                          </div>
+                        </div>
+                        }
+                      } @else {
+                        <div
+                          class="ref-empty-slot-content"
+                          (click)="openAddClassModal(day.code, cell.timeCode)"
+                          (contextmenu)="onSlotContextMenu($event, day.code, cell.timeCode)"
+                          [title]="'คลิกขวาเพื่อเพิ่มข้อมูลตารางสอน (วัน' + day.shortLabel + ' ' + getTimePeriod(cell.timeCode) + ')'"
+                        >
+                          <span>—</span>
+                        </div>
+                      }
+                    </td>
+                    }
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+        } @else if (refViewMode() === 'grid') {
+        <!-- 1. TIMETABLE MATRIX TABLE VIEW (DEFAULT) -->
+        <div #singleMatrixScroll class="ref-matrix-scroll-wrapper" (mousedown)="onDragScrollMouseDown($event, singleMatrixScroll)" (wheel)="onTableWheelZoom($event, 'single')">
+          <table class="ref-matrix-table" [style.zoom]="refSingleZoom()">
+            <thead>
+              <tr>
+                <th class="ref-th-day">วัน</th>
+                @for (time of timeSlots(); track time.code) {
+                <th class="ref-th-time">
+                  <div class="ref-th-time-content">
+                    <span class="ref-time-code-label">คาบที่ {{ time.code }}</span>
+                    <span class="ref-time-period-label">{{ time.period }}</span>
+                  </div>
+                </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (day of daysConfig; track day.code) {
+              <tr>
+                <!-- Day label cell -->
+                <td class="ref-td-day">
+                  <div class="ref-day-pill-box" [ngClass]="day.colorClass">
+                    <span class="day-short">{{ day.shortLabel }}</span>
+                  </div>
+                </td>
+
+                <!-- Time slot cells -->
+                @for (cell of refMatrixGridRows()[day.code]; track cell.timeCode) {
+                <td class="ref-td-slot" [class.has-classes]="cell.classes.length > 0">
+                  @if (cell.classes.length > 0) {
+                    @for (c of cell.classes; track c.COURSE_NO + '_' + c.DAY_CODE + '_' + c.TIME_CODE) {
+                    <div
+                      class="ref-grid-course-card"
+                      [class.is-ready]="c.statusColor === 'green'"
+                      [class.is-conflict]="c.statusColor === 'red'"
+                      [class.is-copied]="c.isAlreadyCopied"
+                      [class.can-click]="c.canCopy"
+                      (click)="c.canCopy ? copyClassToReference(c) : null"
+                      (contextmenu)="onRefClassContextMenu($event, c)"
+                      [title]="c.canCopy ? 'คลิกเพื่อคัดลอกวิชา ' + c.COURSE_NO + ' เข้าตารางสอนปัจจุบัน (คลิกขวาเพื่อดูรายละเอียด)' : ((c.conflicts?.join(' • ') || '') + ' (คลิกขวาเพื่อดูรายละเอียด)')"
+                    >
+                      <!-- Top Line: Code & Status Badge -->
+                      <div class="ref-gcc-top">
+                        <div class="ref-gcc-code-wrap">
+                          <span class="ref-gcc-code">{{ c.COURSE_NO }}</span>
+                          @if (c.CREDIT) {
+                          <span class="ref-gcc-credit">({{ c.CREDIT }})</span>
+                          }
+                          @if (c.PAIRED_COURSES && c.PAIRED_COURSES.length > 0) {
+                          <span class="ref-paired-tag" [title]="'วิชาคู่ที่เปิดสอนร่วมกัน (' + c.PAIRED_COURSES.length + ' วิชา): ' + getPairedCoursesTooltip(c.PAIRED_COURSES)">
+                            <span class="material-symbols-rounded">link</span>
+                          </span>
+                          }
+                        </div>
+                        <span
+                          class="ref-gcc-status-badge"
+                          [class.badge-green]="c.statusColor === 'green'"
+                          [class.badge-red]="c.statusColor === 'red'"
+                          [class.badge-blue]="c.statusColor === 'blue'"
+                        >
+                          <span class="material-symbols-rounded status-icon">
+                            {{ c.statusColor === 'green' ? 'check_circle' : (c.statusColor === 'red' ? 'error' : 'task_alt') }}
+                          </span>
+                          <span>{{ c.statusColor === 'green' ? 'พร้อมคัดลอก' : (c.statusColor === 'red' ? 'ติดขัด' : 'จัดแล้ว') }}</span>
+                        </span>
+                      </div>
+
+                      <!-- Instructor: First Instructor Only -->
+                      @if (c.INSTRUCTORS && c.INSTRUCTORS.length > 0) {
+                      <div class="ref-gcc-instructors">
+                        <span class="ref-gcc-inst-item" [title]="(c.INSTRUCTORS[0].RANK_NAME_THAI_S || '') + ' ' + (c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE)">
+                          <span class="material-symbols-rounded">person</span>
+                          <span class="inst-name-text">{{ c.INSTRUCTORS[0].RANK_NAME_THAI_S || '' }} {{ c.INSTRUCTORS[0].INSTRUCTOR_NAME_THAI || c.INSTRUCTORS[0].INSTRUCTOR_CODE }}</span>
+                          @if (c.INSTRUCTORS.length > 1) {
+                          <span class="inst-more-tag">+{{ c.INSTRUCTORS.length - 1 }}</span>
+                          }
+                        </span>
+                      </div>
+                      }
+
+                      <!-- Conflicts if Red -->
+                      @if (c.conflicts && c.conflicts.length > 0) {
+                      <div class="ref-gcc-conflicts">
+                        @for (conf of c.conflicts; track conf) {
+                        <div class="ref-gcc-conflict-row" [title]="conf">
+                          <span class="material-symbols-rounded conf-icon">cancel</span>
+                          <span>{{ conf }}</span>
+                        </div>
+                        }
+                      </div>
+                      }
+
+                      <!-- Action Button inside cell -->
+                      <div class="ref-gcc-action">
+                        @if (c.isAlreadyCopied) {
+                        <span class="ref-gcc-copied-tag">
+                          <span class="material-symbols-rounded">task_alt</span>
+                          <span>อยู่ในตารางแล้ว</span>
+                        </span>
+                        } @else {
+                        <button
+                          type="button"
+                          class="btn-gcc-copy"
+                          [class.btn-gcc-disabled]="!c.canCopy"
+                          [disabled]="!c.canCopy || isCopyingClassNo() === c.COURSE_NO"
+                          (click)="copyClassToReference(c); $event.stopPropagation()"
+                          [title]="c.canCopy ? 'คลิกเพื่อคัดลอกวิชานี้ใส่ตารางสอนปัจจุบัน' : 'ไม่สามารถคัดลอกได้เนื่องจากติดข้อขัดแย้ง'"
+                        >
+                          <span class="material-symbols-rounded" [class.spin-loading]="isCopyingClassNo() === c.COURSE_NO">
+                            {{ isCopyingClassNo() === c.COURSE_NO ? 'sync' : 'add_circle' }}
+                          </span>
+                          <span>{{ isCopyingClassNo() === c.COURSE_NO ? 'กำลังคัดลอก...' : 'คัดลอกวิชานี้' }}</span>
+                        </button>
+                        }
+                      </div>
+                    </div>
+                    }
+                  } @else {
+                    <div class="ref-empty-slot-content">
+                      <span>—</span>
+                    </div>
+                  }
+                </td>
+                }
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+        <!-- 2. CARD LIST VIEW -->
+        <div class="ref-classes-grid">
+          @for (cls of refClasses(); track cls.COURSE_NO + '_' + cls.DAY_CODE + '_' + cls.TIME_CODE) {
+          <div
+            class="ref-class-card"
+            [class.is-conflict]="cls.statusColor === 'red'"
+            [class.is-ready]="cls.statusColor === 'green'"
+            [class.is-copied]="cls.isAlreadyCopied"
+            (contextmenu)="onRefClassContextMenu($event, cls)"
+            title="คลิกขวาเพื่อดูรายละเอียดหรือจัดการวิชา"
+          >
+            
+            <!-- Card Top Bar: Day Badge + Time Period + Status Badge -->
+            <div class="ref-card-header">
+              <div class="ref-card-time-group">
+                <span class="ref-day-pill" [class]="getDayConfig(cls.DAY_CODE).colorClass">
+                  {{ getDayConfig(cls.DAY_CODE).label }}
+                </span>
+                <span class="ref-period-pill">
+                  <span class="material-symbols-rounded period-icon">schedule</span>
+                  <span>คาบที่ {{ cls.TIME_CODE }} ({{ cls.periodText || '—' }})</span>
+                </span>
+              </div>
+
+              <!-- Feasibility Status Badge -->
+              <div class="ref-status-badge" [class.badge-green]="cls.statusColor === 'green'" [class.badge-red]="cls.statusColor === 'red'" [class.badge-blue]="cls.statusColor === 'blue'">
+                <span class="material-symbols-rounded status-icon">
+                  {{ cls.statusColor === 'green' ? 'check_circle' : (cls.statusColor === 'red' ? 'error' : 'task_alt') }}
+                </span>
+                <span>{{ cls.statusText }}</span>
+              </div>
+            </div>
+
+            <!-- Card Body: Course Info -->
+            <div class="ref-card-body">
+              <div class="ref-course-main">
+                <span class="ref-course-code">{{ cls.COURSE_NO }}</span>
+                @if (cls.CREDIT) {
+                <span class="ref-course-credit">{{ cls.CREDIT }} หน่วยกิต</span>
+                }
+                @if (cls.PAIRED_COURSES && cls.PAIRED_COURSES.length > 0) {
+                <span class="ref-paired-tag list-view" [title]="'วิชาคู่ที่เปิดสอนร่วมกัน (' + cls.PAIRED_COURSES.length + ' วิชา): ' + getPairedCoursesTooltip(cls.PAIRED_COURSES)">
+                  <span class="material-symbols-rounded">link</span>
+                  <span>วิชาคู่ ({{ cls.PAIRED_COURSES.length }})</span>
+                </span>
+                }
+              </div>
+              <div class="ref-course-name-thai">{{ cls.COURSE_NAME_THAI || '—' }}</div>
+              @if (cls.COURSE_NAME_ENG) {
+              <div class="ref-course-name-eng">{{ cls.COURSE_NAME_ENG }}</div>
+              }
+
+              <!-- Instructors -->
+              <div class="ref-instructors-section">
+                <span class="ref-section-label">
+                  <span class="material-symbols-rounded">group</span>
+                  <span>อาจารย์ผู้สอน:</span>
+                </span>
+                @if (cls.INSTRUCTORS && cls.INSTRUCTORS.length > 0) {
+                <div class="ref-instructors-list">
+                  @for (inst of cls.INSTRUCTORS; track inst.INSTRUCTOR_CODE) {
+                  <span class="ref-instructor-chip">
+                    <span class="material-symbols-rounded inst-icon">person</span>
+                    <span>{{ inst.RANK_NAME_THAI_S || '' }} {{ inst.INSTRUCTOR_NAME_THAI || inst.INSTRUCTOR_CODE }}</span>
+                  </span>
+                  }
+                </div>
+                } @else {
+                <span class="ref-no-instructors text-muted">ไม่ระบุอาจารย์ผู้สอน</span>
+                }
+              </div>
+
+              <!-- Conflict Notice Box (Red Status) -->
+              @if (cls.conflicts && cls.conflicts.length > 0) {
+              <div class="ref-conflicts-box">
+                <div class="ref-conflict-title">
+                  <span class="material-symbols-rounded">warning</span>
+                  <span>ข้อขัดแย้งที่ไม่สามารถคัดลอกได้:</span>
+                </div>
+                <ul class="ref-conflict-list">
+                  @for (conf of cls.conflicts; track conf) {
+                  <li>
+                    <span class="material-symbols-rounded conf-dot">cancel</span>
+                    <span>{{ conf }}</span>
+                  </li>
+                  }
+                </ul>
+              </div>
+              }
+            </div>
+
+            <!-- Card Footer: Copy Action Button -->
+            <div class="ref-card-footer">
+              @if (cls.isAlreadyCopied) {
+              <div class="ref-already-copied-text">
+                <span class="material-symbols-rounded">check_box</span>
+                <span>อยู่ในตารางสอนปัจจุบันแล้ว</span>
+              </div>
+              } @else {
+              <button
+                type="button"
+                class="btn-ref-copy"
+                [class.btn-ref-copy-disabled]="!cls.canCopy"
+                [disabled]="!cls.canCopy || isCopyingClassNo() === cls.COURSE_NO"
+                (click)="copyClassToReference(cls)"
+                [title]="cls.canCopy ? 'คลิกเพื่อคัดลอกวิชานี้ใส่ตารางสอนปัจจุบัน' : 'ไม่สามารถคัดลอกได้เนื่องจากติดข้อขัดแย้ง'"
+              >
+                <span class="material-symbols-rounded" [class.spin-loading]="isCopyingClassNo() === cls.COURSE_NO">
+                  {{ isCopyingClassNo() === cls.COURSE_NO ? 'sync' : 'add_task' }}
+                </span>
+                <span>
+                  {{ isCopyingClassNo() === cls.COURSE_NO ? 'กำลังคัดลอก...' : 'คัดลอกวิชานี้ใส่ตารางสอนปัจจุบัน' }}
+                </span>
+              </button>
+              }
+            </div>
+
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer modal-footer-spaced ref-modal-footer">
+        <div class="footer-left-info">
+          <span class="material-symbols-rounded info-icon">info</span>
+          <span class="info-text">คลิกที่กล่องวิชาหรือปุ่ม "คัดลอกวิชานี้" ในตารางสอนเพื่อคัดลอกเข้าสู่ตารางเรียนปัจจุบันทันที</span>
+        </div>
+        <button type="button" class="btn-ref-close" (click)="closeReferenceModal()">
+          <span class="material-symbols-rounded">close</span>
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+
     </div>
   </div>
   }

@@ -11,6 +11,7 @@ import { ConfirmDialogService } from '../../../services/confirm-dialog.service';
 import { TabLockService } from '../../../services/tab-lock.service';
 import { TimetableService } from '../../../services/timetable.service';
 import { YearSemService } from '../../../services/yearsem.service';
+import { ReferenceScheduleItem } from '../../../models/timetable.model';
 
 export interface InstructorMeta {
   INSTRUCTOR_CODE: string;
@@ -38,8 +39,8 @@ export interface CourseOption {
 }
 
 export interface PairedCourseMeta {
-  groupId: number;
-  courseNo: string;
+  groupId?: number;
+  courseNo?: string;
   courseNameThai?: string;
   courseNameEng?: string;
   credit?: number;
@@ -47,6 +48,11 @@ export interface PairedCourseMeta {
   stopYear?: string;
   yearLevel?: string;
   semester?: string;
+  PAIR_COURSE_GROUP_ID?: number;
+  COURSE_NO?: string;
+  COURSE_NAME_THAI?: string;
+  COURSE_NAME_ENG?: string;
+  CREDIT?: number;
 }
 
 export interface ScheduleClassItem {
@@ -293,6 +299,126 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     { value: '2', label: 'ภาค 2' },
     { value: '3', label: 'ภาคฤดูร้อน (Summer)' },
   ];
+
+  // Reference Timetable Modal State (เทียบตารางสอนปีอื่น & คัดลอกวิชา)
+  readonly isRefModalOpen = signal<boolean>(false);
+  readonly refSourceYear = signal<string>('');
+  readonly refSourceSemester = signal<string>('1');
+  readonly refSelectedYearSem = signal<string>('');
+  readonly isRefLoading = signal<boolean>(false);
+  readonly refClasses = signal<ReferenceScheduleItem[]>([]);
+  readonly isCopyingClassNo = signal<string | null>(null);
+
+  // Reference Context Menu State
+  readonly isRefContextMenuOpen = signal<boolean>(false);
+  readonly refContextMenuItem = signal<ReferenceScheduleItem | null>(null);
+  readonly refContextMenuPos = signal<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  readonly refYearSemSelectOptions = computed<SelectOption[]>(() => {
+    const curVal = `${this.activeYear()}_${this.activeSemester()}`;
+    return this.yearSemList()
+      .filter((item) => `${item.STUDY_YEAR}_${item.STUDY_SEMESTER}` !== curVal)
+      .map((item) => ({
+        value: `${item.STUDY_YEAR}_${item.STUDY_SEMESTER}`,
+        label: `ปีการศึกษา ${item.STUDY_YEAR} ภาค ${item.STUDY_SEMESTER}`,
+        badge: item.STUDY_ACTIVE === '1' ? 'ปัจจุบัน' : undefined,
+      }));
+  });
+
+  readonly refStats = computed(() => {
+    const list = this.refClasses();
+    const total = list.length;
+    const canCopyCount = list.filter((c) => c.canCopy).length;
+    const conflictCount = list.filter((c) => c.statusColor === 'red').length;
+    const alreadyCopiedCount = list.filter((c) => c.isAlreadyCopied).length;
+    return { total, canCopyCount, conflictCount, alreadyCopiedCount };
+  });
+
+  readonly Math = Math;
+
+  // View mode inside reference modal: 'grid' (Timetable matrix - default) vs 'list'
+  readonly refViewMode = signal<'grid' | 'list'>('grid');
+
+  // Split view compare mode inside reference modal (Dual tables: Source vs Current)
+  readonly isRefSplitView = signal<boolean>(false);
+
+  // Zoom State for Reference Timetable Tables (0.55x to 1.6x)
+  readonly refLeftZoom = signal<number>(1);
+  readonly refRightZoom = signal<number>(1);
+  readonly refSingleZoom = signal<number>(1);
+
+  onTableWheelZoom(event: WheelEvent, pane: 'left' | 'right' | 'single'): void {
+    // Zoom with scroll wheel
+    event.preventDefault();
+    const zoomSignal =
+      pane === 'left' ? this.refLeftZoom : pane === 'right' ? this.refRightZoom : this.refSingleZoom;
+
+    const delta = event.deltaY < 0 ? 0.08 : -0.08;
+    const current = zoomSignal();
+    const next = Math.min(1.6, Math.max(0.55, Math.round((current + delta) * 100) / 100));
+    zoomSignal.set(next);
+  }
+
+  setPaneZoom(pane: 'left' | 'right' | 'single', delta: number): void {
+    const zoomSignal =
+      pane === 'left' ? this.refLeftZoom : pane === 'right' ? this.refRightZoom : this.refSingleZoom;
+    const current = zoomSignal();
+    const next = Math.min(1.6, Math.max(0.55, Math.round((current + delta) * 100) / 100));
+    zoomSignal.set(next);
+  }
+
+  resetPaneZoom(pane: 'left' | 'right' | 'single'): void {
+    const zoomSignal =
+      pane === 'left' ? this.refLeftZoom : pane === 'right' ? this.refRightZoom : this.refSingleZoom;
+    zoomSignal.set(1);
+  }
+
+  toggleRefSplitView(): void {
+    this.isRefSplitView.update((v) => !v);
+  }
+
+  // Reference Matrix Data: DayCode -> TimeCode -> ReferenceScheduleItem[]
+  readonly refMatrixData = computed<Record<number, Record<number, ReferenceScheduleItem[]>>>(() => {
+    const matrix: Record<number, Record<number, ReferenceScheduleItem[]>> = {};
+    this.daysConfig.forEach((d) => {
+      matrix[d.code] = {};
+      this.timeSlots().forEach((t) => {
+        matrix[d.code][t.code] = [];
+      });
+    });
+
+    const classes = this.refClasses();
+    classes.forEach((c) => {
+      const day = Number(c.DAY_CODE);
+      const time = Number(c.TIME_CODE);
+      if (matrix[day] && matrix[day][time]) {
+        matrix[day][time].push(c);
+      }
+    });
+
+    return matrix;
+  });
+
+  // Reference Matrix Grid Rows: DayCode -> { dayCode, timeCode, classes }[]
+  readonly refMatrixGridRows = computed<Record<number, { dayCode: number; timeCode: number; classes: ReferenceScheduleItem[] }[]>>(() => {
+    const matrix = this.refMatrixData();
+    const rows: Record<number, { dayCode: number; timeCode: number; classes: ReferenceScheduleItem[] }[]> = {};
+    const slots = this.timeSlots();
+
+    this.daysConfig.forEach((d) => {
+      const cells: { dayCode: number; timeCode: number; classes: ReferenceScheduleItem[] }[] = [];
+      slots.forEach((t) => {
+        cells.push({
+          dayCode: d.code,
+          timeCode: t.code,
+          classes: matrix[d.code]?.[t.code] || [],
+        });
+      });
+      rows[d.code] = cells;
+    });
+
+    return rows;
+  });
 
   // Instructor Availability Matrix State (Companion Panel in Edit Modal)
   readonly availabilitySlots = signal<InstructorSlotAvailability[]>([]);
@@ -1030,10 +1156,18 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
           this.classList.set(list as any);
           this.originalClassList.set(JSON.parse(JSON.stringify(list)));
           this.pendingMoves.set([]);
+          if (this.isRefModalOpen()) {
+            this.syncRefClassesWithCurrentSchedule(list);
+            this.loadReferenceSchedule(true);
+          }
         } else {
           this.classList.set([]);
           this.originalClassList.set([]);
           this.pendingMoves.set([]);
+          if (this.isRefModalOpen()) {
+            this.syncRefClassesWithCurrentSchedule([]);
+            this.loadReferenceSchedule(true);
+          }
         }
       },
       error: (err) => {
@@ -1041,6 +1175,55 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
         this.toastService.error('โหลดตารางเรียนไม่สำเร็จ');
       },
     });
+  }
+
+  syncRefClassesWithCurrentSchedule(currentList: ScheduleClassItem[]): void {
+    if (!this.isRefModalOpen() || this.refClasses().length === 0) return;
+
+    const currentClassKeys = new Set(
+      currentList.map(
+        (c) => `${(c.COURSE_NO || '').trim().toUpperCase()}_${Number(c.DAY_CODE)}_${Number(c.TIME_CODE)}`
+      )
+    );
+
+    const busySlotKeys = new Set(
+      currentList.map((c) => `${Number(c.DAY_CODE)}_${Number(c.TIME_CODE)}`)
+    );
+
+    this.refClasses.update((list) =>
+      list.map((c) => {
+        const courseKey = `${(c.COURSE_NO || '').trim().toUpperCase()}_${Number(c.DAY_CODE)}_${Number(c.TIME_CODE)}`;
+        const inCurrent = currentClassKeys.has(courseKey);
+
+        if (!inCurrent && c.isAlreadyCopied) {
+          const slotKey = `${Number(c.DAY_CODE)}_${Number(c.TIME_CODE)}`;
+          const slotOccupiedByOther = busySlotKeys.has(slotKey);
+          const otherConflicts = (c.conflicts || []).filter(
+            (conf) => !conf.includes('อยู่ในตารางแล้ว') && !conf.includes('ซ้ำ')
+          );
+
+          const hasConflicts = slotOccupiedByOther || otherConflicts.length > 0;
+          return {
+            ...c,
+            isAlreadyCopied: false,
+            canCopy: !hasConflicts,
+            statusColor: hasConflicts ? 'red' : 'green',
+            statusText: hasConflicts
+              ? (slotOccupiedByOther ? 'มีวิชาอื่นลงในคาบนี้แล้ว' : `ไม่สามารถคัดลอกได้ (${otherConflicts.length} ข้อขัดแย้ง)`)
+              : 'พร้อมคัดลอก (ไม่มีคาบชน)',
+          };
+        } else if (inCurrent && !c.isAlreadyCopied) {
+          return {
+            ...c,
+            isAlreadyCopied: true,
+            canCopy: false,
+            statusColor: 'blue',
+            statusText: 'อยู่ในตารางปัจจุบันแล้ว',
+          };
+        }
+        return c;
+      })
+    );
   }
 
   async onYearSemChange(val: string): Promise<void> {
@@ -1580,6 +1763,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   }
 
   openClassDetail(item: ScheduleClassItem, event?: MouseEvent): void {
+    if (this.wasScrollDragged) return;
     if (this.isEditMode()) return;
     if (event) event.stopPropagation();
     this.selectedClassDetail.set(item);
@@ -1649,10 +1833,11 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
     this.toastService.success('ส่งออกไฟล์ CSV สำเร็จ');
   }
 
-  getPairedCoursesTooltip(pairedList?: PairedCourseMeta[]): string {
+  getPairedCoursesTooltip(pairedList?: any[]): string {
     if (!pairedList || pairedList.length === 0) return '';
     return pairedList
-      .map((p) => `${p.courseNo} (${p.courseNameThai || ''})`)
+      .map((p) => `${p.courseNo || p.COURSE_NO || ''} (${p.courseNameThai || p.COURSE_NAME_THAI || ''})`.trim())
+      .filter((s) => s.length > 0)
       .join(', ');
   }
 
@@ -1893,7 +2078,7 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
   openInlineDropdown(): void {
     this.isInlineDropdownOpen.set(true);
     if (this.inlineSearchResults().length === 0) {
-      this.executeInlineCourseSearch(this.inlineSearchQuery() || this.editCourseNo() || 'A');
+      this.executeInlineCourseSearch(this.inlineSearchQuery() || this.editCourseNo() || '');
     }
   }
 
@@ -2150,6 +2335,320 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.isCloning.set(false);
         this.toastService.error(err?.error?.message || err?.message || 'เกิดข้อผิดพลาดในการคัดลอกตารางสอน');
+      },
+    });
+  }
+
+  // REFERENCE TIMETABLE MODAL HANDLERS (เทียบตารางสอนปีอื่น & คัดลอกวิชา)
+  getDayConfig(dayCode: number): DayConfig {
+    return this.daysConfig.find((d) => d.code === dayCode) || {
+      code: dayCode,
+      label: `วันรหัส ${dayCode}`,
+      shortLabel: `${dayCode}`,
+      colorClass: 'day-mon',
+    };
+  }
+
+  openReferenceModal(): void {
+    const curYear = Number(this.activeYear());
+    const prevYear = isNaN(curYear) ? '' : String(curYear - 1);
+    const prevSem = this.activeSemester() || '1';
+
+    const options = this.refYearSemSelectOptions();
+    if (options.length > 0) {
+      const matchPrev = options.find((o) => o.value === `${prevYear}_${prevSem}`);
+      const chosen = matchPrev ? matchPrev.value : options[0].value;
+      this.refSelectedYearSem.set(chosen);
+      const [y, s] = chosen.split('_');
+      this.refSourceYear.set(y);
+      this.refSourceSemester.set(s);
+    } else {
+      this.refSourceYear.set(prevYear);
+      this.refSourceSemester.set(prevSem);
+      this.refSelectedYearSem.set(`${prevYear}_${prevSem}`);
+    }
+
+    this.isRefModalOpen.set(true);
+    this.loadReferenceSchedule();
+  }
+
+  closeReferenceModal(): void {
+    this.closeRefContextMenu();
+    this.isRefModalOpen.set(false);
+    this.isRefSplitView.set(false);
+    this.refClasses.set([]);
+    this.refLeftZoom.set(1);
+    this.refRightZoom.set(1);
+    this.refSingleZoom.set(1);
+  }
+
+  onRefClassContextMenu(event: MouseEvent, item: ReferenceScheduleItem): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.closeContextMenu();
+    this.closeEmptySlotMenu();
+    this.refContextMenuItem.set(item);
+
+    const menuWidth = 260;
+    const menuHeight = 180;
+    let x = event.clientX;
+    let y = event.clientY;
+
+    if (x + menuWidth > window.innerWidth - 12) {
+      x = Math.max(12, window.innerWidth - menuWidth - 12);
+    }
+    if (y + menuHeight > window.innerHeight - 12) {
+      y = Math.max(12, window.innerHeight - menuHeight - 12);
+    }
+
+    this.refContextMenuPos.set({ x, y });
+    this.isRefContextMenuOpen.set(true);
+  }
+
+  closeRefContextMenu(): void {
+    this.isRefContextMenuOpen.set(false);
+    this.refContextMenuItem.set(null);
+  }
+
+  openRefClassDetail(item: ReferenceScheduleItem): void {
+    this.closeRefContextMenu();
+    const detailItem: ScheduleClassItem = {
+      COURSE_NO: item.COURSE_NO,
+      COURSE_NAME_THAI: item.COURSE_NAME_THAI || '',
+      COURSE_NAME_ENG: item.COURSE_NAME_ENG || '',
+      CREDIT: item.CREDIT,
+      DAY_CODE: item.DAY_CODE,
+      TIME_CODE: item.TIME_CODE,
+      ROOM_CODE: item.ROOM_CODE || this.selectedRoom(),
+      STUDY_YEAR: item.STUDY_YEAR || this.refSourceYear(),
+      STUDY_SEMESTER: item.STUDY_SEMESTER || this.refSourceSemester(),
+      INSTRUCTORS: (item.INSTRUCTORS || []).map((i) => ({
+        INSTRUCTOR_CODE: i.INSTRUCTOR_CODE,
+        INSTRUCTOR_NAME_THAI: i.INSTRUCTOR_NAME_THAI || '',
+        INSTRUCTOR_NAME_ENG: i.INSTRUCTOR_NAME_ENG || '',
+        RANK_NAME_THAI_S: i.RANK_NAME_THAI_S || '',
+        RANK_NAME_THAI_L: i.RANK_NAME_THAI_L || '',
+        INSTRUCTOR_ORD: i.INSTRUCTOR_ORD,
+      })),
+      PAIRED_COURSES: (item as any).PAIRED_COURSES || [],
+    };
+    this.selectedClassDetail.set(detailItem);
+    this.isDetailModalOpen.set(true);
+  }
+
+  copyClassFromRefMenu(item: ReferenceScheduleItem): void {
+    this.closeRefContextMenu();
+    this.copyClassToReference(item);
+  }
+
+  copyClassFromDetail(detail: ScheduleClassItem): void {
+    const refItem: ReferenceScheduleItem = {
+      COURSE_NO: detail.COURSE_NO,
+      COURSE_NAME_THAI: detail.COURSE_NAME_THAI,
+      COURSE_NAME_ENG: detail.COURSE_NAME_ENG,
+      CREDIT: detail.CREDIT,
+      DAY_CODE: detail.DAY_CODE,
+      TIME_CODE: detail.TIME_CODE,
+      ROOM_CODE: detail.ROOM_CODE || this.selectedRoom(),
+      STUDY_YEAR: detail.STUDY_YEAR || this.refSourceYear(),
+      STUDY_SEMESTER: detail.STUDY_SEMESTER || this.refSourceSemester(),
+      INSTRUCTORS: (detail.INSTRUCTORS || []).map((i) => ({
+        INSTRUCTOR_CODE: i.INSTRUCTOR_CODE,
+        INSTRUCTOR_NAME_THAI: i.INSTRUCTOR_NAME_THAI,
+        INSTRUCTOR_NAME_ENG: i.INSTRUCTOR_NAME_ENG,
+        RANK_NAME_THAI_S: i.RANK_NAME_THAI_S,
+        INSTRUCTOR_ORD: i.INSTRUCTOR_ORD,
+      })),
+      canCopy: true,
+    };
+    this.closeDetailModal();
+    this.copyClassToReference(refItem);
+  }
+
+  onRefYearSemChange(val: string): void {
+    this.refSelectedYearSem.set(val);
+    if (val) {
+      const [y, s] = val.split('_');
+      this.refSourceYear.set(y);
+      this.refSourceSemester.set(s);
+      this.loadReferenceSchedule();
+    }
+  }
+
+  loadReferenceSchedule(silent: boolean = false): void {
+    const sYear = this.refSourceYear().trim();
+    const sSem = this.refSourceSemester().trim();
+    const room = this.selectedRoom();
+    const tYear = this.activeYear();
+    const tSem = this.activeSemester();
+
+    if (!sYear || !sSem || !room) {
+      this.refClasses.set([]);
+      this.isRefLoading.set(false);
+      return;
+    }
+
+    if (!silent) {
+      this.isRefLoading.set(true);
+    }
+
+    this.timetableService
+      .getReferenceRoomSchedule(sYear, sSem, room, tYear, tSem, room)
+      .subscribe({
+        next: (res) => {
+          this.isRefLoading.set(false);
+          if (res && res.success) {
+            this.refClasses.set(res.results || []);
+          } else {
+            this.refClasses.set([]);
+          }
+        },
+        error: () => {
+          this.isRefLoading.set(false);
+          if (!silent) {
+            this.toastService.error('โหลดตารางสอนปีอื่นไม่สำเร็จ');
+          }
+          this.refClasses.set([]);
+        },
+      });
+  }
+
+  // ========================================================
+  // DRAG-TO-SCROLL (GOOGLE MAPS / FIGMA STYLE PANNING)
+  // ========================================================
+  private activeScrollContainer: HTMLElement | null = null;
+  private isScrollPanning = false;
+  private scrollStartX = 0;
+  private scrollStartY = 0;
+  private scrollInitialLeft = 0;
+  private scrollInitialTop = 0;
+  readonly isDraggingScroll = signal<boolean>(false);
+  wasScrollDragged = false;
+
+  onDragScrollMouseDown(event: MouseEvent, container: HTMLElement): void {
+    // Only handle left mouse button (0)
+    if (event.button !== 0) return;
+
+    // Do not initiate pan on interactive action controls
+    const target = event.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('.btn-gcc-copy') ||
+      target.closest('.card-quick-menu-btn') ||
+      target.closest('input') ||
+      target.closest('select') ||
+      target.closest('a')
+    ) {
+      return;
+    }
+
+    this.activeScrollContainer = container;
+    this.isScrollPanning = true;
+    this.wasScrollDragged = false;
+    this.scrollStartX = event.clientX;
+    this.scrollStartY = event.clientY;
+    this.scrollInitialLeft = container.scrollLeft;
+    this.scrollInitialTop = container.scrollTop;
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onGlobalMouseMove(event: MouseEvent): void {
+    if (!this.isScrollPanning || !this.activeScrollContainer) return;
+
+    const dx = event.clientX - this.scrollStartX;
+    const dy = event.clientY - this.scrollStartY;
+
+    if (!this.wasScrollDragged && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      this.wasScrollDragged = true;
+      this.isDraggingScroll.set(true);
+      this.activeScrollContainer.classList.add('is-panning');
+    }
+
+    if (this.wasScrollDragged) {
+      this.activeScrollContainer.scrollLeft = this.scrollInitialLeft - dx;
+      this.activeScrollContainer.scrollTop = this.scrollInitialTop - dy;
+      event.preventDefault();
+    }
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  onGlobalMouseUp(event?: MouseEvent): void {
+    if (this.isScrollPanning) {
+      this.isScrollPanning = false;
+      if (this.activeScrollContainer) {
+        this.activeScrollContainer.classList.remove('is-panning');
+        this.activeScrollContainer = null;
+      }
+      if (this.wasScrollDragged) {
+        this.isDraggingScroll.set(false);
+        setTimeout(() => {
+          this.wasScrollDragged = false;
+        }, 60);
+      }
+    }
+  }
+
+  copyClassToReference(item: ReferenceScheduleItem): void {
+    if (this.wasScrollDragged) return;
+    if (!item.canCopy) return;
+
+    const tYear = this.activeYear();
+    const tSem = this.activeSemester();
+    const tRoom = this.selectedRoom();
+
+    if (!tYear || !tSem || !tRoom) {
+      this.toastService.warning('ข้อมูลปี/ภาค หรือห้องเรียนปัจจุบันไม่ถูกต้อง');
+      return;
+    }
+
+    this.isCopyingClassNo.set(item.COURSE_NO);
+    const payload = {
+      targetYear: tYear,
+      targetSemester: tSem,
+      targetRoom: tRoom,
+      courseNo: item.COURSE_NO,
+      dayCode: item.DAY_CODE,
+      timeCode: item.TIME_CODE,
+      instructors: (item.INSTRUCTORS || []).map((i) => ({
+        instructorCode: i.INSTRUCTOR_CODE,
+        instructorName: i.INSTRUCTOR_NAME_THAI,
+        instructorOrd: Number(i.INSTRUCTOR_ORD) || 1,
+      })),
+      user: this.authService.getCurrentUsername(),
+    };
+
+    this.timetableService.copySingleClass(payload).subscribe({
+      next: (res) => {
+        this.isCopyingClassNo.set(null);
+        if (res && res.success) {
+          this.toastService.success(res.message || `คัดลอกวิชา ${item.COURSE_NO} สำเร็จ`);
+          this.refClasses.update((list) =>
+            list.map((c) => {
+              if (
+                c.COURSE_NO === item.COURSE_NO &&
+                c.DAY_CODE === item.DAY_CODE &&
+                c.TIME_CODE === item.TIME_CODE
+              ) {
+                return {
+                  ...c,
+                  isAlreadyCopied: true,
+                  canCopy: false,
+                  statusColor: 'blue',
+                  statusText: 'อยู่ในตารางปัจจุบันแล้ว',
+                };
+              }
+              return c;
+            })
+          );
+          // Refresh background schedule immediately!
+          this.loadScheduleForRoom();
+        } else {
+          this.toastService.error(res?.message || 'คัดลอกวิชาไม่สำเร็จ');
+        }
+      },
+      error: (err) => {
+        this.isCopyingClassNo.set(null);
+        this.toastService.error(err?.error?.message || err?.message || 'คัดลอกวิชาไม่สำเร็จ');
       },
     });
   }
@@ -2420,6 +2919,9 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
           const oldRoom = this.selectedRoom();
           this.closeEditModal();
           this.loadRoomsAndSchedule();
+          if (this.isRefModalOpen()) {
+            this.loadReferenceSchedule();
+          }
 
           if (isAdd && room && room !== oldRoom && !this.selectedRoom()) {
             this.selectedRoom.set(room);
@@ -2479,6 +2981,9 @@ export class TabStudentScheduleComponent implements OnInit, OnDestroy {
           this.toastService.success(`ลบตารางสอนวิชา ${item.COURSE_NO} เรียบร้อยแล้ว`);
           this.loadScheduleForRoom();
           this.loadRoomsAndSchedule();
+          if (this.isRefModalOpen()) {
+            this.loadReferenceSchedule();
+          }
         } else {
           this.toastService.error(res?.message || 'ลบตารางสอนไม่สำเร็จ');
         }

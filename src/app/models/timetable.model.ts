@@ -8,8 +8,8 @@ export interface TimetableInstructorMeta {
 }
 
 export interface TimetablePairedCourseMeta {
-  groupId: number;
-  courseNo: string;
+  groupId?: number;
+  courseNo?: string;
   courseNameThai?: string;
   courseNameEng?: string;
   credit?: number;
@@ -17,6 +17,11 @@ export interface TimetablePairedCourseMeta {
   stopYear?: string;
   yearLevel?: string;
   semester?: string;
+  PAIR_COURSE_GROUP_ID?: number;
+  COURSE_NO?: string;
+  COURSE_NAME_THAI?: string;
+  COURSE_NAME_ENG?: string;
+  CREDIT?: number;
 }
 
 export interface TimetableClassItem {
@@ -126,4 +131,35 @@ export interface TimetableSlotMoveRecord {
   newTimeCode: number;
   instrGroup?: number;
   roomCode?: string;
+}
+
+export interface ReferenceScheduleItem {
+  STUDY_YEAR: string;
+  STUDY_SEMESTER: string;
+  COURSE_NO: string;
+  DAY_CODE: number;
+  TIME_CODE: number;
+  ROOM_CODE: string;
+  INSTR_GROUP?: number;
+  COURSE_NAME_THAI?: string;
+  COURSE_NAME_ENG?: string;
+  CREDIT?: number;
+  INSTRUCTORS?: {
+    INSTRUCTOR_CODE: string;
+    INSTRUCTOR_NAME_THAI?: string;
+    INSTRUCTOR_NAME_ENG?: string;
+    RANK_NAME_THAI_S?: string;
+    RANK_NAME_THAI_L?: string;
+    INSTRUCTOR_ORD?: number | string;
+  }[];
+  PAIRED_COURSES?: TimetablePairedCourseMeta[] | any[];
+  HAS_PAIRED_COURSES?: boolean;
+  periodText?: string;
+  timeStart?: string;
+  timeEnd?: string;
+  isAlreadyCopied?: boolean;
+  canCopy?: boolean;
+  statusColor?: 'green' | 'red' | 'blue';
+  statusText?: string;
+  conflicts?: string[];
 }

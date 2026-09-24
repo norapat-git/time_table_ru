@@ -12,6 +12,7 @@ import {
   TimetableCourseOption,
   TimetableSlotAvailability,
   TimetableSlotMoveRecord,
+  ReferenceScheduleItem,
 } from '../models/timetable.model';
 
 @Injectable({
@@ -238,5 +239,83 @@ export class TimetableService {
     userInsert?: string;
   }): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/clone-semester`, payload);
+  }
+
+  copySelectedClasses(payload: {
+    sourceYear: string;
+    sourceSemester: string;
+    targetYear: string;
+    targetSemester: string;
+    courseNos: string[];
+    copySlots?: boolean;
+    mode?: 'merge' | 'replace';
+    userInsert?: string;
+  }): Observable<{
+    success: boolean;
+    message: string;
+    insertedCoursesCount?: number;
+    insertedClassesCount?: number;
+    insertedInstructorsCount?: number;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      insertedCoursesCount?: number;
+      insertedClassesCount?: number;
+      insertedInstructorsCount?: number;
+    }>(`${this.baseUrl}/copy-classes`, payload);
+  }
+
+  getReferenceRoomSchedule(
+    sourceYear: string,
+    sourceSemester: string,
+    sourceRoom?: string,
+    targetYear?: string,
+    targetSemester?: string,
+    targetRoom?: string
+  ): Observable<{
+    success: boolean;
+    sourceYear: string;
+    sourceSemester: string;
+    sourceRoom: string;
+    targetYear?: string;
+    targetSemester?: string;
+    targetRoom?: string;
+    results: ReferenceScheduleItem[];
+  }> {
+    let params = new HttpParams()
+      .set('sourceYear', sourceYear)
+      .set('sourceSemester', sourceSemester);
+    if (sourceRoom) params = params.set('sourceRoom', sourceRoom);
+    if (targetYear) params = params.set('targetYear', targetYear);
+    if (targetSemester) params = params.set('targetSemester', targetSemester);
+    if (targetRoom) params = params.set('targetRoom', targetRoom);
+
+    return this.http.get<{
+      success: boolean;
+      sourceYear: string;
+      sourceSemester: string;
+      sourceRoom: string;
+      targetYear?: string;
+      targetSemester?: string;
+      targetRoom?: string;
+      results: ReferenceScheduleItem[];
+    }>(`${this.baseUrl}/reference-room-schedule`, { params });
+  }
+
+  copySingleClass(payload: {
+    targetYear: string;
+    targetSemester: string;
+    targetRoom: string;
+    courseNo: string;
+    dayCode: number;
+    timeCode: number;
+    instructors?: { instructorCode: string; instructorName?: string; instructorOrd?: number }[];
+    user?: string;
+  }): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/copy-single-class`,
+      payload
+    );
   }
 }

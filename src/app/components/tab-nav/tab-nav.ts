@@ -16,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
 import { TabLockService } from '../../services/tab-lock.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { YearSemService } from '../../services/yearsem.service';
 
 export type TabGroupKey = 'setup' | 'courses' | 'timetable' | 'reports';
 
@@ -36,6 +37,7 @@ export interface TabItem {
   styleUrl: './tab-nav.css',
 })
 export class TabNavComponent implements AfterViewInit {
+  private readonly yearSemService = inject(YearSemService);
   readonly authService = inject(AuthService);
   readonly tabLockService = inject(TabLockService);
   readonly toastService = inject(ToastService);
@@ -44,6 +46,8 @@ export class TabNavComponent implements AfterViewInit {
   readonly tabs = input.required<TabItem[]>();
   readonly activeTab = input.required<string>();
   readonly tabChange = output<string>();
+
+  readonly activeSemesterLabel = signal<string>('ภาคเรียน - / ----');
 
   readonly isMobileOpen = signal<boolean>(false);
 
@@ -77,6 +81,17 @@ export class TabNavComponent implements AfterViewInit {
   });
 
   constructor() {
+    this.yearSemService.getActiveYearSem().subscribe({
+      next: (res) => {
+        if (res && res.results && res.results.STUDY_YEAR && res.results.STUDY_SEMESTER) {
+          this.activeSemesterLabel.set(`ภาคเรียนที่ ${res.results.STUDY_SEMESTER} / ${res.results.STUDY_YEAR}`);
+        }
+      },
+      error: () => {
+        // Fallback default
+      },
+    });
+
     // Whenever activeTab signal changes, glide to that tab smoothly
     effect(() => {
       const active = this.activeTab();

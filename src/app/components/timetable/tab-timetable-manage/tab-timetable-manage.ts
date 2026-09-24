@@ -1366,7 +1366,7 @@ export class TabTimetableManageComponent implements OnInit {
 
     const confirmed = await this.confirmDialogService.confirm({
       title: 'ยืนยันคัดลอกตารางสอน',
-      message: `ต้องการคัดลอกตารางสอนจากปี ${sYear} ภาค ${sSem} ไปยังปี ${tYear} ภาค ${tSem} (รูปแบบ: ${modeText}) หรือไม่?`,
+      message: `ต้องการคัดลอกตารางสอน รายวิชา และอาจารย์ผู้สอนจากปี ${sYear} ภาค ${sSem} ไปยังปี ${tYear} ภาค ${tSem} (รูปแบบ: ${modeText}) หรือไม่?`,
       confirmText: 'เริ่มคัดลอก',
       cancelText: 'ยกเลิก',
       variant: this.cloneMode() === 'replace' ? 'danger' : 'primary',
@@ -1548,7 +1548,7 @@ export class TabTimetableManageComponent implements OnInit {
   openInlineDropdown(): void {
     this.isInlineDropdownOpen.set(true);
     if (this.inlineSearchResults().length === 0) {
-      this.executeInlineCourseSearch(this.inlineSearchQuery() || this.formCourseNo() || 'A');
+      this.executeInlineCourseSearch(this.inlineSearchQuery() || this.formCourseNo() || '');
     }
   }
 
@@ -1667,6 +1667,10 @@ export class TabTimetableManageComponent implements OnInit {
           this.letters.set(res.results || []);
           if (this.letters().length > 0 && !this.selectedLetter()) {
             this.selectLetter(this.letters()[0]);
+          } else if (this.letters().length === 0) {
+            this.selectedLetter.set('');
+            this.prefixes.set([]);
+            this.drawerCourses.set([]);
           }
         }
       },

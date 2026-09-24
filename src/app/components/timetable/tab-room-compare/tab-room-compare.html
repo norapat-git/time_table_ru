@@ -173,6 +173,8 @@
                     (dragstart)="onDragStart($event, item, selectedRoomLeft(), slot.timeCode, selectedDayLeft())"
                     (dragend)="onDragEnd()"
                     (click)="openClassDetail(item, $event)"
+                    (contextmenu)="openClassDetail(item, $event); $event.preventDefault()"
+                    title="คลิกหรือคลิกขวาเพื่อดูรายละเอียด • ลากเพื่อย้ายห้อง/วัน"
                   >
                     <div class="card-drag-handle" title="ลากเพื่อย้ายหรือสลับห้อง/วัน">
                       <span class="material-symbols-rounded">drag_indicator</span>
@@ -314,6 +316,8 @@
                     (dragstart)="onDragStart($event, item, selectedRoomRight(), slot.timeCode, selectedDayRight())"
                     (dragend)="onDragEnd()"
                     (click)="openClassDetail(item, $event)"
+                    (contextmenu)="openClassDetail(item, $event); $event.preventDefault()"
+                    title="คลิกหรือคลิกขวาเพื่อดูรายละเอียด • ลากเพื่อย้ายห้อง/วัน"
                   >
                     <div class="card-drag-handle" title="ลากเพื่อย้ายหรือสลับห้อง/วัน">
                       <span class="material-symbols-rounded">drag_indicator</span>
